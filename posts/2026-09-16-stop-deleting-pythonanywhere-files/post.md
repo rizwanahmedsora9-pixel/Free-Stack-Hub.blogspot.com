@@ -1,35 +1,35 @@
 <!--
 Post for Blogger (Free Stack Hub)
 
+![A stressed developer deleting files next to one syncing code with the cloud using git](images/01-stop-deleting-your-pythonanywhere-files.jpg)
+*The old way and the new way, side by side.*
+
+I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.
+
+<!-- jump break: in Blogger put the cursor here and use Insert > Jump break -->
+
 TITLE:  Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.
 LABELS: PythonAnywhere, Git, GitHub, Flask, Deployment, Web Development
 SEARCH DESCRIPTION: Still deleting and re-uploading your PythonAnywhere project on every update? Here's the Git workflow that replaces it with one command.
 
-IMAGES (upload these 4 files into the post, in this order, where marked):
-  images/01-stop-deleting-your-pythonanywhere-files.jpg   (hero, 1200x480, 46 KB)
-  images/02-local-github-server-workflow.jpg              (1100x604, 30 KB)
-  images/03-git-clone-pull-terminal.jpg                   (1000x667, 27 KB)
-  images/04-reload-web-app.jpg                            (1000x667, 37 KB)
-After uploading in the Blogger editor, the URLs change to blogger.googleusercontent.com
-links. The ready-to-paste HTML version of this post is in:
-  post.html (import.xml is generated from it)
+IMAGES: keep the 4 files in ./images/ and reference them by bare file name in
+post.html; the build rewrites them to public CDN URLs. Nothing is uploaded by hand.
+
+HOW TO PUBLISH: python3 tools/build_import.py <folder>, then import that folder's
+import.xml (Blogger > Settings > Manage blog > Import content). paste.html is the
+body-only fallback and loses title/labels/description. Verify with
+python3 tools/check_published.py <folder>.  Videos: python3 tools/make_video.py <folder>.
 -->
 
 # Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.
 
-I deleted my entire website three times in one month before this lesson finally stuck.
-
 The routine went like this. I'd build a small Flask app on my laptop, upload it to PythonAnywhere through the Files tab, one file at a time. A week later I'd fix a bug or add a page, log back in, select everything in the project folder, hit delete, and upload the whole thing again from scratch.
 
-And it worked. Every single time, it worked. That's exactly what makes the habit so hard to question.
+And it worked. Every single time. That's the trap: a habit that keeps paying off never looks like a risk.
 
 Then one evening I re-uploaded a project and completely forgot that my SQLite database and the whole uploads folder were sitting in that same directory. Gone. Four months of data, wiped in about six seconds, by me, on purpose, while trying to be productive.
 
 That night I sat down and set up Git properly, and I haven't touched the delete button on a server since. If you're running a Python app on a PythonAnywhere free account and still doing the delete-and-reupload dance, this is the shortcut I wish I'd had. It takes ten minutes to set up once. After that, every update is one command.
-
-![A stressed developer deleting files next to one syncing code with the cloud using git](images/01-stop-deleting-your-pythonanywhere-files.jpg)
-*The old way and the new way, side by side.*
-
 ## Why "delete everything, upload again" eventually blows up
 
 On a tiny project, re-uploading everything feels harmless. It's six files. It takes two minutes and you get a little clean-slate feeling out of it.
@@ -160,3 +160,5 @@ Be aware that `git checkout --` discards that file's server-side changes permane
 5. Never edit code on the server. Push from local, pull on the server.
 
 The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your `.env` and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.
+
+If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. Next up: the `.gitignore` that keeps your `.env` and database off GitHub without breaking your app.

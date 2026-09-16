@@ -4,16 +4,40 @@ LABELS: Label One, Label Two, Label Three
 PUBLISHED: 2026-01-01
 SEARCH DESCRIPTION:
 One or two sentences (max ~150 chars) shown in Google results.
+
+Structure the build enforces (see POST_RULES.md):
+  feature image  ->  2-4 sentence hook  ->  the "more" marker  ->  the rest.
+Everything above the marker is what the homepage teaser shows, so keep it to
+one image and a few short sentences that create tension without answering it.
+Do not write the marker's closing bracket inside this header comment.
 -->
 
-<p>Opening paragraph.</p>
-
 <div style="text-align:center; margin:18px 0;">
-  <img src="01-hero.jpg" alt="Describe the image" width="1200" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Caption.</i></div>
+  <img src="01-hero.jpg" alt="Describe the feature image" width="1200" style="max-width:100%; height:auto;" />
+  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Short caption.</i></div>
 </div>
 
-<h2>First section</h2>
-<p>...</p>
+<p>Hook sentence one: the mistake, the surprising result, or the problem everyone recognises. Sentence two: turn the screw a little. Sentence three: promise that the fix is boringly simple, then stop there.</p>
 
-<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>some command</code></pre>
+<!--more-->
+
+<h2>Why this goes wrong</h2>
+<p>Full explanation starts after the break - it can be as long as it needs to be.</p>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="02-diagram.jpg" alt="Describe the diagram" width="1100" style="max-width:100%; height:auto;" />
+  <div style="font-size:13px; color:#777; margin-top:6px;"><i>A diagram earns its place here.</i></div>
+</div>
+
+<h2>The steps</h2>
+<p>Do this:</p>
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>one command per line</code></pre>
+
+<h2>Quick recap</h2>
+<ol>
+<li>The one thing to remember.</li>
+<li>The second thing.</li>
+<li>What to do next, or what to download.</li>
+</ol>
+
+<p>Close with a call to action in a sentence: the next post, the download, or the one command worth running tonight.</p>

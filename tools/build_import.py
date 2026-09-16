@@ -69,10 +69,12 @@ REPO_CDN = os.environ.get(
     "REPO_CDN", f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@{IMAGE_REF}/"
 )
 
-HEADER_RE = re.compile(r"^\s*<!--(.*?)-->", re.S)
+HEADER_RE = re.compile(r"^\s*<!--(.*?)^[ \t]*[-=]*[ \t]*-->[ \t]*$", re.S | re.M)
 KEY_RE = re.compile(r"^\s*([A-Z][A-Z ]+?)(?:\s*\(.*?\))?\s*:\s*(.*)$")
 KEYS = {"TITLE", "LABELS", "SEARCH DESCRIPTION", "PUBLISHED", "IMAGES", "BLOGGER POST"}
 IMG_SRC_RE = re.compile(r'(<img\b[^>]*\bsrc=")([^"]+)(")', re.I)
+JUMP_RE = re.compile(r"^[ \t]*<!--[ \t]*more[ \t]*-->[ \t]*$", re.M | re.I)
+TAG_RE = re.compile(r"<[^>]+>")
 FOLDER_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-([a-z0-9-]+)$")
 
 
@@ -144,8 +146,39 @@ def load_post(folder: Path) -> dict:
     if "alt=" not in body and used:
         problems.append("images have no alt text")
 
+    # --- jump break (the "Read More" split Blogger renders on the homepage) ---
+    teaser, jump_after = body, ""
+    marks = list(JUMP_RE.finditer(body))
+    if not marks:
+        problems.append(
+            "no jump break: put a line containing only <!--more--> right after the 2-4 "
+            "sentence hook (feature image first)"
+        )
+    elif len(marks) > 1:
+        problems.append(f"{len(marks)} jump break markers found - a post may have exactly one")
+    else:
+        cut = marks[0]
+        teaser, rest = body[: cut.start()], body[cut.end():]
+        jump_after = " ".join(TAG_RE.sub(" ", teaser).split())[-90:]
+        if not " ".join(TAG_RE.sub(" ", teaser).split()):
+            problems.append("nothing before the jump break - the homepage teaser would be empty")
+        if not " ".join(TAG_RE.sub(" ", rest).split()):
+            problems.append("nothing after the jump break - the marker must not sit at the end")
+        imgs = len(IMG_SRC_RE.findall(teaser))
+        if imgs != 1:
+            problems.append(f"the teaser should hold exactly 1 feature image, found {imgs}")
+        hook_txt = " ".join(" ".join(TAG_RE.sub(" ", x).split()) for x in re.findall(r"<p\b[^>]*>(.*?)</p>", teaser, re.S | re.I))
+        hook_sents = [x for x in re.split(r"(?<=[.!?])\s+", hook_txt) if x]
+        if not 2 <= len(hook_sents) <= 4:
+            problems.append(
+                f"hook is {len(hook_sents)} sentence(s) before the break; the rule is 2-4 short ones"
+            )
+        body = teaser.strip() + "\n\n" + rest.strip()
+
     return {
         "folder": folder,
+        "teaser": teaser,
+        "jump_after": jump_after,
         "slug": slug,
         "title": meta.get("TITLE", ""),
         "labels": [l.strip() for l in meta.get("LABELS", "").split(",") if l.strip()],
@@ -233,6 +266,10 @@ def main():
         print(f"   labels  {', '.join(p['labels'])}")
         print(f"   images  {len(p['images'])}  ->  {REPO_CDN}posts/{folder.name}/images/")
         if not a.check:
+            (folder / "title.txt").write_text(p["title"] + "\n", encoding="utf-8")
+            print(f"   wrote   posts/{folder.name}/title.txt")
+            if p.get("jump_after"):
+                print(f'   break   paste into the editor, then Insert > Jump break right after:  "...{p["jump_after"]}"')
             out = folder / "import.xml"
             out.write_text(feed_xml(p), encoding="utf-8")
             print(f"   wrote   posts/{folder.name}/import.xml")

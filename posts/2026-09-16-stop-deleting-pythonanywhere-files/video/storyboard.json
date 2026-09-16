@@ -1,0 +1,74 @@
+[
+  {
+    "kind": "hook",
+    "image": "01-stop-deleting-your-pythonanywhere-files.jpg",
+    "eyebrow": "Free Stack Hub · 16 Sep 2026",
+    "title": "Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.",
+    "voiceover": "I deleted my entire website three times in one month. It always worked. That is exactly why the habit felt safe.",
+    "index": "01 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "01-stop-deleting-your-pythonanywhere-files.jpg",
+    "eyebrow": "The post",
+    "title": "Why \"delete everything, upload again\" eventually blows up",
+    "voiceover": "Re-uploading everything looks fine, right up to the day you wipe the folder holding your database and your API keys.",
+    "index": "02 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "02-local-github-server-workflow.jpg",
+    "eyebrow": "The post",
+    "title": "The mental switch: your server is a copy, not the original",
+    "voiceover": "The switch is simple. Your laptop writes the code, GitHub holds the truth, and the server just holds a connected copy.",
+    "index": "03 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "03-git-clone-pull-terminal.jpg",
+    "eyebrow": "The post",
+    "title": "Step 1: clone your repo once",
+    "voiceover": "Clone the repo on the server once, and you finally have the undo button you never had.",
+    "index": "04 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "01-stop-deleting-your-pythonanywhere-files.jpg",
+    "eyebrow": "The post",
+    "title": "Step 2: every update after that is one command",
+    "voiceover": "Every update after that is three commands at home, and one pull on the server.",
+    "index": "05 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "04-reload-web-app.jpg",
+    "eyebrow": "The post",
+    "title": "Step 3: reload the web app (the step everybody forgets)",
+    "voiceover": "Now the step everybody forgets. Pull, then hit Reload, or your site keeps serving the old code from memory.",
+    "index": "06 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "01-stop-deleting-your-pythonanywhere-files.jpg",
+    "eyebrow": "The post",
+    "title": "Keep it boring, stay conflict-free",
+    "voiceover": "One branch, no editing on the server, and your pulls stop conflicting. That is the whole discipline.",
+    "index": "07 / 08"
+  },
+  {
+    "kind": "recap",
+    "image": "01-stop-deleting-your-pythonanywhere-files.jpg",
+    "eyebrow": "Quick recap",
+    "title": "The whole routine",
+    "voiceover": "Clone once, pull, reload, and leave the delete button alone. The full walkthrough is on the blog.",
+    "bullets": [
+      "git clone once, to set the project up on PythonAnywhere.",
+      "git pull origin main every time you ship updates.",
+      "Reload the app from the Web tab.",
+      "Stay on a single main branch.",
+      "Never edit code on the server. Push from local, pull on the server."
+    ],
+    "cta": "Full walkthrough: freestackhub.blogspot.com",
+    "index": "08 / 08"
+  }
+]
