@@ -49,11 +49,6 @@ def skin_css(theme_xml: str) -> str:
     return m.group(1)
 
 
-def plain(fragment: str) -> str:
-    text = html.unescape(TAG_RE.sub(" ", fragment))
-    return " ".join(text.split())
-
-
 def newest_post() -> Path:
     folders = sorted(p for p in POSTS_DIR.iterdir() if p.is_dir() and not p.name.startswith("_"))
     if not folders:
@@ -73,13 +68,7 @@ def first_image(post: dict) -> str:
     return f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@{IMAGE_REF}/{rel}"
 
 
-def teaser_text(post: dict) -> str:
-    """What data:post.snippets.long holds: the body up to the jump break, as text
-    (Blogger returns it without tags and without line breaks)."""
-    return plain(post["teaser"])
-
-
-def card(post: dict, title: str, url: str, excerpt: str, image: str, labels: list,
+def card(post: dict, title: str, url: str, image: str, labels: list,
          date: str, demo: bool = False, first: bool = False) -> str:
     tags = "".join(f'<a href="{url}" rel="tag">{html.escape(l)}</a>' for l in labels)
     badge = '<span class="preview-demo">demo card</span>' if demo else ""
@@ -93,13 +82,15 @@ def card(post: dict, title: str, url: str, excerpt: str, image: str, labels: lis
         f'loading="{loading}" src="{image}" width="{CARD_IMG_W}"/></a>'
         if image else ""
     )
-    return f"""        <article class="post-card{' has-media' if image else ''}">
+    # No excerpt: the card is image + labels + title + date + Read more. The
+    # theme stopped printing data:post.snippets.long because that showed up as
+    # a wall of the post itself on the home page.
+    return f"""        <article class="post-card">
           {media}
           <div class="card-body">
             <div class="card-tags">{badge}{tags}</div>
             <h2 class="card-title"><a href="{url}">{html.escape(title)}</a></h2>
             <div class="card-meta"><time class="published">{date}</time></div>
-            <div class="card-excerpt">{html.escape(excerpt)}</div>
             <div class="card-more">
               <a class="read-more" href="{url}" aria-label="Read more: {html.escape(title, quote=True)}">Read more <span aria-hidden="true">&#8594;</span></a>
             </div>
@@ -116,13 +107,15 @@ def widget(title: str, inner: str) -> str:
     )
 
 
-SIDEBAR = (
-    widget("About", "Free PDFs, self-made apps and legit config files &mdash; "
-                    "organized, ad-supported, no cracked or pirated content.")
-    + '<div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>'
-    + widget("Categories", "<ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li>"
-                           "<li><a href='#'>Configs &amp; Patches</a></li></ul>")
-)
+def sidebar(popular_item: str) -> str:
+    return (
+        widget("About", "Free PDFs, self-made apps and legit config files &mdash; "
+                        "organized, ad-supported, no cracked or pirated content.")
+        + '<div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>'
+        + widget("Categories", "<ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li>"
+                               "<li><a href='#'>Configs &amp; Patches</a></li></ul>")
+        + widget("Most Downloaded", f'<ul class="popular-list">{popular_item}</ul>')
+    )
 
 
 def build(post: dict) -> str:
@@ -133,7 +126,6 @@ def build(post: dict) -> str:
     labels = post["labels"]
     date = post["published"].strftime("%B %d, %Y")
     image = first_image(post)
-    excerpt = teaser_text(post)
     body = MORE_RE.sub("", post["html"]).strip()
 
     # bare image names in the body -> the public URLs the build writes
@@ -151,9 +143,17 @@ def build(post: dict) -> str:
     post_url = f"/{post['published'].strftime('%Y/%m')}/{post['slug']}.html"
 
     demo_title = "Your next post shows up as the second card in this list"
-    demo_excerpt = ("The card, the spacing and the Read more button are the same for every "
-                    "post, so the home page keeps one rhythm no matter how long the posts are.")
     demo_label = labels[:1] or ["PythonAnywhere"]
+
+    # the "Most Downloaded" sidebar widget: thumbnail + title only, the way
+    # the theme's custom PopularPosts includable renders it
+    popular_item = ""
+    if image:
+        popular_item = (
+            f'<li><a href="#"><img aria-hidden="true" alt="{html.escape(title)}" '
+            f'decoding="async" height="56" loading="lazy" src="{image}" width="56"/>'
+            f"<span>{html.escape(title)}</span></a></li>"
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -231,20 +231,21 @@ def build(post: dict) -> str:
 
     <section class="preview-block">
       <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
-      <p class="preview-hint">Feature image + labels + title + date + the text before the jump
-        break + <b>Read more</b>. The whole card is a link to the post; nothing after the jump
-        break is loaded on this page any more.</p>
+      <p class="preview-hint">Feature image + labels + title + date + <b>Read more</b> &mdash;
+        no body text on the home page any more (the cards used to print the post&rsquo;s own
+        snippet, which read like the full post). The title and the button both open that
+        post&rsquo;s own URL.</p>
       <div class="main-layout">
         <section class="content-area">
           <div class="post-list hfeed">
-{card(post, title, slug_url, excerpt, image, labels, date, first=True)}
-{card(post, demo_title, slug_url, demo_excerpt, "", demo_label, date, demo=True)}
+{card(post, title, slug_url, image, labels, date, first=True)}
+{card(post, demo_title, slug_url, "", demo_label, date, demo=True)}
           </div>
           <div class="blog-pager container" id="blog-pager">
             <a class="blog-pager-older-link" href="#">Older Posts</a>
           </div>
         </section>
-        <aside class="sidebar">{SIDEBAR}</aside>
+        <aside class="sidebar">{sidebar(popular_item)}</aside>
       </div>
     </section>
 
@@ -269,7 +270,7 @@ def build(post: dict) -> str:
             </div>
           </article>
         </section>
-        <aside class="sidebar">{SIDEBAR}</aside>
+        <aside class="sidebar">{sidebar(popular_item)}</aside>
       </div>
     </section>
 

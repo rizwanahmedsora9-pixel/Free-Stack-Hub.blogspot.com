@@ -38,16 +38,17 @@ The fixed theme defines the Blog widget's includeables itself, so the chain is e
 
 | view | what renders |
 | --- | --- |
-| home / label / search / archive | one **card** per post: feature image, labels, title, date, the text before the jump break, and a **Read more** button |
+| home / label / search / archive | one **card** per post: feature image full width on top, then labels, title, date and a **Read more** button — no body text |
 | card click | `data:post.url` - that post's own permalink |
 | post / page | full `data:post.body`, title, date, labels ("Filed under"), comments, then Blogger's schema block for SEO |
 | under the list | the pager (`← Newer Posts` / `Older Posts →`) |
 
 Key data tags, and why these ones:
 
-- `data:post.snippets.long` - the post **up to the jump break** as plain text (Blog widget v2 has
-  `snippets`, not v1's `snippet`). This is the "catchy lines", cut by Blogger itself, so no
-  JavaScript, no `max-height` hacks, and the rest of the post is not even sent to the browser.
+- No snippet tag at all - the cards used to print `data:post.snippets.long`, but Blogger fills
+  that with roughly the first 1000 characters of the post (it does not reliably stop at the
+  jump break), so the home page read like the full post. Cards are image + labels + title +
+  date + **Read more** now; the post body is only ever sent on the post's own page.
 - `data:post.featuredImage` - the first image of the post. Cards therefore have a picture even
   though Blogger never generates a `media$thumbnail` for jsDelivr-hosted images (the caveat in
   `POST_RULES.md` §8 no longer applies to the home page). `thumbnailUrl` is the fallback.
@@ -64,8 +65,8 @@ on three round trips. The `@font-face` rules are inlined at the top of `<b:skin>
 families are variable fonts, so a single file covers `font-weight: 400 700` (Space Grotesk) and
 `400 600` (Source Serif 4); the old link asked for four discrete weights that all resolved to the
 same file. `unicode-range` keeps an English page down to the two `latin` files. The theme adds no
-`<script src>` of its own - there is no first-party JavaScript to defer, because the cards are cut
-at the jump break by `data:post.snippets.long`, server side.
+`<script src>` of its own - there is no first-party JavaScript to defer, because the cards are
+pure server-rendered HTML (image + labels + title + date + Read more, no post text).
 
 **Both origins the page fetches from are preconnected:** `fonts.gstatic.com` for the woff2 files
 (with `crossorigin`, which fonts require or the connection cannot be reused) and `cdn.jsdelivr.net`,
@@ -141,10 +142,11 @@ mock, not a second copy of the blog: edit the theme or the post, re-run, refresh
 
 - `theme/freestackhub-theme.xml` is hand-maintained. When it changes, Blogger writes the whole
   expanded widget back if you re-download it - keep editing this file, not that one.
-- The card excerpt is the post's own text **before the jump break**, captions included. So a
-  caption under the feature image ("The old way and the new way, side by side.") shows up as the
-  first words of the card. Give the feature image no visible caption if you would rather the card
-  open straight on the hook.
+- Cards show **no post text**: only the feature image (full width, 16:9, `object-fit: cover`),
+  labels, title, date and the Read more button. Captions under the feature image therefore never
+  leak onto the home page. The "Most Downloaded" sidebar widget has a custom includable that
+  renders thumbnail + title only - Blogger's default PopularPosts markup dumps a long snippet
+  under every entry, which is the "dozens of lines" the sidebar used to show.
 - CSS lives in the `<b:skin>` block: the inlined `@font-face` rules and their metric-adjusted
   fallbacks come first, then the layout, then the additions labelled "List cards (home / label /
   search / archive)". Blogger's own share buttons are hidden in both the widget (`shareButtons`)

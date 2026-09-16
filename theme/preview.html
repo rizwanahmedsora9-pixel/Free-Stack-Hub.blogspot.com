@@ -169,19 +169,25 @@
 
   /* ============================================================
      List cards (home / label / search / archive).
-     Each card is the feature image, the labels, the title, the
-     date, the text before the jump break, and a Read More button
-     that opens that post's own URL.
+     Each card is the feature image full width across the top,
+     then the labels, the title, the date and a Read More button
+     that opens that post's own URL. Deliberately NO body text:
+     the cards used to print data:post.snippets.long, which is
+     roughly the first 1000 characters of the post, so the home
+     page read like a wall of the post itself.
      ============================================================ */
-  .post-list{display:flex;flex-direction:column;gap:20px}
+  .post-list{display:flex;flex-direction:column;gap:24px}
   .post-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;
     transition:border-color .16s ease, box-shadow .16s ease}
-  .post-card.has-media{display:grid;grid-template-columns:320px minmax(0,1fr)}
   .post-card:hover{border-color:#CFD6E0;box-shadow:0 12px 28px rgba(16,24,40,.08)}
-  .card-media{display:block;background:#EAEEF3;min-height:100%;aspect-ratio:16/9}
-  .card-media img{width:100%;height:100%;min-height:216px;object-fit:cover;aspect-ratio:16/9}
-  /* Blogger renders PopularPosts/Label thumbnails with markup this theme does not
-     control; pinning a square box means they cannot push the column down. */
+  /* The image gets a fixed 16:9 box, filled with object-fit:cover. The old
+     side-column version stretched the image to the card's full height on wide
+     screens (min-height:100% + height:100%), which cropped away most of it -
+     that is why post images looked broken on PC. */
+  .card-media{display:block;background:#EAEEF3;aspect-ratio:16/9;overflow:hidden}
+  .card-media img{width:100%;height:100%;object-fit:cover}
+  /* Blogger renders Label thumbnails with markup this theme does not control;
+     pinning a square box means they cannot push the column down. */
   .sidebar .widget img{aspect-ratio:1/1;height:auto;object-fit:cover}
   .card-body{padding:20px 22px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
   .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
@@ -191,15 +197,30 @@
   .card-title{font-family:var(--font-head);font-size:22px;line-height:1.28;font-weight:600;margin:0 0 8px}
   .card-title a:hover{color:var(--accent)}
   .card-meta{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px}
-  .card-excerpt{font-size:16.5px;color:#3B4250;margin:0 0 18px;overflow:hidden;
-    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
-  .card-more{margin-top:auto}
+  .card-more{margin-top:14px}
   .read-more{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:#fff;
     font-family:var(--font-head);font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:6px}
   .read-more:hover{background:var(--accent-ink);color:#fff}
   .read-more span{transition:transform .16s ease}
   .read-more:hover span{transform:translateX(3px)}
   .post-meta .post-author{color:var(--ink-soft)}
+
+  /* ============================================================
+     "Most Downloaded" (PopularPosts) sidebar widget.
+     Blogger's default markup prints a long snippet under every
+     entry, which turned the sidebar into dozens of lines per
+     post. The widget renders the custom includable below instead:
+     a small thumbnail plus the title, nothing else.
+     ============================================================ */
+  .popular-list{list-style:none;margin:0;padding:0}
+  .popular-list li{border-bottom:1px solid var(--line);padding:9px 0}
+  .popular-list li:first-child{padding-top:2px}
+  .popular-list li:last-child{border-bottom:none;padding-bottom:0}
+  .sidebar .popular-list a{display:flex;gap:12px;align-items:center;font-family:var(--font-head);
+    font-size:14px;font-weight:600;line-height:1.4;color:var(--ink)}
+  .sidebar .popular-list a:hover{color:var(--accent)}
+  .sidebar .popular-list img{width:56px;height:56px;flex:none;object-fit:cover;border-radius:6px;
+    background:#EAEEF3}
 
   /* labels + comment link on the post page itself */
   .post-labels a{display:inline-block;font-family:var(--font-head);font-size:11px;font-weight:600;
@@ -211,12 +232,8 @@
   .comment-link:hover{color:var(--accent-ink)}
 
   @media(max-width:760px){
-    .post-card.has-media{grid-template-columns:1fr}
-    .card-media{min-height:0}
-    .card-media img{height:auto;min-height:0;aspect-ratio:16/9}
     .card-body{padding:16px 18px 18px}
     .card-title{font-size:19.5px}
-    .card-excerpt{font-size:16px;-webkit-line-clamp:5}
   }
   
   /* ---- preview-only chrome (not part of the Blogger theme) ---- */
@@ -281,19 +298,19 @@
 
     <section class="preview-block">
       <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
-      <p class="preview-hint">Feature image + labels + title + date + the text before the jump
-        break + <b>Read more</b>. The whole card is a link to the post; nothing after the jump
-        break is loaded on this page any more.</p>
+      <p class="preview-hint">Feature image + labels + title + date + <b>Read more</b> &mdash;
+        no body text on the home page any more (the cards used to print the post&rsquo;s own
+        snippet, which read like the full post). The title and the button both open that
+        post&rsquo;s own URL.</p>
       <div class="main-layout">
         <section class="content-area">
           <div class="post-list hfeed">
-        <article class="post-card has-media">
+        <article class="post-card">
           <a aria-hidden="true" class="card-media" href="#" tabindex="-1"><img alt="Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead." decoding="async" fetchpriority="high" height="360" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" width="640"/></a>
           <div class="card-body">
             <div class="card-tags"><a href="#" rel="tag">PythonAnywhere</a><a href="#" rel="tag">Git</a><a href="#" rel="tag">GitHub</a><a href="#" rel="tag">Flask</a><a href="#" rel="tag">Deployment</a><a href="#" rel="tag">Web Development</a></div>
             <h2 class="card-title"><a href="#">Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</a></h2>
             <div class="card-meta"><time class="published">September 16, 2026</time></div>
-            <div class="card-excerpt">The old way and the new way, side by side. I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.</div>
             <div class="card-more">
               <a class="read-more" href="#" aria-label="Read more: Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.">Read more <span aria-hidden="true">&#8594;</span></a>
             </div>
@@ -305,7 +322,6 @@
             <div class="card-tags"><span class="preview-demo">demo card</span><a href="#" rel="tag">PythonAnywhere</a></div>
             <h2 class="card-title"><a href="#">Your next post shows up as the second card in this list</a></h2>
             <div class="card-meta"><time class="published">September 16, 2026</time></div>
-            <div class="card-excerpt">The card, the spacing and the Read more button are the same for every post, so the home page keeps one rhythm no matter how long the posts are.</div>
             <div class="card-more">
               <a class="read-more" href="#" aria-label="Read more: Your next post shows up as the second card in this list">Read more <span aria-hidden="true">&#8594;</span></a>
             </div>
@@ -316,7 +332,7 @@
             <a class="blog-pager-older-link" href="#">Older Posts</a>
           </div>
         </section>
-        <aside class="sidebar"><div class="widget"><h2>About</h2><div class="widget-content">Free PDFs, self-made apps and legit config files &mdash; organized, ad-supported, no cracked or pirated content.</div></div><div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div><div class="widget"><h2>Categories</h2><div class="widget-content"><ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li><li><a href='#'>Configs &amp; Patches</a></li></ul></div></div></aside>
+        <aside class="sidebar"><div class="widget"><h2>About</h2><div class="widget-content">Free PDFs, self-made apps and legit config files &mdash; organized, ad-supported, no cracked or pirated content.</div></div><div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div><div class="widget"><h2>Categories</h2><div class="widget-content"><ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li><li><a href='#'>Configs &amp; Patches</a></li></ul></div></div><div class="widget"><h2>Most Downloaded</h2><div class="widget-content"><ul class="popular-list"><li><a href="#"><img aria-hidden="true" alt="Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead." decoding="async" height="56" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" width="56"/><span>Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</span></a></li></ul></div></div></aside>
       </div>
     </section>
 
@@ -509,7 +525,7 @@ git pull origin main</code></pre>
             </div>
           </article>
         </section>
-        <aside class="sidebar"><div class="widget"><h2>About</h2><div class="widget-content">Free PDFs, self-made apps and legit config files &mdash; organized, ad-supported, no cracked or pirated content.</div></div><div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div><div class="widget"><h2>Categories</h2><div class="widget-content"><ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li><li><a href='#'>Configs &amp; Patches</a></li></ul></div></div></aside>
+        <aside class="sidebar"><div class="widget"><h2>About</h2><div class="widget-content">Free PDFs, self-made apps and legit config files &mdash; organized, ad-supported, no cracked or pirated content.</div></div><div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div><div class="widget"><h2>Categories</h2><div class="widget-content"><ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li><li><a href='#'>Configs &amp; Patches</a></li></ul></div></div><div class="widget"><h2>Most Downloaded</h2><div class="widget-content"><ul class="popular-list"><li><a href="#"><img aria-hidden="true" alt="Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead." decoding="async" height="56" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" width="56"/><span>Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</span></a></li></ul></div></div></aside>
       </div>
     </section>
 
