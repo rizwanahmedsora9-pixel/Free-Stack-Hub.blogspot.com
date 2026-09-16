@@ -10,9 +10,11 @@ Layout (one folder per post):
       post.md          <- (optional) markdown/readable version
       images/          <- ONLY this post's images
       import.xml       <- GENERATED: import this one file into Blogger
+      paste.html       <- GENERATED: same body with full image URLs; safe to
+                          copy-paste into the Blogger post editor (HTML view)
 
 Usage:
-  python3 tools/build_import.py              # build import.xml for every post folder
+  python3 tools/build_import.py              # build import.xml + paste.html for every post
   python3 tools/build_import.py <folder>     # build just one post (name or path)
   python3 tools/build_import.py --check      # validate all posts, build nothing
 
@@ -206,10 +208,16 @@ def main():
             out = folder / "import.xml"
             out.write_text(feed_xml(p), encoding="utf-8")
             print(f"   wrote   posts/{folder.name}/import.xml")
+            paste = folder / "paste.html"
+            paste.write_text(p["html"], encoding="utf-8")
+            print(f"   wrote   posts/{folder.name}/paste.html")
     if bad:
         sys.exit(f"\n{bad} post(s) have errors, fix them and re-run.")
     if not a.check:
-        print("\nImport: Blogger > Settings > Manage blog > Import content > pick the post's import.xml")
+        print("\nPublish option A: Blogger > Settings > Manage blog > Import content > pick the post's import.xml")
+        print("Publish option B: open the post's paste.html, copy ALL of it into the Blogger editor's HTML view")
+        print("WARNING: never paste post.html itself into Blogger - its <img> tags use bare file")
+        print("names, so the images would show as broken. Always use import.xml or paste.html.")
 
 
 if __name__ == "__main__":
