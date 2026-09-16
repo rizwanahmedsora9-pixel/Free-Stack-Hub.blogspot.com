@@ -87,6 +87,45 @@ The bar is now a two-column grid, which has no wrap to fall back on:
 - Icons are now 34px round buttons (19px glyph inside) with a tint on hover/focus, which
   also clears the tap-target complaint the 18px bare glyph used to raise on mobile.
 
+## Follow-up: brand text and icons hug the top of the bar together
+
+A later change pinned the icons to the top of the bar (`align-self:start` on `.social-row`)
+while the grid still centred the brand column (`align-items:center` on `.brand-row`). The
+icons hugged the top edge and the wordmark floated at the bar's vertical middle - the two
+corners visibly disagreed. The grid now uses `align-items:start`, putting **both** corners
+on the top edge (the leftover slack of the `min-height:100px` bar sits below both equally).
+If the two ever cannot share the top edge, the rule is to centre **both** again - never one
+top, one middle.
+
+## The live visitor strip (home page only)
+
+A slim four-cell strip sits between the search bar and the first ad slot: **total visits ·
+your country · your device · local time**, with a pulsing green live dot. Blogger only sends
+it on the main page - the markup and its script are both wrapped in
+`<b:if cond='data:view.isHomepage'>`, so posts, pages, label, search and archive views carry
+none of it.
+
+Every number is real, and all of them stay off the critical path:
+
+| cell | source | cost |
+| --- | --- | --- |
+| total visits | `abacus.jasoncameron.dev/hit/freestackhub/visits` - free open counter; `/hit/` auto-creates it, no key, no account | one ~300 B JSON GET, after `load` + idle |
+| your country | `ipwho.is` free geo lookup; the flag is an emoji built from the ISO code (`String.fromCodePoint`), not an image | one ~500 B JSON GET, after `load` + idle |
+| your device | UA string + `pointer:coarse` | none - no request |
+| local time | JS `Date` | none - one `textContent` write/second |
+
+Core Web Vitals reasoning is in `../PERFORMANCE.md` §1.8: inline script at the end of `<body>`
+(no request, no parser block), SVG icons + emoji flag (no image/font requests), reserved cell
+heights (em-dash placeholders swap in place, CLS 0), and the only animations are transform /
+opacity on a one-shot rise and the 2px dot - collapsed under `prefers-reduced-motion` (the
+count-up is skipped, not just sped up). Nothing is stored: no cookies, no localStorage. Note
+`ipwho.is` necessarily sees the visitor's IP to answer the country, like any fetched server.
+If either service is down the cell just keeps its em dash - no retry, no error, no shift.
+
+To drop the strip, delete the block between `<!-- visit-strip:start -->` and
+`<!-- visit-strip:end -->` (+ its `<b:if>`), the matching `<script>` at the end of `<body>`,
+and the `.visit-*` rules in the skin; re-run `python3 tools/build_theme_preview.py`.
+
 ## Performance, accessibility and SEO
 
 What the theme does now, and the reason each piece is there.
@@ -97,8 +136,10 @@ on three round trips. The `@font-face` rules are inlined at the top of `<b:skin>
 families are variable fonts, so a single file covers `font-weight: 400 700` (Space Grotesk) and
 `400 600` (Source Serif 4); the old link asked for four discrete weights that all resolved to the
 same file. `unicode-range` keeps an English page down to the two `latin` files. The theme adds no
-`<script src>` of its own - there is no first-party JavaScript to defer, because the cards are
-pure server-rendered HTML (image + labels + title + date + Read more, no post text).
+`<script src>` of its own: the cards are pure server-rendered HTML (image + labels + title + date
++ Read more, no post text), and the only first-party JavaScript anywhere is the live visitor
+strip's ~1 KB inline script - it sits at the end of `<body>`, does nothing until after `load`,
+and is sent on the home page only (see "The live visitor strip" below).
 
 **Both origins the page fetches from are preconnected:** `fonts.gstatic.com` for the woff2 files
 (with `crossorigin`, which fonts require or the connection cannot be reused) and `cdn.jsdelivr.net`,

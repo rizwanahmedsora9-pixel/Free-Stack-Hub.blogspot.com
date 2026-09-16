@@ -70,11 +70,13 @@ page downloads only the two `latin` files - the other subsets are never fetched.
 `font-display: swap` on every webfont keeps text painted in the fallback while
 they load (no invisible text, no FOIT).
 
-**Also removed:** the theme has no `<script src>` of its own, and adds none. The
-home page cards are pure server-rendered HTML (feature image + labels + title +
-date + Read more; no post text) - Blogger cuts everything at the template, so
-there is no JavaScript to load, parse, or defer. That is why no `defer`/`async`
-work was needed: the theme ships zero first-party JS.
+**Also removed:** the theme has no `<script src>` of its own. The home page
+cards are pure server-rendered HTML (feature image + labels + title + date +
+Read more; no post text) - Blogger cuts everything at the template. The only
+first-party JavaScript anywhere is the visitor strip's ~1 KB inline script at
+the end of `<body>` (§1.8): inline, so it is not a request, not a parser pause,
+and not on any page but the home page - so there is still nothing that
+`defer`/`async` would help.
 
 ### 1.2 Resource hints
 
@@ -213,11 +215,46 @@ SHA instead of a branch that jsDelivr caches for a week (POST_RULES.md §7).
 
 ### 1.7 Unused code
 
-There is no bundle to split: no first-party JavaScript, no framework, no
-route-level chunks. The reduction that was available was in CSS and fonts, and
-both were taken - the four discrete Space Grotesk weights collapsed into one
-variable range, the unused subsets stay unfetched thanks to `unicode-range`, and
-the Google Fonts stylesheet request is gone entirely.
+There is no bundle to split: no framework, no route-level chunks, and the only
+first-party JavaScript is the visitor strip's inline ~1 KB (§1.8). The
+reduction that was available was in CSS and fonts, and both were taken - the
+four discrete Space Grotesk weights collapsed into one variable range, the
+unused subsets stay unfetched thanks to `unicode-range`, and the Google Fonts
+stylesheet request is gone entirely.
+
+### 1.8 The live visitor strip (home page only)
+
+The strip under the search bar - total visits · your country · your device ·
+local time - was added with the explicit requirement of not moving any of the
+metrics above. Budget, line by line:
+
+- **Markup is home-page-only.** Both the strip and its script sit inside
+  `<b:if cond='data:view.isHomepage'>`; every other view ships neither. Item
+  pages keep exactly the weight they had.
+- **FCP / LCP: untouched.** The script is inline at the end of `<body>`, so it
+  is neither a request nor a parser pause, and the two data fetches wait for
+  `window.load` + `requestIdleCallback` - they start after LCP has already
+  resolved. No `<link>` hints were added for their origins: an idle-time
+  connection does not need a preconnect, and the head stays exactly as audited.
+  (Do not be tempted to "speed them up" - idle is the point.)
+- **Zero image/font cost.** Icons are inline SVG in `currentColor`; the country
+  flag is an emoji composed from the ISO code with `String.fromCodePoint`
+  (each regional indicator letter = codepoint + 127397), so there is no flag
+  sprite, no icon font, no extra origin at all.
+- **TBT / INP: ~0.** The script body is a few `getElementById`s and a UA test.
+  The count-up is one 700 ms `requestAnimationFrame` loop, after which the page
+  holds no frame work at all; the clock writes one `textContent` per second.
+- **CLS: 0.** The skin reserves the strip (`min-height` + fixed cell padding)
+  with em-dash placeholders; real values swap in place. The two `@keyframes`
+  animate only `transform` and `opacity` (no width/height/top reflow), and the
+  global `prefers-reduced-motion` block collapses them - the JS additionally
+  skips the count-up outright instead of animating it anyway.
+- **Failure is invisible.** If either service is down the cell keeps its em
+  dash. No retry loop, no error state, no layout change.
+- **Privacy.** No cookies, no localStorage, nothing written about the visitor.
+  The Abacus hit increments one page-view counter; ipwho.is sees the visitor's
+  IP to answer the country, as any fetched server does. The strip is also why
+  the Privacy Policy page should not claim "no third-party requests".
 
 ---
 
