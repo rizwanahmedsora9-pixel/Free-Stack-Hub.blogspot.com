@@ -212,6 +212,49 @@ def report(post: dict, entries: list, cdn_files: set) -> int:
             "no Blogger thumbnail (media$thumbnail) - external CDN images get no preview card, "
             "so the homepage shows text only; upload the hero image into Blogger if you want a card",
         )
+
+    # 6. did the Core Web Vitals markup survive Blogger's importer?
+    #    tools/check_perf.py audits what this repo publishes; this audits what
+    #    Blogger actually kept, because its importer rewrites post HTML.
+    live_html = live["html"]
+    if "<picture" in post.get("html", "").lower():
+        if "<picture" in live_html.lower():
+            line(OK, "the <picture> elements survived Blogger's importer")
+        else:
+            line(
+                WARN,
+                "Blogger stripped the <picture> wrappers - the images still show (the <img> "
+                "fallback is the JPG), but the post is served without AVIF/WebP, so LCP and "
+                "the page weight go back up",
+            )
+        modern = [i for i in post["images"] if i.endswith((".avif", ".webp"))]
+        served = [i for i in modern if i in live_html]
+        if modern and served:
+            line(OK, f"{len(served)}/{len(modern)} AVIF/WebP variant(s) are in the published HTML")
+        elif modern:
+            line(WARN, f"none of the {len(modern)} AVIF/WebP variants reached the published HTML")
+
+    imgs = re.findall(r"<img\b[^>]*>", live_html, re.I)
+    if imgs:
+        bare = [t for t in imgs if not ("width=" in t.lower() and "height=" in t.lower())]
+        if bare:
+            line(
+                WARN,
+                f"Blogger dropped width/height from {len(bare)}/{len(imgs)} published <img> - "
+                "the page shifts as they land (CLS); re-add them in the editor's HTML view",
+            )
+        else:
+            line(OK, f"all {len(imgs)} published <img> keep their width/height (CLS stays 0)")
+        if "fetchpriority" not in imgs[0].lower():
+            line(
+                WARN,
+                "the published hero image lost fetchpriority=high - it is still the LCP element, "
+                "just a lower-priority request than it should be",
+            )
+        else:
+            line(OK, "the published hero image is still fetchpriority=high")
+        if "loading" in imgs[0].lower() and 'loading="lazy"' in imgs[0].lower():
+            line(ERR, "the published hero image is loading=lazy - that is the LCP element, it must be eager")
     return rc
 
 

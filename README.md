@@ -8,7 +8,7 @@ Each post is one self-contained folder under `posts/`:
 posts/2026-09-16-stop-deleting-pythonanywhere-files/
   post.html    the post: header comment (title/labels/date/description) + HTML body
   post.md      readable markdown copy
-  images/      this post's images only
+  images/      this post's images, plus GENERATED .avif/.webp variants of each
   title.txt    GENERATED - exact title, so you never retype it in Blogger
   import.xml   GENERATED - the file you import into Blogger
   paste.html   GENERATED - body with full image URLs, for the editor's HTML view
@@ -31,6 +31,7 @@ that post's own URL. After publishing, check what actually landed:
 
 ```bash
 python3 tools/check_published.py      # live title / labels / permalink / images vs posts/
+python3 tools/check_perf.py           # Core Web Vitals / a11y / SEO, offline, no browser
 python3 tools/make_video.py 2026-09-16-stop-deleting-pythonanywhere-files   # social videos
 ```
 
@@ -41,10 +42,15 @@ images would show as broken. Only the generated files have full URLs.
 - **Blogger theme:** `theme/freestackhub-theme.xml` (the file to upload to Blogger) plus
   `theme/preview.html`, a static mock of the home page and a post page - see [theme/README.md](theme/README.md)
 - **Build tool:** `python3 tools/build_import.py` (regenerates `import.xml`, `paste.html`, `title.txt`)
+- **Image tool:** `python3 tools/optimize_images.py` (writes the `.avif`/`.webp` variants, reports pixel sizes)
+- **Performance audit:** `python3 tools/check_perf.py` - see [PERFORMANCE.md](PERFORMANCE.md)
 - **Theme preview:** `python3 tools/build_theme_preview.py` (regenerates `theme/preview.html`)
-- **Video tool:** `python3 tools/make_video.py` (needs `pillow` + ffmpeg; see POST_RULES §10)
+- **Video tool:** `python3 tools/make_video.py` (needs `pillow` + ffmpeg; see POST_RULES §11)
 - **Published-vs-source check:** `python3 tools/check_published.py`
+- **Cache headers for a static host:** `perf/netlify.toml`
 - **Template:** `posts/_template/`
+- **Performance / accessibility / SEO:** [PERFORMANCE.md](PERFORMANCE.md) - what was changed in the
+  theme and the build to pass PageSpeed, and how to keep the next post passing
 
 Images are served from this repo via jsDelivr, so the repository must be **public**
 (Settings → General → Change visibility), and the post must be merged to `main`. A brand-new

@@ -434,6 +434,26 @@ def main() -> int:
         print(f"using the existing storyboard ({len(cards)} cards)")
     else:
         cards = storyboard_from_post(post, a.max_cards)
+        if sb.exists():
+            # POST_RULES.md section 11 makes storyboard.json the edit surface: the
+            # voiceover in it is also the burned-in caption, so it gets hand-tuned
+            # and the narration clips are timed to it. Regenerating without
+            # --reuse-storyboard silently throws those edits away (and leaves the
+            # existing 01.mp3, 02.mp3, ... out of step with the new text), so say so.
+            try:
+                old = json.loads(sb.read_text(encoding="utf-8"))
+            except Exception:                                    # pragma: no cover
+                old = []
+            edited = [
+                o.get("voiceover", "")
+                for o, n in zip(old, cards)
+                if o.get("voiceover") and o.get("voiceover") != n.get("voiceover")
+            ]
+            if edited:
+                print(f"  WARNING about to overwrite {len(edited)} hand-edited voiceover line(s) in "
+                      f"posts/{folder.name}/video/storyboard.json")
+                print("          keep them with --reuse-storyboard, or restore afterwards with "
+                      f"git checkout -- posts/{folder.name}/video/storyboard.json")
     for i, c in enumerate(cards, 1):
         c["index"] = f"{i:02d} / {len(cards):02d}"
         c["_subs"] = caption_chunks(c.get("subtitle") or c.get("voiceover") or c.get("title"))

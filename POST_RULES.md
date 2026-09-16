@@ -8,13 +8,14 @@ posts/
   2026-09-16-stop-deleting-pythonanywhere-files/
     post.html      source (metadata header + HTML body)      <- written by hand/agent
     post.md        readable markdown copy (optional)
-    images/        only this post's images
+    images/        only this post's images, plus the GENERATED .avif/.webp
+                   variant of each one (see section 4)
     import.xml     GENERATED - the file you import into Blogger
     paste.html     GENERATED - copy-paste-ready body (full image URLs) for the
                    Blogger editor's HTML view
     title.txt      GENERATED - the exact title, so you never retype it by hand
     video/         GENERATED - storyboard.json, blog-to-video-vertical.mp4 and
-                   blog-to-video-wide.mp4 (see section 10)
+                   blog-to-video-wide.mp4 (see section 11)
   _template/       copy this to start a new post
 ```
 
@@ -64,7 +65,26 @@ the card - leave it off if you want the card to open straight on the hook.
 ## 4. Images
 - Put them in the post's own `images/` folder, named `01-…jpg`, `02-…jpg` in order of appearance.
 - In `post.html` reference them by **bare file name only**: `<img src="01-hero.jpg" alt="…">`.
-- Every image needs `alt` text. Keep files under ~150 KB (JPG for photos/illustrations).
+  Write **no** `width`, `height`, `<picture>`, `loading` or `fetchpriority` - the build adds all
+  of them from the file itself, and overwrites anything you typed (section 5).
+- Every image needs `alt` text. Keep files under ~150 KB (JPG for photos/illustrations); the hero
+  image is the post page's LCP element, so the smaller it is the faster the page measures.
+- Generate the modern-format variants, and commit them next to the JPGs:
+
+  ```bash
+  python3 tools/optimize_images.py <folder>     # writes NN-name.avif and NN-name.webp
+  python3 tools/optimize_images.py --check      # report missing/stale variants, write nothing
+  ```
+
+  The build then wraps every image in a `<picture>` that offers AVIF (≈63 % smaller than the JPG
+  on this blog's images), then WebP (≈48 %), then the JPG as the `<img>` fallback. **AVIF must be
+  the first `<source>`** - the browser takes the first type it can decode - and the JPG fallback
+  must stay, both for old browsers and because Blogger reads `data:post.featuredImage` from the
+  `<img>`, which is what feeds the home-page cards.
+- Captions and any other inline colour sit on the white card, so they must clear WCAG AA: the
+  template's `color:#5B6270` is the theme's own `--ink-soft` at 6.13:1. Do not use `#777` - that
+  is 4.48:1 and fails the contrast audit. `tools/check_perf.py` extracts every inline
+  `color:`/`background:` pair from the built HTML and checks it.
 - The build rewrites the `src` to a public URL; nothing is uploaded to Blogger manually.
 
 ## 5. Build
@@ -77,6 +97,15 @@ The build **fails** if: folder name is wrong, TITLE/LABELS/SEARCH DESCRIPTION mi
 `<img>` points to a file that isn't in `images/`, or the section 3 structure is off (missing or
 doubled jump break, empty teaser, not exactly one feature image, hook outside 2-4 sentences).
 It writes `title.txt` alongside `import.xml`/`paste.html` and warns about unused images.
+
+The build also **produces and enforces** the Core Web Vitals markup, so a post cannot ship without
+it. For every `<img>` it emits a `<picture>` with the AVIF/WebP sources ahead of the JPG, sets
+`width`/`height` from the file's real pixels (this is what keeps CLS at 0 - the browser reserves
+the exact box before the bytes arrive), and marks the **first** image
+`loading="eager" fetchpriority="high"` because it is the LCP element, with `loading="lazy"
+decoding="async"` on every later one. It fails if an image has no `alt`, no dimensions could be
+read, the first image is lazy, or a later image is not lazy. `import.xml` is only re-stamped when
+the post actually changed, so re-running the build never dirties the file.
 
 ## 6. Publish (two ways)
 **Import (recommended):** Blogger → **Settings → Manage blog → Import content** → choose that
@@ -137,9 +166,18 @@ in those widgets.
 Checked against this blog's own takeout export (`sample export/`), and worth knowing because
 each one silently drops something the build files carry:
 
-- **Settings → Search description → Enable.** `blog_meta_description_enabled` is currently `false`,
-  so the `SEARCH DESCRIPTION:` in every `post.html` goes nowhere and Google fills the snippet with
-  the first sentences of the post instead.
+- **Settings → Search preferences → Meta tags → Description → Enable.**
+  `blog_meta_description_enabled` is currently `false`, so the `SEARCH DESCRIPTION:` in every
+  `post.html` goes nowhere. The theme now emits a 146-character fallback description of its own on
+  every page while that is off, guarded by `<b:if cond='not data:blog.metaDescription'>`, so no page
+  ships without one - but the fallback is generic. Enable the setting and paste a blog-level
+  description to make `import.xml`'s `<blogger:metaDescription>` win, which gives every post its own
+  snippet; the theme's fallback steps aside automatically and there is never a duplicate.
+- **Settings → Posts, comments and media → Lightbox = No.** `blog_use_lightbox` is currently `true`,
+  which makes Blogger inject its lightbox CSS/JS and wrap every post image in a generated `<a>`.
+  That is extra render-blocking payload, and the wrapper link has no accessible name - both are
+  things `check_perf.py` would fail if they were ours. Turn it off; the post images are already
+  full width.
 - **Settings → Posts, comments and media → Convert line breaks = On** (`blog_convert_line_breaks`
   is `true`). Right for typed text; for pasted `paste.html` it can add blank space between blocks
   that already have `<p>` tags.
@@ -151,7 +189,29 @@ each one silently drops something the build files carry:
 Never rename a folder after import, and never retitle the post in Blogger: `posts/` is the source
 of truth, and `check_published.py` reports the pair as a mismatch (exit 1).
 
-## 10. Video for a post (optional, one command per post)
+## 10. Performance, accessibility and SEO (check before every merge)
+```bash
+python3 tools/check_perf.py             # 88 checks; exit 1 if one would fail a Lighthouse audit
+python3 tools/check_perf.py --verbose   # list the passing checks too
+```
+It runs offline with nothing but the standard library, and audits `theme/freestackhub-theme.xml`,
+`theme/preview.html` and every post against the four PageSpeed categories: no render-blocking
+resource in the head, fonts inlined with `font-display:swap` plus metric-adjusted fallbacks,
+preconnect to both origins, explicit `width`/`height` on every image, the LCP image eager at high
+priority, AVIF ahead of WebP with a JPG fallback, an accessible name on every link and button,
+contrast ≥ 4.5:1 (including the inline colours in a post body), one `<h1>`, no skipped heading
+level, a skip link, and exactly one 120-160 character meta description.
+
+What it cannot check is Blogger's own widget CSS/JS, which is not ours to remove. **[PERFORMANCE.md](PERFORMANCE.md)
+has the full reasoning, the measured numbers, and what to do if the live report still fails.**
+
+After publishing, `tools/check_published.py` reports whether Blogger's importer *kept* the
+`<picture>` wrappers, the AVIF/WebP sources, the `width`/`height` attributes and
+`fetchpriority=high` - it rewrites post HTML, and only the live feed shows the result. If it
+stripped them the post still renders (the `<img>` fallback is the JPG); you just lose the
+compression, and the tool says so.
+
+## 11. Video for a post (optional, one command per post)
 ```bash
 python3 tools/make_video.py 2026-09-16-my-post --dry-run   # write video/storyboard.json only
 python3 tools/make_video.py 2026-09-16-my-post              # narrated 1080x1920 + 1920x1080 MP4s
@@ -177,10 +237,12 @@ embed the wide one with a `<iframe>`; never expect the MP4 in the post folder to
 
 ## Checklist for the agent when adding a post
 1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
-2. Write `post.html` (+ `post.md`), generate images into `images/`
+2. Write `post.html` (+ `post.md`), generate images into `images/` - bare `<img src alt>`, no sizes
 3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker
-4. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
-5. Commit the whole folder including `import.xml`, `paste.html` and `title.txt`
-6. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels by hand)
-7. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL
-8. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos
+4. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
+5. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
+6. `python3 tools/check_perf.py` → must print `clean`
+7. Commit the whole folder including the image variants, `import.xml`, `paste.html` and `title.txt`
+8. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels by hand)
+9. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL
+10. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos

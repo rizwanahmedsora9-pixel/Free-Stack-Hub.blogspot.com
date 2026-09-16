@@ -1,6 +1,10 @@
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>The old way and the new way, side by side.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.webp" type="image/webp"/>
+    <img alt="A stressed developer deleting files next to one syncing code with the cloud using git" decoding="async" fetchpriority="high" height="480" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" style="max-width:100%; height:auto;" width="1200"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>The old way and the new way, side by side.</i></div>
 </div>
 
 <p>I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.</p>
@@ -32,8 +36,12 @@
 <h2>The mental switch: your server is a copy, not the original</h2>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.webp" type="image/webp"/>
+    <img alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" style="max-width:100%; height:auto;" width="1100"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.</i></div>
 </div>
 
 <p>Here's the idea that makes everything click. From now on, your project lives in three places:</p>
@@ -55,8 +63,12 @@
 <pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>git clone https://github.com/your-username/your-repo.git</code></pre>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>One command brings the whole project down, history included.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.webp" type="image/webp"/>
+    <img alt="A bash terminal pulling the latest files from GitHub into a project folder" decoding="async" height="667" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" style="max-width:100%; height:auto;" width="1000"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>One command brings the whole project down, history included.</i></div>
 </div>
 
 <p>Git downloads the entire project into a folder named after your repo, and it arrives with its complete history attached. Every commit you ever made is now sitting on the server too, which quietly gives you that undo button you never had before.</p>
@@ -89,8 +101,12 @@ git pull origin main</code></pre>
 <p>The code is on the disk, but your app is still running the old version from memory. PythonAnywhere keeps your web app alive as a long-running process, and it doesn't watch your files for changes. You have to tell it. Open the <b>Web</b> tab and hit the big green <b>Reload</b> button.</p>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Pull, then Reload. Every time.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.webp" type="image/webp"/>
+    <img alt="A browser window with a green reload button in front of a server" decoding="async" height="667" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" style="max-width:100%; height:auto;" width="1000"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Pull, then Reload. Every time.</i></div>
 </div>
 
 <p>Refresh your site. New code is live, five seconds after you finished the pull.</p>

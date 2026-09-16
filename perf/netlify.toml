@@ -1,0 +1,59 @@
+# Ready-to-use Cache-Control for the static assets.
+#
+# The blog itself is served by Blogger, which sets its own headers and cannot be
+# configured - but nothing here is needed for it either, because the two things
+# this repo serves are already cached well:
+#
+#   * images come from jsDelivr, which sends `cache-control: public, max-age=604800`
+#     for a branch ref (@main) and `max-age=31536000, immutable` for a commit-SHA
+#     ref. That is why POST_RULES.md section 7 tells you to pin IMAGE_REF=<sha>
+#     when a brand-new image 404s: the SHA form is both faster and permanent.
+#   * the theme's CSS is inlined into the HTML by Blogger, so there is no
+#     separate stylesheet request to cache at all.
+#
+# This file is for the day the same output is served from a static host
+# (Netlify, Cloudflare Pages, an nginx box in front of the exported HTML). Drop
+# it at the site root - Netlify and Cloudflare Pages both read `netlify.toml` /
+# `_headers` from there - or copy the block into your deploy config.
+
+[[headers]]
+  for = "/posts/*/images/*"
+  [headers.values]
+    # every image in this repo is addressed by an immutable path, and the build
+    # rewrites the URL to a commit SHA when it needs to, so a year is safe
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.avif"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/theme/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  # HTML must never be cached long: it is the document that points at everything
+  # else, and a stale index.html would pin the whole site to old asset URLs.
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Best-practices headers while we are here: no referrer leaks to third parties,
+# a modern content type, and no MIME sniffing.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
