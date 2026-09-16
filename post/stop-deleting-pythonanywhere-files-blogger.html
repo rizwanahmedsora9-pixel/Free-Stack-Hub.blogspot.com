@@ -3,13 +3,13 @@ BLOGGER POST - paste this into the Blogger post editor's HTML view.
 
 TITLE:  Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.
 LABELS: PythonAnywhere, Git, GitHub, Flask, Deployment, Web Development
+PUBLISHED: 2026-09-16
 SEARCH DESCRIPTION (Post settings > Search description):
 Still deleting and re-uploading your PythonAnywhere project on every update?
 Here's the Git workflow that replaces it with one command.
 
-IMAGES: before publishing, upload the 4 images from the images/ folder into the
-post (where each <img> sits below), then replace each src="..." with the
-blogger.googleusercontent.com URL Blogger gives you. Alt text is already set.
+IMAGES: the <img> tags below use bare file names from images/. Running
+python3 tools/build_import.py rewrites them to public URLs automatically.
 ============================================================= -->
 
 <p>I deleted my entire website three times in one month before this lesson finally stuck.</p>
