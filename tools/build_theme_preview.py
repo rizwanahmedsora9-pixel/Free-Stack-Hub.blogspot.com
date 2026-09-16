@@ -30,6 +30,14 @@ ROOT = Path(__file__).resolve().parent.parent
 THEME = ROOT / "theme" / "freestackhub-theme.xml"
 OUT = ROOT / "theme" / "preview.html"
 
+# Kept in step with theme/freestackhub-theme.xml by tools/check_perf.py, which
+# fails if the two ever disagree.
+SITE_DESCRIPTION = (
+    "Free PDFs, self-made apps and clean config files, plus step-by-step guides "
+    "for Python, Git and free-tier hosting. No cracked software, no clutter."
+)
+CARD_IMG_W, CARD_IMG_H = 640, 360        # the 16:9 box the skin renders cards into
+
 TAG_RE = re.compile(r"<[^>]+>")
 MORE_RE = re.compile(r"<!--\s*more\s*-->", re.I)
 
@@ -72,12 +80,17 @@ def teaser_text(post: dict) -> str:
 
 
 def card(post: dict, title: str, url: str, excerpt: str, image: str, labels: list,
-         date: str, demo: bool = False) -> str:
+         date: str, demo: bool = False, first: bool = False) -> str:
     tags = "".join(f'<a href="{url}" rel="tag">{html.escape(l)}</a>' for l in labels)
     badge = '<span class="preview-demo">demo card</span>' if demo else ""
+    # first card = the LCP element: eager, high priority. Every other card is
+    # below the fold and lazy, so it never competes with it for bandwidth.
+    priority = ' fetchpriority="high"' if first else ""
+    loading = "eager" if first else "lazy"
     media = (
         f'<a aria-hidden="true" class="card-media" href="{url}" tabindex="-1">'
-        f'<img alt="{html.escape(title)}" src="{image}"/></a>'
+        f'<img alt="{html.escape(title)}" decoding="async"{priority} height="{CARD_IMG_H}" '
+        f'loading="{loading}" src="{image}" width="{CARD_IMG_W}"/></a>'
         if image else ""
     )
     return f"""        <article class="post-card{' has-media' if image else ''}">
@@ -88,7 +101,7 @@ def card(post: dict, title: str, url: str, excerpt: str, image: str, labels: lis
             <div class="card-meta"><time class="published">{date}</time></div>
             <div class="card-excerpt">{html.escape(excerpt)}</div>
             <div class="card-more">
-              <a class="read-more" href="{url}">Read more <span aria-hidden="true">&#8594;</span></a>
+              <a class="read-more" href="{url}" aria-label="Read more: {html.escape(title, quote=True)}">Read more <span aria-hidden="true">&#8594;</span></a>
             </div>
           </div>
         </article>"""
@@ -148,7 +161,12 @@ def build(post: dict) -> str:
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>Theme preview &middot; Free Stack Hub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap" rel="stylesheet"/>
+  <meta content="{SITE_DESCRIPTION}" name="description"/>
+  <meta content="#1F6F5C" name="theme-color"/>
+  <link crossorigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net" rel="preconnect"/>
+  <!-- No <link rel=stylesheet> to Google Fonts here: the @font-face rules are
+       inlined in the skin CSS just below, exactly like in the Blogger theme. -->
   <style>
 {css}
   /* ---- preview-only chrome (not part of the Blogger theme) ---- */
@@ -165,6 +183,8 @@ def build(post: dict) -> str:
   </style>
 </head>
 <body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <div class="preview-note">
     <b>Design preview</b> &mdash; this is a static mock of what
@@ -198,7 +218,7 @@ def build(post: dict) -> str:
     <div class="container">
       <form class="search">
         <input aria-label="Search" placeholder="Search PDFs, apps, configs&hellip;" type="search"/>
-        <button type="submit">Search</button>
+        <button aria-label="Search this blog" type="submit">Search</button>
       </form>
     </div>
   </div>
@@ -207,7 +227,7 @@ def build(post: dict) -> str:
     <div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>
   </div>
 
-  <main class="container">
+  <main class="container" id="main-content" tabindex="-1">
 
     <section class="preview-block">
       <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
@@ -217,7 +237,7 @@ def build(post: dict) -> str:
       <div class="main-layout">
         <section class="content-area">
           <div class="post-list hfeed">
-{card(post, title, slug_url, excerpt, image, labels, date)}
+{card(post, title, slug_url, excerpt, image, labels, date, first=True)}
 {card(post, demo_title, slug_url, demo_excerpt, "", demo_label, date, demo=True)}
           </div>
           <div class="blog-pager container" id="blog-pager">

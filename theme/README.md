@@ -11,6 +11,11 @@ theme/
   preview.html             GENERATED - static mock of the home page + post page
 ```
 
+`python3 tools/check_perf.py` audits this theme - and `preview.html`, and every post - against the
+Lighthouse Performance / Accessibility / Best Practices / SEO audits, offline and with no browser.
+Run it before uploading; it exits 1 if a change would fail one. **[../PERFORMANCE.md](../PERFORMANCE.md)
+has the reasoning and the measured numbers behind every item below.**
+
 ## Fix: the home page showed whole posts instead of teaser cards
 
 The archived theme described only one thing for the Blog widget:
@@ -49,6 +54,64 @@ Key data tags, and why these ones:
 - `data:post.hasJumpLink` / jump-break text - not needed any more: every card ends in the same
   *Read more* button, whether or not the post has a break. (`POST_RULES.md` §3 requires one.)
 
+## Performance, accessibility and SEO
+
+What the theme does now, and the reason each piece is there.
+
+**Nothing in `<head>` blocks paint.** The Google Fonts `<link rel='stylesheet'>` is gone - it was a
+stylesheet on a third origin whose only job was to name two files on a fourth, so first paint waited
+on three round trips. The `@font-face` rules are inlined at the top of `<b:skin>` instead. Both
+families are variable fonts, so a single file covers `font-weight: 400 700` (Space Grotesk) and
+`400 600` (Source Serif 4); the old link asked for four discrete weights that all resolved to the
+same file. `unicode-range` keeps an English page down to the two `latin` files. The theme adds no
+`<script src>` of its own - there is no first-party JavaScript to defer, because the cards are cut
+at the jump break by `data:post.snippets.long`, server side.
+
+**Both origins the page fetches from are preconnected:** `fonts.gstatic.com` for the woff2 files
+(with `crossorigin`, which fonts require or the connection cannot be reused) and `cdn.jsdelivr.net`,
+which serves the hero image - the LCP element.
+
+**The LCP image is not lazy.** The card list loops with `<b:loop index='i'>` and wraps each card in
+`<b:with value='data:i == 0' var='isFirst'>`, so `cardImage` can render the first card's image
+`loading='eager' fetchpriority='high'` and every later one `loading='lazy'`. Before this, *every*
+card image was `loading='lazy'`, including the one at the top of the page - a lazy LCP image is not
+requested until after layout, so the browser finds its own largest element last.
+
+**Nothing shifts.** Card `<img>`s declare `width='640' height='360'` and `.card-media` an
+`aspect-ratio:16/9`, so the media column has a height before the image lands. Post images get their
+`width`/`height` from the build, read off the real file. And because `font-display:swap` re-lays out
+every line when the webfont arrives, two metric-adjusted faces - `'Space Grotesk Fallback'` and
+`'Source Serif 4 Fallback'`, `size-adjust`/`ascent-override`/`descent-override`, `src:local()` -
+sit behind the real ones in `--font-head`/`--font-body` and absorb the swap. They are estimates;
+re-derive them if the swap still visibly moves text. `.sidebar .widget img` is pinned to a square
+because Blogger's own PopularPosts/Label markup is not ours to add attributes to.
+
+**Every link has a name.** The four social icons are SVG-only, so each has an `aria-label`. The card
+image is a second link to the same post as its title, so it stays `aria-hidden='true'
+tabindex='-1'`. The important one is *Read more*: repeated per card it announces as an identical
+list, so each carries `expr:aria-label='"Read more: " + data:post.title'` while the visible text
+stays "Read more →".
+
+**Keyboard and contrast.** A skip link is the first thing in `<body>`, targeting
+`<main id='main-content' tabindex='-1'>`. The search field used to be `outline:0` - the one input on
+the page with no focus indicator - and now has a ring, with a global `:focus-visible` rule (light
+ring on the dark nav and footer). Every `target='_blank'` link carries `rel='noopener noreferrer'`.
+The footer copyright moved `#8991A0` → `#A8B0BE`, the placeholder is darkened to `#4A5160`, and all
+13 pairs `check_perf.py` computes from this file now clear 4.5:1. `@media(prefers-reduced-motion)`
+collapses the card and button transitions.
+
+**SEO.** `<b:if cond='not data:blog.metaDescription'>` emits a 146-character description when
+Blogger does not - and this blog does not, because `blog_description` is empty *and*
+`blog_meta_description_enabled` is false (see `../POST_RULES.md` §9). The guard is what makes it
+safe: enable Settings → Search description and Blogger's own tag takes over, with no duplicate.
+Also added: `og:`/`twitter:card` for the Shorts/Reels shares, a `Blog` JSON-LD block, `theme-color`,
+and a fallback tagline in the header so the home page has descriptive text above the fold instead of
+the blank line an empty `data:blog.description` leaves.
+
+`preview.html` mirrors all of it - same inlined skin, same head, same card attributes - so what
+`check_perf.py` passes is what Blogger will render. It is generated by
+`tools/build_theme_preview.py`; if the two disagree the tool says so.
+
 ## Upload it to Blogger
 
 1. **Keep a rollback copy:** Blogger → **Theme** → ⋮ → **Backup** (or *Download*).
@@ -82,6 +145,13 @@ mock, not a second copy of the blog: edit the theme or the post, re-run, refresh
   caption under the feature image ("The old way and the new way, side by side.") shows up as the
   first words of the card. Give the feature image no visible caption if you would rather the card
   open straight on the hook.
-- CSS lives in the `<b:skin>` block: list cards at the top of the additions, labelled
-  "List cards (home / label / search / archive)". Blogger's own share buttons are hidden in both
-  the widget (`shareButtons`) and the CSS.
+- CSS lives in the `<b:skin>` block: the inlined `@font-face` rules and their metric-adjusted
+  fallbacks come first, then the layout, then the additions labelled "List cards (home / label /
+  search / archive)". Blogger's own share buttons are hidden in both the widget (`shareButtons`)
+  and the CSS.
+- If you change a colour, re-run `python3 tools/check_perf.py`: it reads the palette out of this
+  file and recomputes all 13 contrast pairs, so a recolour that drops under 4.5:1 fails the build
+  rather than the audit.
+- Blogger's own widget CSS and JavaScript arrive through `<b:include name='all-head-content'/>` and
+  are not removable from a theme. If PageSpeed still reports unused JavaScript after uploading,
+  check the URL in the report's network table - `blogspot.com`/`blogger.com` means it is theirs.

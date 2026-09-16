@@ -46,6 +46,9 @@ import sys
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from optimize_images import VARIANTS, identify  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 POSTS_DIR = ROOT / "posts"
 
@@ -73,9 +76,31 @@ HEADER_RE = re.compile(r"^\s*<!--(.*?)^[ \t]*[-=]*[ \t]*-->[ \t]*$", re.S | re.M
 KEY_RE = re.compile(r"^\s*([A-Z][A-Z ]+?)(?:\s*\(.*?\))?\s*:\s*(.*)$")
 KEYS = {"TITLE", "LABELS", "SEARCH DESCRIPTION", "PUBLISHED", "IMAGES", "BLOGGER POST"}
 IMG_SRC_RE = re.compile(r'(<img\b[^>]*\bsrc=")([^"]+)(")', re.I)
+# <img src> and <source srcset> both carry file names the build has to make public
+TAG_SRC_RE = re.compile(r'(<img\b[^>]*?(?<![\w-])src=|<source\b[^>]*?(?<![\w-])srcset=)"([^"]+)"', re.I)
+# an existing <picture> block (re-build) or a bare <img> (first build). The
+# <picture> alternative comes first so the <img> inside it is not matched twice.
+PICTURE_OR_IMG_RE = re.compile(r"([ \t]*)(<picture\b[^>]*>.*?</picture\s*>|<img\b[^>]*>)",
+                               re.I | re.S)
+# <source> order matters: the browser takes the FIRST type it can decode, so the
+# smallest format has to come first.
+SOURCE_ORDER = ("avif", "webp")
+MIME = {"avif": "image/avif", "webp": "image/webp"}
+IMG_TAG_RE = re.compile(r"<img\b[^>]*>", re.I)
+# (?<![\w-]) rather than \b: a word boundary also sits between "-" and "s", so
+# \bsrc would happily match the "src" inside data-src / data-srcset.
+ATTR_RE = lambda name: re.compile(rf'(?<![\w-]){name}\s*=\s*"([^"]*)"', re.I)  # noqa: E731
 JUMP_RE = re.compile(r"^[ \t]*<!--[ \t]*more[ \t]*-->[ \t]*$", re.M | re.I)
 TAG_RE = re.compile(r"<[^>]+>")
 FOLDER_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-([a-z0-9-]+)$")
+# the feed-level <updated> (2-space indent); the entry-level one is 4-space indented
+FEED_UPDATED_RE = re.compile(r"^  <updated>.*</updated>$", re.M)
+
+
+def stamp(feed: str) -> str:
+    """The feed's own timestamp, so two builds can be compared ignoring it."""
+    m = FEED_UPDATED_RE.search(feed)
+    return m.group(0) if m else ""
 
 
 def parse_header(header: str) -> dict:
@@ -91,6 +116,111 @@ def parse_header(header: str) -> dict:
         elif key:
             meta[key] = (meta[key] + " " + line.strip()).strip()
     return meta
+
+
+def public_url(name: str, rel: str) -> str:
+    """The jsDelivr URL one file inside a post's images/ folder is served from."""
+    return f"{REPO_CDN}{rel}{name}"
+
+
+def is_remote(src: str) -> bool:
+    return bool(re.match(r"^(https?:)?//", src)) or src.startswith("data:")
+
+
+def attr(tag: str, name: str) -> str:
+    m = ATTR_RE(name).search(tag)
+    return m.group(1) if m else ""
+
+
+def upgrade_picture(block: str, img_dir: Path, rel: str, hero: str, indent: str,
+                    problems: list) -> "tuple[str, set]":
+    """Rewrite one <picture>/<img> block into the shape Core Web Vitals want.
+
+    * bare file names  -> full jsDelivr URLs (on <img src> and <source srcset>)
+    * the file's real pixel size -> width= and height=, so the browser reserves
+      the exact box before a single byte arrives (this is what keeps CLS at 0)
+    * .webp/.avif siblings, when tools/optimize_images.py has made them ->
+      <source> elements ahead of the .jpg, so every browser gets the smallest
+      format it can decode
+    * the hero image -> loading=eager + fetchpriority=high (it is the LCP
+      element); every later image -> loading=lazy + decoding=async
+
+    Idempotent: a block that is already in this shape comes back byte-identical,
+    so re-running the build is safe and git diff only shows real changes.
+    Returns (new block, set of file names it references).
+    """
+    imgs = IMG_TAG_RE.findall(block)
+    if not imgs:
+        return block, set()
+    tag = imgs[0]
+    src = attr(tag, "src").split("/")[-1]
+    if not src or src.startswith("data:"):
+        return block, set()
+
+    referenced = {n for n in re.findall(r'(?<![\w-])src(?:set)?="([^"]+)"', block, re.I)}
+    referenced = {n.split("/")[-1] for n in referenced if not is_remote(n)}
+
+    # A remote src we did not generate: only fix up the URLs, change no shape.
+    if is_remote(src) or not (img_dir / src).exists():
+        fixed = TAG_SRC_RE.sub(lambda m: m.group(0) if is_remote(m.group(2))
+                               else f'{m.group(1)}"{public_url(m.group(2).split("/")[-1], rel)}"',
+                               block)
+        return fixed, referenced
+
+    size = identify(img_dir / src)
+    if not size:
+        problems.append(f"cannot read the pixel size of {src}, so no width/height could be set")
+        return block, referenced
+    w, h = size
+
+    is_hero = src == hero
+    sources = []
+    for ext in SOURCE_ORDER:
+        variant = (img_dir / src).with_suffix("." + ext)
+        if variant.exists():
+            sources.append(f'{indent}  <source srcset="{public_url(variant.name, rel)}" '
+                           f'type="{MIME[ext]}"/>')
+
+    style = attr(tag, "style") or "max-width:100%; height:auto;"
+    if "height:auto" not in style.replace(" ", ""):
+        style = style.rstrip("; ").lstrip("; ") + "; max-width:100%; height:auto;"
+    extras = "".join(
+        f' {name}="{attr(tag, name)}"'
+        for name in ("class", "id", "title") if attr(tag, name)
+    )
+    priority = ' fetchpriority="high"' if is_hero else ""
+    img = (
+        f'{indent}  <img alt="{attr(tag, "alt")}" decoding="async"{priority} height="{h}" '
+        f'loading="{"eager" if is_hero else "lazy"}" src="{public_url(src, rel)}" '
+        f'style="{style}" width="{w}"{extras}/>'
+    )
+    return (f"{indent}<picture>\n" + "\n".join(sources + [img])
+            + f"\n{indent}</picture>", referenced)
+
+
+def perf_checks(body: str) -> list:
+    """Fail the build on the Core Web Vitals mistakes a post could still make.
+
+    These are the audits upgrade_picture() exists to pass; the checks stay here
+    so a hand-edited or externally hosted <img> cannot sneak past them.
+    """
+    problems = []
+    for i, tag in enumerate(IMG_TAG_RE.findall(body), 1):
+        name = attr(tag, "src").split("/")[-1] or f"image #{i}"
+        for need in ("width", "height", "alt"):
+            if not attr(tag, need):
+                why = ("the browser cannot reserve its box, so the page shifts when it "
+                       "lands (CLS)" if need != "alt" else "screen readers get nothing")
+                problems.append(f"{name} has no {need}= attribute - {why}")
+        loading = attr(tag, "loading").lower()
+        if i == 1:
+            if loading == "lazy":
+                problems.append("the first image is the LCP element - it must not be loading=lazy")
+            if attr(tag, "fetchpriority").lower() != "high":
+                problems.append("the first image is the LCP element - it needs fetchpriority=high")
+        elif loading != "lazy":
+            problems.append(f"{name} is below the fold - give it loading=lazy")
+    return problems
 
 
 def load_post(folder: Path) -> dict:
@@ -125,26 +255,36 @@ def load_post(folder: Path) -> dict:
 
     slug = fm.group(2) if fm else folder.name
     img_dir = folder / "images"
-    used, missing = set(), []
     rel = f"posts/{folder.name}/images/"
 
-    def fix(mm):
-        src = mm.group(2)
-        if re.match(r"^(https?:)?//", src) or src.startswith("data:"):
-            return mm.group(0)
-        name = src.split("/")[-1]
-        used.add(name)
-        if not (img_dir / name).exists():
-            missing.append(name)
-        return mm.group(1) + REPO_CDN + rel + name + mm.group(3)
+    # --- responsive, dimension-correct images (Core Web Vitals) -------------
+    # Every bare <img> that points at a file in images/ becomes a <picture>
+    # with AVIF + WebP sources and the file's real width/height on the <img>,
+    # so the browser can reserve the exact box before a single byte arrives
+    # (CLS 0) and pick the smallest format it can decode (LCP / byte weight).
+    blocks = list(PICTURE_OR_IMG_RE.finditer(body))
+    first_tag = IMG_TAG_RE.search(blocks[0].group(2)) if blocks else None
+    hero = attr(first_tag.group(0), "src").split("/")[-1] if first_tag else ""
+    assets, local = set(), set()          # assets = referenced AND on disk
 
-    body = IMG_SRC_RE.sub(fix, body)
-    for n in missing:
-        problems.append(f"image used in post but not in images/: {n}")
+    def upgrade(m):
+        block, refs = upgrade_picture(m.group(2), img_dir, rel, hero, m.group(1), problems)
+        for n in refs:
+            local.add(n)
+            if (img_dir / n).exists():
+                assets.add(n)
+                assets.update(v for v in (f"{Path(n).stem}.{e}" for e, _ in VARIANTS)
+                              if (img_dir / v).exists())
+        return block
+
+    body = PICTURE_OR_IMG_RE.sub(upgrade, body)
+    for n in sorted(local):
+        if not (img_dir / n).exists():
+            problems.append(f"image used in post but not in images/: {n}")
+    used = set(assets)
     unused = sorted(p.name for p in img_dir.glob("*") if p.is_file()) if img_dir.exists() else []
-    unused = [n for n in unused if n not in used]
-    if "alt=" not in body and used:
-        problems.append("images have no alt text")
+    unused = [n for n in unused if n not in used and not n.startswith(".")]
+    problems.extend(perf_checks(body))
 
     # --- jump break (the "Read More" split Blogger renders on the homepage) ---
     teaser, jump_after = body, ""
@@ -271,8 +411,16 @@ def main():
             if p.get("jump_after"):
                 print(f'   break   paste into the editor, then Insert > Jump break right after:  "...{p["jump_after"]}"')
             out = folder / "import.xml"
-            out.write_text(feed_xml(p), encoding="utf-8")
-            print(f"   wrote   posts/{folder.name}/import.xml")
+            feed = feed_xml(p)
+            # <updated> is wall-clock, so a rebuild that changed nothing would
+            # still dirty the file. Keep the old stamp unless the post moved.
+            old = out.read_text(encoding="utf-8") if out.exists() else ""
+            if old and FEED_UPDATED_RE.sub("", old) == FEED_UPDATED_RE.sub("", feed):
+                feed = FEED_UPDATED_RE.sub(lambda _: stamp(old), feed, count=1)
+                print(f"   kept    posts/{folder.name}/import.xml (unchanged, timestamp not bumped)")
+            else:
+                print(f"   wrote   posts/{folder.name}/import.xml")
+            out.write_text(feed, encoding="utf-8")
             paste = folder / "paste.html"
             paste.write_text(p["html"], encoding="utf-8")
             print(f"   wrote   posts/{folder.name}/paste.html")

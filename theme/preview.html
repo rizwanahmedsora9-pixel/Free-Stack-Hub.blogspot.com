@@ -4,14 +4,67 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
   <title>Theme preview &middot; Free Stack Hub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap" rel="stylesheet"/>
+  <meta content="Free PDFs, self-made apps and clean config files, plus step-by-step guides for Python, Git and free-tier hosting. No cracked software, no clutter." name="description"/>
+  <meta content="#1F6F5C" name="theme-color"/>
+  <link crossorigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link crossorigin="anonymous" href="https://cdn.jsdelivr.net" rel="preconnect"/>
+  <!-- No <link rel=stylesheet> to Google Fonts here: the @font-face rules are
+       inlined in the skin CSS just below, exactly like in the Blogger theme. -->
   <style>
+
+  /* ============================================================
+     Fonts, inlined.
+
+     Both families are variable fonts, so one file per subset covers
+     every weight this theme uses: Space Grotesk 400-700 (headings,
+     nav, buttons) and Source Serif 4 400-600 (body). The browser
+     downloads a subset only if a glyph in it is actually rendered,
+     so an English page pulls the two "latin" files and nothing else.
+
+     font-display:swap paints the fallback immediately and swaps the
+     webfont in, which is what keeps FCP off the critical path.
+     ============================================================ */
+  @font-face{
+    font-family:'Source Serif 4';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(https://fonts.gstatic.com/s/sourceserif4/v14/vEFI2_tTDB4M7-auWDN0ahZJW1gb8tc.woff2) format('woff2');
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  }
+  @font-face{
+    font-family:'Source Serif 4';font-style:normal;font-weight:400 600;font-display:swap;
+    src:url(https://fonts.gstatic.com/s/sourceserif4/v14/vEFI2_tTDB4M7-auWDN0ahZJW1gV8tenXg.woff2) format('woff2');
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+  }
+  @font-face{
+    font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;
+    src:url(https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2) format('woff2');
+    unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+  }
+  @font-face{
+    font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;
+    src:url(https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2) format('woff2');
+    unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+  }
+
+  /* Metric-adjusted fallbacks. font-display:swap means the page first paints in
+     the fallback and then re-lays out in the webfont; without these two faces
+     that swap moves every line of text (CLS). size-adjust scales the fallback to
+     the webfont's average glyph width so the reflow is a couple of pixels, not a
+     paragraph. */
+  @font-face{
+    font-family:'Space Grotesk Fallback';src:local('Arial'),local('Helvetica');
+    size-adjust:104%;ascent-override:90%;descent-override:22%;line-gap-override:0%;
+  }
+  @font-face{
+    font-family:'Source Serif 4 Fallback';src:local('Georgia'),local('Times New Roman');
+    size-adjust:101%;ascent-override:94%;descent-override:26%;line-gap-override:0%;
+  }
 
   :root{
     --bg:#F7F8FA; --surface:#FFFFFF; --ink:#1B1F27; --ink-soft:#5B6270;
     --line:#E4E7EC; --accent:#1F6F5C; --accent-ink:#0F4A3C; --gold:#C77D2E;
-    --max:1160px; --font-head:'Space Grotesk',system-ui,sans-serif;
-    --font-body:'Source Serif 4',Georgia,serif;
+    --max:1160px;
+    --font-head:'Space Grotesk','Space Grotesk Fallback',system-ui,sans-serif;
+    --font-body:'Source Serif 4','Source Serif 4 Fallback',Georgia,serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
@@ -19,6 +72,16 @@
   a{color:inherit;text-decoration:none}
   img{max-width:100%;height:auto;display:block}
   .container{width:min(var(--max),calc(100% - 32px));margin:auto}
+
+  /* Keyboard: every interactive element gets a visible ring. Blogger's own
+     outline:0 on the search field is overridden below. */
+  a:focus-visible,button:focus-visible,input:focus-visible,
+  summary:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .nav a:focus-visible,.footer a:focus-visible{outline-color:#FFD98A}
+  .skip-link{position:absolute;left:8px;top:-100px;z-index:200;background:var(--accent);color:#fff;
+    font-family:var(--font-head);font-size:14px;font-weight:600;padding:12px 18px;border-radius:0 0 6px 6px;
+    transition:top .12s ease}
+  .skip-link:focus{top:0}
 
   .header{background:var(--surface);border-bottom:1px solid var(--line)}
   .brand-row{min-height:100px;display:flex;align-items:center;justify-content:space-between;padding:18px 0;gap:20px;flex-wrap:wrap}
@@ -36,7 +99,10 @@
 
   .search-wrap{padding:16px 0;border-bottom:1px solid var(--line);background:var(--surface)}
   .search{display:flex;max-width:560px;margin:auto}
-  .search input{flex:1;border:1px solid var(--line);border-right:0;padding:11px 13px;outline:0;font-family:var(--font-body)}
+  .search input{flex:1;min-width:0;border:1px solid var(--line);border-right:0;padding:11px 13px;
+    font-family:var(--font-body);font-size:15px}
+  .search input:focus{outline:3px solid var(--accent);outline-offset:-3px}
+  .search input::placeholder{color:#4A5160;opacity:1}
   .search button{border:1px solid var(--accent);background:var(--accent);color:#fff;padding:0 18px;cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:13px}
 
   .ad-slot{margin:20px 0}
@@ -79,7 +145,7 @@
   .footer ul{list-style:none;padding:0;margin:0}
   .footer li{padding:4px 0}
   .footer a:hover{color:var(--gold)}
-  .copyright{border-top:1px solid rgba(255,255,255,.1);margin-top:20px;padding-top:14px;text-align:center;font-size:12px;color:#8991A0}
+  .copyright{border-top:1px solid rgba(255,255,255,.1);margin-top:20px;padding-top:14px;text-align:center;font-size:12px;color:#A8B0BE}
 
   .blog-pager{display:flex;justify-content:center;gap:10px;margin:16px 0 6px}
   .blog-pager a{border:1px solid var(--line);background:var(--surface);padding:8px 14px;font-family:var(--font-head);font-size:13px}
@@ -90,6 +156,10 @@
   @media(max-width:860px){
     .main-layout{grid-template-columns:1fr;gap:14px}
     .footer-grid{grid-template-columns:1fr}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition-duration:.001ms !important;animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;scroll-behavior:auto !important}
   }
   @media(max-width:560px){
     .brand-title{font-size:21px}
@@ -108,8 +178,11 @@
     transition:border-color .16s ease, box-shadow .16s ease}
   .post-card.has-media{display:grid;grid-template-columns:320px minmax(0,1fr)}
   .post-card:hover{border-color:#CFD6E0;box-shadow:0 12px 28px rgba(16,24,40,.08)}
-  .card-media{display:block;background:#EAEEF3;min-height:100%}
-  .card-media img{width:100%;height:100%;min-height:216px;object-fit:cover}
+  .card-media{display:block;background:#EAEEF3;min-height:100%;aspect-ratio:16/9}
+  .card-media img{width:100%;height:100%;min-height:216px;object-fit:cover;aspect-ratio:16/9}
+  /* Blogger renders PopularPosts/Label thumbnails with markup this theme does not
+     control; pinning a square box means they cannot push the column down. */
+  .sidebar .widget img{aspect-ratio:1/1;height:auto;object-fit:cover}
   .card-body{padding:20px 22px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
   .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
   .card-tags a{font-family:var(--font-head);font-size:10.5px;font-weight:600;letter-spacing:.07em;
@@ -161,6 +234,8 @@
 </head>
 <body>
 
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
   <div class="preview-note">
     <b>Design preview</b> &mdash; this is a static mock of what
     <code>theme/freestackhub-theme.xml</code> renders, not the live blog.
@@ -193,7 +268,7 @@
     <div class="container">
       <form class="search">
         <input aria-label="Search" placeholder="Search PDFs, apps, configs&hellip;" type="search"/>
-        <button type="submit">Search</button>
+        <button aria-label="Search this blog" type="submit">Search</button>
       </form>
     </div>
   </div>
@@ -202,7 +277,7 @@
     <div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>
   </div>
 
-  <main class="container">
+  <main class="container" id="main-content" tabindex="-1">
 
     <section class="preview-block">
       <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
@@ -213,14 +288,14 @@
         <section class="content-area">
           <div class="post-list hfeed">
         <article class="post-card has-media">
-          <a aria-hidden="true" class="card-media" href="#" tabindex="-1"><img alt="Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead." src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg"/></a>
+          <a aria-hidden="true" class="card-media" href="#" tabindex="-1"><img alt="Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead." decoding="async" fetchpriority="high" height="360" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" width="640"/></a>
           <div class="card-body">
             <div class="card-tags"><a href="#" rel="tag">PythonAnywhere</a><a href="#" rel="tag">Git</a><a href="#" rel="tag">GitHub</a><a href="#" rel="tag">Flask</a><a href="#" rel="tag">Deployment</a><a href="#" rel="tag">Web Development</a></div>
             <h2 class="card-title"><a href="#">Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</a></h2>
             <div class="card-meta"><time class="published">September 16, 2026</time></div>
             <div class="card-excerpt">The old way and the new way, side by side. I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.</div>
             <div class="card-more">
-              <a class="read-more" href="#">Read more <span aria-hidden="true">&#8594;</span></a>
+              <a class="read-more" href="#" aria-label="Read more: Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.">Read more <span aria-hidden="true">&#8594;</span></a>
             </div>
           </div>
         </article>
@@ -232,7 +307,7 @@
             <div class="card-meta"><time class="published">September 16, 2026</time></div>
             <div class="card-excerpt">The card, the spacing and the Read more button are the same for every post, so the home page keeps one rhythm no matter how long the posts are.</div>
             <div class="card-more">
-              <a class="read-more" href="#">Read more <span aria-hidden="true">&#8594;</span></a>
+              <a class="read-more" href="#" aria-label="Read more: Your next post shows up as the second card in this list">Read more <span aria-hidden="true">&#8594;</span></a>
             </div>
           </div>
         </article>
@@ -259,8 +334,12 @@
             </header>
             <div class="post-body entry-content" id="post-body-1">
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>The old way and the new way, side by side.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.webp" type="image/webp"/>
+    <img alt="A stressed developer deleting files next to one syncing code with the cloud using git" decoding="async" fetchpriority="high" height="480" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" style="max-width:100%; height:auto;" width="1200"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>The old way and the new way, side by side.</i></div>
 </div>
 
 <p>I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.</p>
@@ -292,8 +371,12 @@
 <h2>The mental switch: your server is a copy, not the original</h2>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.webp" type="image/webp"/>
+    <img alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" style="max-width:100%; height:auto;" width="1100"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.</i></div>
 </div>
 
 <p>Here's the idea that makes everything click. From now on, your project lives in three places:</p>
@@ -315,8 +398,12 @@
 <pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>git clone https://github.com/your-username/your-repo.git</code></pre>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>One command brings the whole project down, history included.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.webp" type="image/webp"/>
+    <img alt="A bash terminal pulling the latest files from GitHub into a project folder" decoding="async" height="667" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" style="max-width:100%; height:auto;" width="1000"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>One command brings the whole project down, history included.</i></div>
 </div>
 
 <p>Git downloads the entire project into a folder named after your repo, and it arrives with its complete history attached. Every commit you ever made is now sitting on the server too, which quietly gives you that undo button you never had before.</p>
@@ -349,8 +436,12 @@ git pull origin main</code></pre>
 <p>The code is on the disk, but your app is still running the old version from memory. PythonAnywhere keeps your web app alive as a long-running process, and it doesn't watch your files for changes. You have to tell it. Open the <b>Web</b> tab and hit the big green <b>Reload</b> button.</p>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" />
-  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Pull, then Reload. Every time.</i></div>
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.webp" type="image/webp"/>
+    <img alt="A browser window with a green reload button in front of a server" decoding="async" height="667" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" style="max-width:100%; height:auto;" width="1000"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Pull, then Reload. Every time.</i></div>
 </div>
 
 <p>Refresh your site. New code is live, five seconds after you finished the pull.</p>
