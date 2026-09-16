@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-freestackhub</id>
-  <updated>2026-09-16T06:30:09.133+00:00</updated>
+  <updated>2026-09-16T06:34:39.810+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://free-stack-hub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -29,7 +29,7 @@
 &lt;p&gt;That night I sat down and set up Git properly, and I haven't touched the delete button on a server since. If you're running a Python app on a PythonAnywhere free account and still doing the delete-and-reupload dance, this is the shortcut I wish I'd had. It takes ten minutes to set up once. After that, every update is one command.&lt;/p&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
-  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" /&gt;
+  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" /&gt;
   &lt;div style="font-size:13px; color:#777; margin-top:6px;"&gt;&lt;i&gt;The old way and the new way, side by side.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
 
@@ -52,7 +52,7 @@
 &lt;h2&gt;The mental switch: your server is a copy, not the original&lt;/h2&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
-  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/images/02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" /&gt;
+  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" /&gt;
   &lt;div style="font-size:13px; color:#777; margin-top:6px;"&gt;&lt;i&gt;Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
 
@@ -75,7 +75,7 @@
 &lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;git clone https://github.com/your-username/your-repo.git&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
-  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/images/03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" /&gt;
+  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" /&gt;
   &lt;div style="font-size:13px; color:#777; margin-top:6px;"&gt;&lt;i&gt;One command brings the whole project down, history included.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
 
@@ -109,7 +109,7 @@ git pull origin main&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The code is on the disk, but your app is still running the old version from memory. PythonAnywhere keeps your web app alive as a long-running process, and it doesn't watch your files for changes. You have to tell it. Open the &lt;b&gt;Web&lt;/b&gt; tab and hit the big green &lt;b&gt;Reload&lt;/b&gt; button.&lt;/p&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
-  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/images/04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" /&gt;
+  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" /&gt;
   &lt;div style="font-size:13px; color:#777; margin-top:6px;"&gt;&lt;i&gt;Pull, then Reload. Every time.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
 

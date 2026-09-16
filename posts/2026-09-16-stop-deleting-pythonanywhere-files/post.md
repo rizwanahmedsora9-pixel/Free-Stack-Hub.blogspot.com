@@ -12,7 +12,7 @@ IMAGES (upload these 4 files into the post, in this order, where marked):
   images/04-reload-web-app.jpg                            (1000x667, 37 KB)
 After uploading in the Blogger editor, the URLs change to blogger.googleusercontent.com
 links. The ready-to-paste HTML version of this post is in:
-  post/stop-deleting-pythonanywhere-files-blogger.html
+  post.html (import.xml is generated from it)
 -->
 
 # Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.
