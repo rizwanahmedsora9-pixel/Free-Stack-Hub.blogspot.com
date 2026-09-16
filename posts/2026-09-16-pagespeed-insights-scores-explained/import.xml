@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-16T19:26:47.074+00:00</updated>
+  <updated>2026-09-16T19:30:15.867+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -17,9 +17,9 @@
     <title type="text">Check Your Website's Vital Scores with PageSpeed Insights — and What Every Number Actually Means</title>
     <content type="html">&lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.webp" type="image/webp"/&gt;
-    &lt;img alt="A developer at a laptop watching a website speed dashboard with LCP, FCP and CLS score cards" decoding="async" fetchpriority="high" height="480" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.webp" type="image/webp"/&gt;
+    &lt;img alt="A developer at a laptop watching a website speed dashboard with LCP, FCP and CLS score cards" decoding="async" fetchpriority="high" height="480" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The report I was trying to read at 11pm: one orange score, four gauges, zero instructions.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -40,9 +40,9 @@
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.webp" type="image/webp"/&gt;
-    &lt;img alt="Real users' phones and a simulated lab both feeding into one score gauge" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.webp" type="image/webp"/&gt;
+    &lt;img alt="Real users' phones and a simulated lab both feeding into one score gauge" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Left: the field &amp;mdash; real users&amp;rsquo; phones, 28 days of data. Right: the lab &amp;mdash; one simulated phone, one run. Same metrics, two different worlds.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -77,9 +77,9 @@
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.webp" type="image/webp"/&gt;
-    &lt;img alt="A page-load timeline marking FCP at the first painted text block and LCP at the largest image" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.webp" type="image/webp"/&gt;
+    &lt;img alt="A page-load timeline marking FCP at the first painted text block and LCP at the largest image" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Same page, two moments: FCP is the first line of text; LCP is the big image landing behind it.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -122,9 +122,9 @@
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.webp" type="image/webp"/&gt;
-    &lt;img alt="Scissors cutting a greyed-out block of unused JavaScript out of a page's code" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.webp" type="image/webp"/&gt;
+    &lt;img alt="Scissors cutting a greyed-out block of unused JavaScript out of a page's code" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Unused JavaScript: downloaded, parsed, and then never run once.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -141,9 +141,9 @@
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.webp" type="image/webp"/&gt;
-    &lt;img alt="A speed checklist of compressed images, lazy loading, clean JavaScript and caching next to a gauge pointing green" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.webp" type="image/webp"/&gt;
+    &lt;img alt="A speed checklist of compressed images, lazy loading, clean JavaScript and caching next to a gauge pointing green" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@8a5472a456e4150330c683b87564e5cec0fb75c5/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The whole system: two fixes at a time, then re-test. The needle moves when you stop chasing the score and start chasing the rows.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
