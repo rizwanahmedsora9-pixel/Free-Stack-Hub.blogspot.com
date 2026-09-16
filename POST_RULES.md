@@ -56,11 +56,12 @@ The build (section 5) **fails the post** if the marker is missing, doubled, last
 teaser is not one image plus a 2-4 sentence hook, so a post cannot ship with a ragged teaser.
 The marker lives only in `post.html`: `import.xml` and `paste.html` are written without it,
 and the build prints the sentence the break belongs after. In Blogger put the cursor there and
-use **Insert -> Jump break**. The theme (`theme/freestackhub-theme.xml`) builds each home-page
-card from the post *up to* that break (`data:post.snippets.long`), so the card is feature image +
-hook + **Read more**, and the button opens that post's own URL. Because the break also decides
-where the card's text stops, a visible caption under the feature image becomes the first words of
-the card - leave it off if you want the card to open straight on the hook.
+use **Insert -> Jump break**. The home-page cards themselves show **no body text at all**:
+the theme (`theme/freestackhub-theme.xml`) builds each card as feature image + labels + title +
+date + **Read more**, and the title and the button both open that post's own URL. (The cards
+used to print `data:post.snippets.long`, which shows up as a wall of the post itself - roughly
+its first 1000 characters - so the snippet was removed from the card entirely.) The jump break
+still matters for feeds and for any view Blogger trims at the break, so keep writing it.
 
 ## 4. Images
 - Put them in the post's own `images/` folder, named `01-…jpg`, `02-…jpg` in order of appearance.

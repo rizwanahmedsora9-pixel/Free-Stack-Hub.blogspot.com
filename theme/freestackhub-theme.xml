@@ -217,19 +217,25 @@
 
   /* ============================================================
      List cards (home / label / search / archive).
-     Each card is the feature image, the labels, the title, the
-     date, the text before the jump break, and a Read More button
-     that opens that post's own URL.
+     Each card is the feature image full width across the top,
+     then the labels, the title, the date and a Read More button
+     that opens that post's own URL. Deliberately NO body text:
+     the cards used to print data:post.snippets.long, which is
+     roughly the first 1000 characters of the post, so the home
+     page read like a wall of the post itself.
      ============================================================ */
-  .post-list{display:flex;flex-direction:column;gap:20px}
+  .post-list{display:flex;flex-direction:column;gap:24px}
   .post-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;
     transition:border-color .16s ease, box-shadow .16s ease}
-  .post-card.has-media{display:grid;grid-template-columns:320px minmax(0,1fr)}
   .post-card:hover{border-color:#CFD6E0;box-shadow:0 12px 28px rgba(16,24,40,.08)}
-  .card-media{display:block;background:#EAEEF3;min-height:100%;aspect-ratio:16/9}
-  .card-media img{width:100%;height:100%;min-height:216px;object-fit:cover;aspect-ratio:16/9}
-  /* Blogger renders PopularPosts/Label thumbnails with markup this theme does not
-     control; pinning a square box means they cannot push the column down. */
+  /* The image gets a fixed 16:9 box, filled with object-fit:cover. The old
+     side-column version stretched the image to the card's full height on wide
+     screens (min-height:100% + height:100%), which cropped away most of it -
+     that is why post images looked broken on PC. */
+  .card-media{display:block;background:#EAEEF3;aspect-ratio:16/9;overflow:hidden}
+  .card-media img{width:100%;height:100%;object-fit:cover}
+  /* Blogger renders Label thumbnails with markup this theme does not control;
+     pinning a square box means they cannot push the column down. */
   .sidebar .widget img{aspect-ratio:1/1;height:auto;object-fit:cover}
   .card-body{padding:20px 22px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
   .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
@@ -239,15 +245,30 @@
   .card-title{font-family:var(--font-head);font-size:22px;line-height:1.28;font-weight:600;margin:0 0 8px}
   .card-title a:hover{color:var(--accent)}
   .card-meta{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px}
-  .card-excerpt{font-size:16.5px;color:#3B4250;margin:0 0 18px;overflow:hidden;
-    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
-  .card-more{margin-top:auto}
+  .card-more{margin-top:14px}
   .read-more{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:#fff;
     font-family:var(--font-head);font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:6px}
   .read-more:hover{background:var(--accent-ink);color:#fff}
   .read-more span{transition:transform .16s ease}
   .read-more:hover span{transform:translateX(3px)}
   .post-meta .post-author{color:var(--ink-soft)}
+
+  /* ============================================================
+     "Most Downloaded" (PopularPosts) sidebar widget.
+     Blogger's default markup prints a long snippet under every
+     entry, which turned the sidebar into dozens of lines per
+     post. The widget renders the custom includable below instead:
+     a small thumbnail plus the title, nothing else.
+     ============================================================ */
+  .popular-list{list-style:none;margin:0;padding:0}
+  .popular-list li{border-bottom:1px solid var(--line);padding:9px 0}
+  .popular-list li:first-child{padding-top:2px}
+  .popular-list li:last-child{border-bottom:none;padding-bottom:0}
+  .sidebar .popular-list a{display:flex;gap:12px;align-items:center;font-family:var(--font-head);
+    font-size:14px;font-weight:600;line-height:1.4;color:var(--ink)}
+  .sidebar .popular-list a:hover{color:var(--accent)}
+  .sidebar .popular-list img{width:56px;height:56px;flex:none;object-fit:cover;border-radius:6px;
+    background:#EAEEF3}
 
   /* labels + comment link on the post page itself */
   .post-labels a{display:inline-block;font-family:var(--font-head);font-size:11px;font-weight:600;
@@ -259,12 +280,8 @@
   .comment-link:hover{color:var(--accent-ink)}
 
   @media(max-width:760px){
-    .post-card.has-media{grid-template-columns:1fr}
-    .card-media{min-height:0}
-    .card-media img{height:auto;min-height:0;aspect-ratio:16/9}
     .card-body{padding:16px 18px 18px}
     .card-title{font-size:19.5px}
-    .card-excerpt{font-size:16px;-webkit-line-clamp:5}
   }
   ]]></b:skin>
 </head>
@@ -322,7 +339,9 @@
           <!-- ==========================================================
                LISTS (home / label / search / archive)  =  teaser cards.
                One card per post:  feature image + labels + title + date
-               + the text before the jump break + Read More.
+               + Read More. No body text at all - the cards used to print
+               the post's own snippet, which showed up as a wall of the
+               post itself on the home page.
                Read More and the card title both link to the post's own
                URL, so a click opens that single post.
                ========================================================== -->
@@ -344,9 +363,10 @@
             </b:if>
           </b:includable>
 
-          <!-- one card in the list -->
+          <!-- one card in the list: image on top, then labels, title,
+               date and the Read more button. No excerpt. -->
           <b:includable id='indexCard' var='post'>
-            <article expr:class='data:post.featuredImage ? &quot;post-card has-media&quot; : &quot;post-card&quot;'>
+            <article class='post-card'>
               <b:include data='post' name='cardImage'/>
               <div class='card-body'>
                 <b:if cond='data:post.labels'>
@@ -362,7 +382,6 @@
                 <div class='card-meta'>
                   <time class='published' expr:datetime='data:post.date.iso8601'><data:post.date/></time>
                 </div>
-                <b:include data='post' name='postBodySnippet'/>
                 <div class='card-more'>
                   <a class='read-more' expr:aria-label='&quot;Read more: &quot; + data:post.title' expr:href='data:post.url' expr:title='data:post.title'>Read more <span aria-hidden='true'>&#8594;</span></a>
                 </div>
@@ -395,17 +414,6 @@
                 </a>
               </b:if>
             </b:if>
-          </b:includable>
-
-          <!-- the teaser text: snippets.long is the post up to the jump break -->
-          <b:includable id='postBodySnippet' var='post'>
-            <div class='card-excerpt'>
-              <b:if cond='data:post.snippets.long'>
-                <data:post.snippets.long/>
-              <b:else/>
-                <data:post.snippets.short/>
-              </b:if>
-            </div>
           </b:includable>
 
           <!-- a single post or standalone page, opened from a card -->
@@ -494,7 +502,32 @@
         </b:widget>
 
         <b:widget id='Label1' locked='false' title='Categories' type='Label'/>
-        <b:widget id='PopularPosts1' locked='false' title='Most Downloaded' type='PopularPosts'/>
+
+        <!-- Blogger's default PopularPosts markup prints a long snippet under
+             every entry - the sidebar became dozens of lines per post. This
+             custom includable renders each post as thumbnail + title only. -->
+        <b:widget id='PopularPosts1' locked='false' title='Most Downloaded' type='PopularPosts'>
+          <b:includable id='main'>
+            <div class='widget'>
+              <h2><data:title/></h2>
+              <div class='widget-content'>
+                <ul class='popular-list'>
+                  <b:loop values='data:posts' var='post'>
+                    <li>
+                      <a expr:href='data:post.href' expr:title='data:post.title'>
+                        <b:if cond='data:post.featuredImage'>
+                          <img aria-hidden='true' decoding='async' expr:alt='data:post.title' expr:src='data:post.featuredImage' height='56' loading='lazy' width='56'/>
+                        </b:if>
+                        <span><data:post.title/></span>
+                      </a>
+                    </li>
+                  </b:loop>
+                </ul>
+              </div>
+            </div>
+          </b:includable>
+        </b:widget>
+
         <b:widget id='BlogArchive1' locked='false' title='Archive' type='BlogArchive'/>
       </b:section>
     </aside>

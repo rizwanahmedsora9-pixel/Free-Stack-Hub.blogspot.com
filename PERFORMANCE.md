@@ -71,9 +71,10 @@ page downloads only the two `latin` files - the other subsets are never fetched.
 they load (no invisible text, no FOIT).
 
 **Also removed:** the theme has no `<script src>` of its own, and adds none. The
-home page cards are cut at the jump break by `data:post.snippets.long` - server
-side, by Blogger - so there is no JavaScript to load, parse, or defer. That is
-why no `defer`/`async` work was needed: the theme ships zero first-party JS.
+home page cards are pure server-rendered HTML (feature image + labels + title +
+date + Read more; no post text) - Blogger cuts everything at the template, so
+there is no JavaScript to load, parse, or defer. That is why no `defer`/`async`
+work was needed: the theme ships zero first-party JS.
 
 ### 1.2 Resource hints
 

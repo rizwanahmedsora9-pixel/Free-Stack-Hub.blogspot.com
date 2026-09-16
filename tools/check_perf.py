@@ -146,7 +146,7 @@ CONTRAST_PAIRS = [
     ("body text on page",          "var(--ink)",                        "var(--bg)",                        4.5),
     ("body text on card",          "var(--ink)",                        "var(--surface)",                   4.5),
     ("meta, dates, tagline",       "var(--ink-soft)",                   "var(--surface)",                   4.5),
-    ("card excerpt",               ".card-excerpt::color",              "var(--surface)",                   4.5),
+    ("popular list titles",        ".sidebar .popular-list a::color",   "var(--surface)",                   4.5),
     ("nav links",                  ".nav a::color",                     ".nav-wrap::background",            4.5),
     ("footer body text",           ".footer p,.footer li::color",       ".footer::background",              4.5),
     ("footer copyright",           ".copyright::color",                 ".footer::background",              4.5),
