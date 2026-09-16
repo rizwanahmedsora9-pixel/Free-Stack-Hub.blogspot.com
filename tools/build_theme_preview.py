@@ -40,6 +40,31 @@ CARD_IMG_W, CARD_IMG_H = 640, 360        # the 16:9 box the skin renders cards i
 
 TAG_RE = re.compile(r"<[^>]+>")
 MORE_RE = re.compile(r"<!--\s*more\s*-->", re.I)
+HEADER_RE = re.compile(r"<header class='header'.*?</header>", re.S)
+BLOG_TITLE = "Free Stack Hub"
+
+
+def header_html(theme_xml: str) -> str:
+    """The theme's own <header> block, with Blogger's tags resolved by hand.
+
+    The preview used to carry a second, hand-written header, and that is exactly
+    how the mock (two text glyphs) and the theme (four SVG icons, a .brand
+    wrapper, the corner-pinned social row) drifted apart. Parsing the block out
+    of theme/freestackhub-theme.xml means a header change shows up in the preview
+    on the next run, with nothing to remember to copy.
+    """
+    m = HEADER_RE.search(theme_xml)
+    if not m:
+        sys.exit("ERR  could not find <header class='header'> in theme/freestackhub-theme.xml")
+    head = m.group(0)
+    # <b:if cond='data:blog.description'>...<b:else/>FALLBACK</b:if> -> the
+    # fallback, because on this blog the description setting is off (see
+    # POST_RULES.md section 9), which is what Blogger renders today.
+    head = re.sub(r"<b:if\b[^>]*>.*?<b:else/>(.*?)</b:if>", r"\1", head, flags=re.S)
+    head = head.replace("expr:href='data:blog.homepageUrl'", "href='#'")
+    head = head.replace("<data:blog.title/>", BLOG_TITLE)
+    head = re.sub(r"<data:[^>]*/>", "", head)
+    return head
 
 
 def skin_css(theme_xml: str) -> str:
@@ -121,6 +146,7 @@ def sidebar(popular_item: str) -> str:
 def build(post: dict) -> str:
     theme_xml = THEME.read_text(encoding="utf-8")
     css = skin_css(theme_xml)
+    header = header_html(theme_xml)
     title = post["title"]
     slug_url = "#"
     labels = post["labels"]
@@ -194,18 +220,7 @@ def build(post: dict) -> str:
     <code>{html.escape(post_url)}</code>).
   </div>
 
-  <header class="header">
-    <div class="container brand-row">
-      <a href="#">
-        <div class="brand-title">Free Stack Hub</div>
-        <div class="brand-tagline">Free PDFs, self-made apps and legit config files</div>
-      </a>
-      <div class="social-row">
-        <a aria-label="YouTube" href="#">&#9654;</a>
-        <a aria-label="WhatsApp" href="#">&#9993;</a>
-      </div>
-    </div>
-  </header>
+  {header}
 
   <nav class="nav-wrap">
     <div class="container nav">
