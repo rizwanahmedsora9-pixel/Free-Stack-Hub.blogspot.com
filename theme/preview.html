@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>Theme preview &middot; Free Stack Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap" rel="stylesheet"/>
+  <style>
+
+  :root{
+    --bg:#F7F8FA; --surface:#FFFFFF; --ink:#1B1F27; --ink-soft:#5B6270;
+    --line:#E4E7EC; --accent:#1F6F5C; --accent-ink:#0F4A3C; --gold:#C77D2E;
+    --max:1160px; --font-head:'Space Grotesk',system-ui,sans-serif;
+    --font-body:'Source Serif 4',Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:var(--font-body);font-size:17px;line-height:1.65}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;height:auto;display:block}
+  .container{width:min(var(--max),calc(100% - 32px));margin:auto}
+
+  .header{background:var(--surface);border-bottom:1px solid var(--line)}
+  .brand-row{min-height:100px;display:flex;align-items:center;justify-content:space-between;padding:18px 0;gap:20px;flex-wrap:wrap}
+  .brand-title{font-family:var(--font-head);font-size:26px;font-weight:700;letter-spacing:-0.01em}
+  .brand-title span{color:var(--accent)}
+  .brand-tagline{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
+  .social-row{display:flex;gap:14px}
+  .social-row a{color:var(--ink-soft)}
+  .social-row a:hover{color:var(--accent)}
+
+  .nav-wrap{background:var(--ink)}
+  .nav{min-height:46px;display:flex;align-items:center;gap:0;overflow-x:auto;white-space:nowrap}
+  .nav a{padding:13px 16px;font-family:var(--font-head);font-size:13.5px;font-weight:500;color:#EDEFF2;border-right:1px solid rgba(255,255,255,.08)}
+  .nav a:hover{background:var(--accent);color:#fff}
+
+  .search-wrap{padding:16px 0;border-bottom:1px solid var(--line);background:var(--surface)}
+  .search{display:flex;max-width:560px;margin:auto}
+  .search input{flex:1;border:1px solid var(--line);border-right:0;padding:11px 13px;outline:0;font-family:var(--font-body)}
+  .search button{border:1px solid var(--accent);background:var(--accent);color:#fff;padding:0 18px;cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:13px}
+
+  .ad-slot{margin:20px 0}
+  .ad-slot .ad-inner{border:1px dashed var(--line);background:var(--surface);text-align:center;padding:12px}
+  .ad-slot .ad-label{font-family:var(--font-head);font-size:10px;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:6px}
+
+  .main-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:34px;padding:28px 0}
+  .content-area{min-width:0}
+
+  .post-outer{background:var(--surface);border:1px solid var(--line);padding:22px 24px;margin:0 0 20px}
+  .post-title{font-family:var(--font-head);font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:600}
+  .post-title a:hover{color:var(--accent)}
+  .post-meta,.post-timestamp{font-size:12.5px;color:var(--ink-soft)}
+  .post-header{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+  .post-body{font-size:16.5px}
+  .post-body pre{background:#12161C;color:#E7E9EE;padding:13px;overflow:auto;font-size:13.5px}
+  .post-labels{margin-top:14px}
+  .post-labels a:hover{background:var(--accent);color:#fff}
+  .post-footer{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft)}
+
+  .download-box{margin:20px 0;padding:16px 18px;border:1px solid var(--accent);background:#F0F6F4}
+  .download-box strong{display:block;font-family:var(--font-head);font-size:15px;margin-bottom:4px}
+  .download-box .meta{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+  .download-box a.dl-btn{display:inline-block;background:var(--accent);color:#fff;font-family:var(--font-head);font-weight:600;font-size:13.5px;padding:9px 18px}
+  .download-box a.dl-btn:hover{background:var(--accent-ink)}
+
+  .sidebar{min-width:0}
+  .widget{background:var(--surface);border:1px solid var(--line);margin-bottom:20px}
+  .widget h2,.widget h3{font-family:var(--font-head);font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin:0;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .widget-content{padding:12px 15px 15px}
+  .sidebar ul{list-style:none;margin:0;padding:0}
+  .sidebar li{border-bottom:1px solid var(--line);padding:8px 0;font-size:13.5px}
+  .sidebar li:last-child{border-bottom:none}
+  .sidebar a:hover{color:var(--accent)}
+
+  .footer{border-top:1px solid var(--line);background:var(--ink);color:#C7CBD3;padding:28px 0 18px;margin-top:10px}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:26px}
+  .footer h3{font-family:var(--font-head);font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-top:0}
+  .footer p,.footer li{font-size:13px;color:#B7BCC6}
+  .footer ul{list-style:none;padding:0;margin:0}
+  .footer li{padding:4px 0}
+  .footer a:hover{color:var(--gold)}
+  .copyright{border-top:1px solid rgba(255,255,255,.1);margin-top:20px;padding-top:14px;text-align:center;font-size:12px;color:#8991A0}
+
+  .blog-pager{display:flex;justify-content:center;gap:10px;margin:16px 0 6px}
+  .blog-pager a{border:1px solid var(--line);background:var(--surface);padding:8px 14px;font-family:var(--font-head);font-size:13px}
+  .blog-pager a:hover{border-color:var(--accent);color:var(--accent)}
+  .feed-links{display:none}
+  .post-share-buttons,.post-share-buttons-bottom,.share-buttons,.PostShare,.gs-c-share{display:none !important}
+
+  @media(max-width:860px){
+    .main-layout{grid-template-columns:1fr;gap:14px}
+    .footer-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:560px){
+    .brand-title{font-size:21px}
+    .post-title{font-size:20px}
+    .post-outer{padding:18px}
+  }
+
+  /* ============================================================
+     List cards (home / label / search / archive).
+     Each card is the feature image, the labels, the title, the
+     date, the text before the jump break, and a Read More button
+     that opens that post's own URL.
+     ============================================================ */
+  .post-list{display:flex;flex-direction:column;gap:20px}
+  .post-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    transition:border-color .16s ease, box-shadow .16s ease}
+  .post-card.has-media{display:grid;grid-template-columns:320px minmax(0,1fr)}
+  .post-card:hover{border-color:#CFD6E0;box-shadow:0 12px 28px rgba(16,24,40,.08)}
+  .card-media{display:block;background:#EAEEF3;min-height:100%}
+  .card-media img{width:100%;height:100%;min-height:216px;object-fit:cover}
+  .card-body{padding:20px 22px;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+  .card-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+  .card-tags a{font-family:var(--font-head);font-size:10.5px;font-weight:600;letter-spacing:.07em;
+    text-transform:uppercase;color:var(--accent);background:#EAF3F0;padding:4px 9px;border-radius:4px}
+  .card-tags a:hover{background:var(--accent);color:#fff}
+  .card-title{font-family:var(--font-head);font-size:22px;line-height:1.28;font-weight:600;margin:0 0 8px}
+  .card-title a:hover{color:var(--accent)}
+  .card-meta{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px}
+  .card-excerpt{font-size:16.5px;color:#3B4250;margin:0 0 18px;overflow:hidden;
+    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+  .card-more{margin-top:auto}
+  .read-more{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:#fff;
+    font-family:var(--font-head);font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:6px}
+  .read-more:hover{background:var(--accent-ink);color:#fff}
+  .read-more span{transition:transform .16s ease}
+  .read-more:hover span{transform:translateX(3px)}
+  .post-meta .post-author{color:var(--ink-soft)}
+
+  /* labels + comment link on the post page itself */
+  .post-labels a{display:inline-block;font-family:var(--font-head);font-size:11px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid #D6E4E0;
+    background:#F1F7F5;padding:4px 9px;margin:0 6px 6px 0;border-radius:4px}
+  .post-labels a:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .comment-link{display:inline-block;margin-top:6px;font-family:var(--font-head);font-size:13px;
+    font-weight:600;color:var(--accent)}
+  .comment-link:hover{color:var(--accent-ink)}
+
+  @media(max-width:760px){
+    .post-card.has-media{grid-template-columns:1fr}
+    .card-media{min-height:0}
+    .card-media img{height:auto;min-height:0;aspect-ratio:16/9}
+    .card-body{padding:16px 18px 18px}
+    .card-title{font-size:19.5px}
+    .card-excerpt{font-size:16px;-webkit-line-clamp:5}
+  }
+  
+  /* ---- preview-only chrome (not part of the Blogger theme) ---- */
+  .preview-note{background:#FFF8E1;border-bottom:1px solid #EFDFA6;color:#6B5300;
+    font:13.5px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:11px 16px;text-align:center}
+  .preview-note b{color:#4E3C00}
+  .preview-block{border-top:2px dashed #D7DCE4;padding-top:4px;margin-top:8px}
+  .preview-tag{display:inline-block;margin:20px 0 0;font:600 11px/1 system-ui,sans-serif;
+    letter-spacing:.09em;text-transform:uppercase;color:#0F4A3C;background:#E4F1ED;
+    padding:6px 10px;border-radius:4px}
+  .preview-hint{font:13.5px/1.5 system-ui,sans-serif;color:#6B7280;margin:8px 0 0}
+  .preview-demo{display:inline-block;font:600 10px/1 system-ui,sans-serif;letter-spacing:.08em;
+    text-transform:uppercase;color:#8A6D00;background:#FFF3C4;padding:4px 8px;border-radius:4px}
+  </style>
+</head>
+<body>
+
+  <div class="preview-note">
+    <b>Design preview</b> &mdash; this is a static mock of what
+    <code>theme/freestackhub-theme.xml</code> renders, not the live blog.
+    The card below is built from the real post <b>Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</b>, and
+    &ldquo;Read more&rdquo; opens that post&rsquo;s own URL (on Blogger:
+    <code>/2026/09/stop-deleting-pythonanywhere-files.html</code>).
+  </div>
+
+  <header class="header">
+    <div class="container brand-row">
+      <a href="#">
+        <div class="brand-title">Free Stack Hub</div>
+        <div class="brand-tagline">Free PDFs, self-made apps and legit config files</div>
+      </a>
+      <div class="social-row">
+        <a aria-label="YouTube" href="#">&#9654;</a>
+        <a aria-label="WhatsApp" href="#">&#9993;</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-wrap">
+    <div class="container nav">
+      <a href="#">Home</a><a href="#">PDFs</a><a href="#">Apps</a>
+      <a href="#">Configs &amp; Patches</a><a href="#">About Us</a>
+    </div>
+  </nav>
+
+  <div class="search-wrap">
+    <div class="container">
+      <form class="search">
+        <input aria-label="Search" placeholder="Search PDFs, apps, configs&hellip;" type="search"/>
+        <button type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>
+  </div>
+
+  <main class="container">
+
+    <section class="preview-block">
+      <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
+      <p class="preview-hint">Feature image + labels + title + date + the text before the jump
+        break + <b>Read more</b>. The whole card is a link to the post; nothing after the jump
+        break is loaded on this page any more.</p>
+      <div class="main-layout">
+        <section class="content-area">
+          <div class="post-list hfeed">
+        <article class="post-card has-media">
+          <a aria-hidden="true" class="card-media" href="#" tabindex="-1"><img alt="Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead." src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg"/></a>
+          <div class="card-body">
+            <div class="card-tags"><a href="#" rel="tag">PythonAnywhere</a><a href="#" rel="tag">Git</a><a href="#" rel="tag">GitHub</a><a href="#" rel="tag">Flask</a><a href="#" rel="tag">Deployment</a><a href="#" rel="tag">Web Development</a></div>
+            <h2 class="card-title"><a href="#">Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</a></h2>
+            <div class="card-meta"><time class="published">September 16, 2026</time></div>
+            <div class="card-excerpt">The old way and the new way, side by side. I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.</div>
+            <div class="card-more">
+              <a class="read-more" href="#">Read more <span aria-hidden="true">&#8594;</span></a>
+            </div>
+          </div>
+        </article>
+        <article class="post-card">
+          
+          <div class="card-body">
+            <div class="card-tags"><span class="preview-demo">demo card</span><a href="#" rel="tag">PythonAnywhere</a></div>
+            <h2 class="card-title"><a href="#">Your next post shows up as the second card in this list</a></h2>
+            <div class="card-meta"><time class="published">September 16, 2026</time></div>
+            <div class="card-excerpt">The card, the spacing and the Read more button are the same for every post, so the home page keeps one rhythm no matter how long the posts are.</div>
+            <div class="card-more">
+              <a class="read-more" href="#">Read more <span aria-hidden="true">&#8594;</span></a>
+            </div>
+          </div>
+        </article>
+          </div>
+          <div class="blog-pager container" id="blog-pager">
+            <a class="blog-pager-older-link" href="#">Older Posts</a>
+          </div>
+        </section>
+        <aside class="sidebar"><div class="widget"><h2>About</h2><div class="widget-content">Free PDFs, self-made apps and legit config files &mdash; organized, ad-supported, no cracked or pirated content.</div></div><div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div><div class="widget"><h2>Categories</h2><div class="widget-content"><ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li><li><a href='#'>Configs &amp; Patches</a></li></ul></div></div></aside>
+      </div>
+    </section>
+
+    <section class="preview-block">
+      <div class="preview-tag">2 &mdash; The post page that Read more opens</div>
+      <p class="preview-hint">Same skin, full body, labels and the comment section below
+        (comments are Blogger&rsquo;s own markup).</p>
+      <div class="main-layout">
+        <section class="content-area">
+          <article class="post-outer hentry">
+            <header class="post-header">
+              <h1 class="post-title entry-title">Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</h1>
+              <div class="post-meta"><time class="published">September 16, 2026</time>
+                <span class="post-author"> &middot; AHMED</span></div>
+            </header>
+            <div class="post-body entry-content" id="post-body-1">
+<div style="text-align:center; margin:18px 0;">
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" />
+  <div style="font-size:13px; color:#777; margin-top:6px;"><i>The old way and the new way, side by side.</i></div>
+</div>
+
+<p>I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.</p>
+
+<p>The routine went like this. I'd build a small Flask app on my laptop, upload it to PythonAnywhere through the Files tab, one file at a time. A week later I'd fix a bug or add a page, log back in, select everything in the project folder, hit delete, and upload the whole thing again from scratch.</p>
+
+<p>And it worked. Every single time. That's the trap: a habit that keeps paying off never looks like a risk.</p>
+
+<p>Then one evening I re-uploaded a project and completely forgot that my SQLite database and the whole uploads folder were sitting in that same directory. Gone. Four months of data, wiped in about six seconds, by me, on purpose, while trying to be productive.</p>
+
+<p>That night I sat down and set up Git properly, and I haven't touched the delete button on a server since. If you're running a Python app on a PythonAnywhere free account and still doing the delete-and-reupload dance, this is the shortcut I wish I'd had. It takes ten minutes to set up once. After that, every update is one command.</p>
+
+<h2>Why "delete everything, upload again" eventually blows up</h2>
+
+<p>On a tiny project, re-uploading everything feels harmless. It's six files. It takes two minutes and you get a little clean-slate feeling out of it.</p>
+
+<p>The problem is that this approach has cracks, and your project grows straight into them.</p>
+
+<p><b>There's no undo button.</b> Say your new upload has a bug that only shows up on the live site, something you never saw on your laptop. Yesterday's version worked, today's doesn't, and the old working files? You overwrote them. Unless you kept backups somewhere (nobody does), your only option is to chase the bug forward.</p>
+
+<p><b>You can delete things you didn't mean to.</b> This is the one that got me. A live app collects stuff that exists only on the server: a database file, a folder of uploaded images, a <code>.env</code> file holding your API keys. Wipe the directory and all of that goes with it. Losing a <code>.env</code> hurts twice, because half the time you can't even remember every key that was in there.</p>
+
+<p><b>It scales terribly.</b> Six files is a small chore. Sixty files is an afternoon gone, plus the very real chance you forget one and spend your evening debugging a missing template instead of doing anything useful.</p>
+
+<p><b>You lose track of what changed.</b> A month into this cycle, can you say what's different between the version running right now and the one from two weeks ago? Neither could I. "What did I change recently?" is the first question you ask when something breaks, and delete-and-reupload makes it unanswerable.</p>
+
+<p>None of this is a skill problem. It's just the wrong tool for the job.</p>
+
+<h2>The mental switch: your server is a copy, not the original</h2>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" />
+  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.</i></div>
+</div>
+
+<p>Here's the idea that makes everything click. From now on, your project lives in three places:</p>
+
+<ol>
+<li><b>Your laptop</b>, where you actually write code.</li>
+<li><b>GitHub</b>, which holds the official copy plus its full history.</li>
+<li><b>PythonAnywhere</b>, which holds a connected copy that serves visitors.</li>
+</ol>
+
+<p>GitHub sits in the middle as the source of truth. You push code up to it from your laptop, and you pull it down onto the server. Files never travel directly between your machine and PythonAnywhere again. No more upload marathons, no more wondering whether the server copy matches what you think you deployed. It always matches, because it's the same repo.</p>
+
+<p>You set this up once. Then it just runs.</p>
+
+<h2>Step 1: clone your repo once</h2>
+
+<p>Log in to PythonAnywhere and open a <b>Bash console</b> (Consoles tab, then Bash). Type one command:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>git clone https://github.com/your-username/your-repo.git</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" />
+  <div style="font-size:13px; color:#777; margin-top:6px;"><i>One command brings the whole project down, history included.</i></div>
+</div>
+
+<p>Git downloads the entire project into a folder named after your repo, and it arrives with its complete history attached. Every commit you ever made is now sitting on the server too, which quietly gives you that undo button you never had before.</p>
+
+<p>If your repo is public, that's genuinely all there is to it. If it's private, GitHub will ask who you are, and your account password won't work there anymore. Create a <b>personal access token</b> on GitHub (Settings &rarr; Developer settings &rarr; Tokens) and paste it when git asks for a password. You deal with this once per clone and never think about it again.</p>
+
+<p>Small tip: clone into your home directory, not some nested folder. Short paths save you headaches later when you're pointing the web app at your code.</p>
+
+<h2>Step 2: every update after that is one command</h2>
+
+<p>The new routine starts on your laptop, not the server:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>git add .
+git commit -m "what you changed"
+git push</code></pre>
+
+<p>Then, on PythonAnywhere, open a Bash console and run:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>cd ~/your-repo
+git pull origin main</code></pre>
+
+<p>That's the whole update process. A pull only downloads what actually changed since last time, so a CSS tweak moves a few kilobytes instead of re-uploading eighty files. Git also stays inside the repo folder, which means your <code>.env</code>, your database, and your uploaded media are never in its way.</p>
+
+<p>Compare that to the old cycle: select all, delete, confirm, re-upload, hope you didn't miss a file. There's no comparison.</p>
+
+<h2>Step 3: reload the web app (the step everybody forgets)</h2>
+
+<p>Here's a classic. You pull, the console confirms the new code arrived, you refresh your site... and nothing changed.</p>
+
+<p>The code is on the disk, but your app is still running the old version from memory. PythonAnywhere keeps your web app alive as a long-running process, and it doesn't watch your files for changes. You have to tell it. Open the <b>Web</b> tab and hit the big green <b>Reload</b> button.</p>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" />
+  <div style="font-size:13px; color:#777; margin-top:6px;"><i>Pull, then Reload. Every time.</i></div>
+</div>
+
+<p>Refresh your site. New code is live, five seconds after you finished the pull.</p>
+
+<p>One related gotcha worth knowing early: <code>git pull</code> moves code, not packages. If an update needs a new library, install it into your virtualenv on PythonAnywhere too, then reload. Forgetting this one produces <code>ModuleNotFoundError</code>, and it's almost always a package that exists on your laptop but not on the server.</p>
+
+<h2>Keep it boring: one branch only</h2>
+
+<p>Sooner or later someone tells you to make a second branch "just in case." For a solo project, or a small team, ignore that advice for now. Do everything on <code>main</code>:</p>
+
+<ul>
+<li>Write and test code locally on <code>main</code>.</li>
+<li>Commit and push to <code>main</code> on GitHub.</li>
+<li>Pull <code>main</code> on PythonAnywhere.</li>
+</ul>
+
+<p>Now "what's live?" has a one-word answer: whatever's on <code>main</code>. No merges to untangle, no guessing which branch is the real one, no deploying a feature branch by accident at midnight. There's plenty of time to learn branching later, when a project actually needs it. A free-tier deployment isn't that project.</p>
+
+<h2>The one rule that keeps pulls conflict-free</h2>
+
+<p>A conflict only happens when both copies changed the same file in different ways and git can't pick a winner. On PythonAnywhere, that almost always traces back to one thing: someone edited a file directly on the server.</p>
+
+<p>So there's really one rule to remember. <b>All edits happen before the push, never after the pull.</b></p>
+
+<p>In practice that means:</p>
+
+<ul>
+<li>Never hand-edit tracked files in a PythonAnywhere console. Treat the server as read-only from git's point of view.</li>
+<li>Do all coding locally (or wherever your dev environment lives), push to GitHub, then pull on the server.</li>
+<li>Keep server-only files, like <code>.env</code>, <code>db.sqlite3</code>, and your media folder, listed in <code>.gitignore</code>, so git never tracks them and never overwrites them.</li>
+</ul>
+
+<p>Follow that and <code>git pull</code> applies cleanly every single time. Mine hasn't thrown a conflict in over two years of doing exactly this.</p>
+
+<h2>When pull complains anyway</h2>
+
+<p>Two situations cover most of what you'll ever see.</p>
+
+<p><b>"Your local changes to the following files would be overwritten by merge."</b> Something touched a tracked file on the server. If the change doesn't matter, throw it away and pull:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>git checkout -- filename
+git pull origin main</code></pre>
+
+<p>Be aware that <code>git checkout --</code> discards that file's server-side changes permanently, so only run it when you're sure nothing valuable is in there.</p>
+
+<p><b>"Already up to date" but the site still shows old stuff.</b> Git did its job. You skipped step 3. Reload on the Web tab. That's it, that's the fix, and you will forget it at least once anyway.</p>
+
+<h2>Quick recap</h2>
+
+<ol>
+<li><code>git clone</code> once, to set the project up on PythonAnywhere.</li>
+<li><code>git pull origin main</code> every time you ship updates.</li>
+<li>Reload the app from the Web tab.</li>
+<li>Stay on a single <code>main</code> branch.</li>
+<li>Never edit code on the server. Push from local, pull on the server.</li>
+</ol>
+
+<p>The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your <code>.env</code> and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.</p>
+
+<p>If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. Next up: the <code>.gitignore</code> that keeps your <code>.env</code> and database off GitHub without breaking your app.</p>
+            </div>
+            <div class="post-footer">
+              <div class="post-labels">Filed under: <a href="#" rel="tag">PythonAnywhere</a><a href="#" rel="tag">Git</a><a href="#" rel="tag">GitHub</a><a href="#" rel="tag">Flask</a><a href="#" rel="tag">Deployment</a><a href="#" rel="tag">Web Development</a></div>
+              <a class="comment-link" href="#">Leave a comment</a>
+            </div>
+          </article>
+        </section>
+        <aside class="sidebar"><div class="widget"><h2>About</h2><div class="widget-content">Free PDFs, self-made apps and legit config files &mdash; organized, ad-supported, no cracked or pirated content.</div></div><div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div><div class="widget"><h2>Categories</h2><div class="widget-content"><ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li><li><a href='#'>Configs &amp; Patches</a></li></ul></div></div></aside>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div><h3>Free Stack Hub</h3><p>Free PDFs, self-made apps and legit config
+          files/patches &mdash; built for readers, not clutter.</p></div>
+        <div><h3>Pages</h3><ul><li><a href="#">About Us</a></li><li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Contact Us</a></li><li><a href="#">DMCA</a></li></ul></div>
+        <div><h3>Categories</h3><ul><li><a href="#">PDFs</a></li><li><a href="#">Apps</a></li>
+          <li><a href="#">Configs &amp; Patches</a></li></ul></div>
+      </div>
+      <div class="copyright">&copy; Free Stack Hub &middot; All rights reserved.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

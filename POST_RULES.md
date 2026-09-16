@@ -55,8 +55,11 @@ The build (section 5) **fails the post** if the marker is missing, doubled, last
 teaser is not one image plus a 2-4 sentence hook, so a post cannot ship with a ragged teaser.
 The marker lives only in `post.html`: `import.xml` and `paste.html` are written without it,
 and the build prints the sentence the break belongs after. In Blogger put the cursor there and
-use **Insert -> Jump break** - only that button produces Blogger's own "Read More" markup, and
-modern themes truncate the teaser at it, so the card becomes image + hook + Read More.
+use **Insert -> Jump break**. The theme (`theme/freestackhub-theme.xml`) builds each home-page
+card from the post *up to* that break (`data:post.snippets.long`), so the card is feature image +
+hook + **Read more**, and the button opens that post's own URL. Because the break also decides
+where the card's text stops, a visible caption under the feature image becomes the first words of
+the card - leave it off if you want the card to open straight on the hook.
 
 ## 4. Images
 - Put them in the post's own `images/` folder, named `01-…jpg`, `02-…jpg` in order of appearance.
@@ -124,9 +127,11 @@ and fails (`exit 1`) on the four things that only ever go wrong on Blogger's sid
 - **images** present in the post but not served by the CDN yet, or images in the repo that the
   published post never references
 
-It also notes when a post has no Blogger `media$thumbnail`: images hosted off-blog never get one,
-so the homepage/list view shows a **text-only snippet** instead of a card with a picture. That is
-expected with this workflow; upload the first image inside Blogger too if you want a preview card.
+It also notes when a post has no Blogger `media$thumbnail`: images hosted off-blog never get one.
+That only affects Blogger's own widgets (Popular Posts, Featured Post, the `/feeds` thumbnail) -
+the theme's home-page cards use `data:post.featuredImage`, i.e. the post's first image, so they
+show a picture either way. Upload the first image inside Blogger too if you also want a thumbnail
+in those widgets.
 
 ## 9. Blogger settings this repo depends on
 Checked against this blog's own takeout export (`sample export/`), and worth knowing because

@@ -25,7 +25,9 @@ To publish a post, either:
   the labels and the search description by hand, or the post goes out without them.
 
 Every post follows one shape, so the homepage teaser is always feature image → 2-4 sentence hook
-→ jump break → the rest. The build enforces it. After publishing, check what actually landed:
+→ jump break → the rest. The build enforces it, and the Blogger theme in `theme/` renders exactly
+that: each home-page card is the feature image, the hook, and a **Read more** button that opens
+that post's own URL. After publishing, check what actually landed:
 
 ```bash
 python3 tools/check_published.py      # live title / labels / permalink / images vs posts/
@@ -36,7 +38,10 @@ Never paste `post.html` itself into Blogger — its `<img>` tags use bare file n
 images would show as broken. Only the generated files have full URLs.
 
 - **Rules for writing / adding posts (structure, images, publishing, videos):** [POST_RULES.md](POST_RULES.md)
+- **Blogger theme:** `theme/freestackhub-theme.xml` (the file to upload to Blogger) plus
+  `theme/preview.html`, a static mock of the home page and a post page - see [theme/README.md](theme/README.md)
 - **Build tool:** `python3 tools/build_import.py` (regenerates `import.xml`, `paste.html`, `title.txt`)
+- **Theme preview:** `python3 tools/build_theme_preview.py` (regenerates `theme/preview.html`)
 - **Video tool:** `python3 tools/make_video.py` (needs `pillow` + ffmpeg; see POST_RULES §10)
 - **Published-vs-source check:** `python3 tools/check_published.py`
 - **Template:** `posts/_template/`
