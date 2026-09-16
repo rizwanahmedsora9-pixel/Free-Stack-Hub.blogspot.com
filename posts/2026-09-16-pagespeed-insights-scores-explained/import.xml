@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
+  <id>tag:blogger.com,1999:blog-7497660712599875944</id>
+  <updated>2026-09-16T19:26:47.074+00:00</updated>
+  <title type="text">Free Stack Hub</title>
+  <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
+  <author><name>Free Stack Hub</name></author>
+  <generator>Free-Stack-Hub build_import.py</generator>
+  <entry>
+    <id>tag:blogger.com,1999:blog-7497660712599875944.post-pagespeed-insights-scores-explained</id>
+    <blogger:type>POST</blogger:type>
+    <blogger:status>LIVE</blogger:status>
+    <author>
+      <name>Free Stack Hub</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title type="text">Check Your Website's Vital Scores with PageSpeed Insights — and What Every Number Actually Means</title>
+    <content type="html">&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.webp" type="image/webp"/&gt;
+    &lt;img alt="A developer at a laptop watching a website speed dashboard with LCP, FCP and CLS score cards" decoding="async" fetchpriority="high" height="480" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/01-pagespeed-gauges-developer.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The report I was trying to read at 11pm: one orange score, four gauges, zero instructions.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I ran my own blog through PageSpeed Insights on a Tuesday night, expecting the score to be green. I got 42 on mobile, three orange metrics, and a list of eleven &amp;ldquo;opportunities&amp;rdquo; &amp;mdash; none of them saying which one would actually matter. The report was pointing me at the wrong one for the first half of the evening.&lt;/p&gt;
+
+&lt;p&gt;It turned out the score wasn&amp;rsquo;t wrong. My hero image was a 480-kilobyte PNG, and two plugins were shipping JavaScript that never runs. But the report didn&amp;rsquo;t say that. It listed seven metrics with little coloured bars and left me to figure out which bar was worth chasing. So this is the guide I wish I&amp;rsquo;d had that night: every number PageSpeed Insights shows you, what &amp;ldquo;good&amp;rdquo; actually looks like for each one, and where the quick wins hide.&lt;/p&gt;
+
+&lt;h2&gt;The test takes one minute. Reading it takes longer.&lt;/h2&gt;
+
+&lt;p&gt;PageSpeed Insights is Google&amp;rsquo;s free tool: you go to &lt;b&gt;pagespeed.web.dev&lt;/b&gt;, paste your URL, and pick mobile or desktop. No account, no install, roughly a minute to a full report. The mobile test is the one that matters, because Google&amp;rsquo;s ranking uses the mobile field numbers &amp;mdash; so when your report says 88 on desktop and 42 on mobile, the 42 is the number Google will act on.&lt;/p&gt;
+
+&lt;p&gt;At the top you get four circular gauges: &lt;b&gt;Performance, Accessibility, Best Practices, and SEO&lt;/b&gt;. Only the first one is about speed; the other three are checklists (tap targets, alt text, valid markup, a meta description) that happen to use the same 0&amp;ndash;100 scale. The colours are fixed: &lt;b&gt;0&amp;ndash;49 is red (poor), 50&amp;ndash;89 is orange (needs improvement), 90&amp;ndash;100 is green (good)&lt;/b&gt;. And the performance score is not a raw speed measurement &amp;mdash; it&amp;rsquo;s a weighted average of the lab metrics below, mostly LCP, FCP, Total Blocking Time, layout shift and Speed Index. That&amp;rsquo;s why two sites with identical raw speed can score differently, and why one single fix can jump the number ten points.&lt;/p&gt;
+
+&lt;h2&gt;Field vs lab &amp;mdash; why your two numbers never agree&lt;/h2&gt;
+
+&lt;p&gt;Scroll a little and you&amp;rsquo;ll notice the report splits every metric into two rows: &lt;b&gt;Field&lt;/b&gt; and &lt;b&gt;Lab&lt;/b&gt;. They measure the same thing in two different worlds, and that distinction is where most of the confusion starts.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.webp" type="image/webp"/&gt;
+    &lt;img alt="Real users' phones and a simulated lab both feeding into one score gauge" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/02-field-vs-lab-data.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Left: the field &amp;mdash; real users&amp;rsquo; phones, 28 days of data. Right: the lab &amp;mdash; one simulated phone, one run. Same metrics, two different worlds.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;b&gt;Field&lt;/b&gt; data is real. Google collects it from actual Chrome users who visited your page in the last 28 days, and the number you see is the 75th percentile &amp;mdash; meaning four out of five real visitors did at least this well. It&amp;rsquo;s slow to move, because the window is a month, and brand-new or low-traffic sites have no field data at all. If a fresh page shows &amp;ldquo;no data&amp;rdquo;, that&amp;rsquo;s normal, not a bug.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Lab&lt;/b&gt; data is a simulation. Lighthouse runs your page on a throttled mid-range phone profile &amp;mdash; slow CPU, slow network, empty cache &amp;mdash; and reports what a typical mid-tier Android on a mid-tier connection would get. It&amp;rsquo;s repeatable: run it ten times and you get roughly the same number, which is exactly what you want while you&amp;rsquo;re developing. It just isn&amp;rsquo;t your users.&lt;/p&gt;
+
+&lt;p&gt;The rule that keeps me sane: &lt;b&gt;lab is for finding problems, field is for proving you fixed them&lt;/b&gt;. If lab LCP is 3.1 seconds, the lab number tells you where it&amp;rsquo;s leaking. A month later, the field LCP tells you whether your real visitors actually felt the difference.&lt;/p&gt;
+
+&lt;h2&gt;LCP &amp;mdash; the number Google actually ranks by&lt;/h2&gt;
+
+&lt;p&gt;Largest Contentful Paint is the moment the biggest piece of content on your page finishes loading. On a typical post that&amp;rsquo;s the hero image; on a text page it might be the largest headline block; on a video page, the poster frame. Whatever it is, it&amp;rsquo;s the thing your eye lands on first &amp;mdash; and it&amp;rsquo;s the Core Web Vital Google uses directly in search ranking.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;2.5 seconds or less &amp;mdash; good.&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;2.5 to 4.0 seconds &amp;mdash; needs improvement.&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Over 4.0 seconds &amp;mdash; poor.&lt;/b&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Two things about LCP trip people up. First, it measures the &lt;i&gt;largest&lt;/i&gt; element, not the most important one &amp;mdash; a 2-megapixel product photo can be your LCP element even though nobody is looking at it. Second, the report shows you &lt;i&gt;which&lt;/i&gt; element won. Click it. If it&amp;rsquo;s an image, almost everything below becomes image work: compress it, serve a modern format (WebP or AVIF), size it to the box it&amp;rsquo;s displayed in, host it on a fast CDN, and preconnect to that host. And whatever you do, &lt;b&gt;don&amp;rsquo;t lazy-load your LCP image&lt;/b&gt; &amp;mdash; lazy loading exists for images below the fold, and telling the browser to wait on the single most important element on the page is the fastest way to sink the score. If your LCP element is text, the usual culprits are font files that block rendering and a slow server; those fixes live under FCP and TTFB below.&lt;/p&gt;
+
+&lt;h2&gt;FCP &amp;mdash; the first flash of something&lt;/h2&gt;
+
+&lt;p&gt;First Contentful Paint is earlier and humbler than LCP: it&amp;rsquo;s the moment the &lt;i&gt;first&lt;/i&gt; bit of real content &amp;mdash; any text, or any image &amp;mdash; is painted on screen. Before FCP you&amp;rsquo;re staring at a blank page, and at that point your site is indistinguishable from a dead link.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;1.8 seconds or less &amp;mdash; good.&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;1.8 to 3.0 seconds &amp;mdash; needs improvement.&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Over 3.0 seconds &amp;mdash; poor.&lt;/b&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.webp" type="image/webp"/&gt;
+    &lt;img alt="A page-load timeline marking FCP at the first painted text block and LCP at the largest image" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/03-lcp-fcp-timeline.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Same page, two moments: FCP is the first line of text; LCP is the big image landing behind it.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;FCP is almost always a &amp;ldquo;what is in your head?&amp;rdquo; problem. A stylesheet the browser must download and parse before it may draw anything, a font file it&amp;rsquo;s waiting on before it&amp;rsquo;ll show the text, a render-blocking script &amp;mdash; each one is a round trip the visitor pays before the first pixel. The standard fixes: cut the CSS the page doesn&amp;rsquo;t use, inline the small amount of critical CSS it does need, defer the JavaScript the first paint doesn&amp;rsquo;t require, and give webfonts &lt;code&gt;font-display: swap&lt;/code&gt; so text appears in a fallback face immediately and swaps to the real font when it lands. If FCP is slow but TTFB is fast, your head is the problem. If both are slow, your server is.&lt;/p&gt;
+
+&lt;h2&gt;CLS &amp;mdash; the page that slides under your finger&lt;/h2&gt;
+
+&lt;p&gt;Cumulative Layout Shift is the only Core Web Vital with no time unit, because it isn&amp;rsquo;t measuring speed &amp;mdash; it&amp;rsquo;s measuring &lt;i&gt;stability&lt;/i&gt;. Every time an element moves unexpectedly, the browser scores the shift, and CLS adds them all up. You tap a link, the page jumps, and the button you meant is now a comment form: that jump has a number, and CLS is the running total of them.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;0.1 or less &amp;mdash; good.&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;0.1 to 0.25 &amp;mdash; needs improvement.&lt;/b&gt;&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Over 0.25 &amp;mdash; poor.&lt;/b&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The usual suspects are images with no reserved space (the page reflows when the photo lands), ad slots and pop-ups that insert themselves above content you&amp;rsquo;re already reading, and fonts that swap in wider than the fallback. &lt;b&gt;Animations are the sneaky one&lt;/b&gt;: an animation that resizes or moves an element &amp;mdash; a hero that grows in, a banner that pushes the menu down &amp;mdash; shifts everything below it, and every shift counts. The fix isn&amp;rsquo;t to stop animating; it&amp;rsquo;s to animate things that don&amp;rsquo;t move layout. &lt;code&gt;transform&lt;/code&gt; and &lt;code&gt;opacity&lt;/code&gt; glide an element without touching its box, so the same entrance animation costs zero CLS, while animating &lt;code&gt;width&lt;/code&gt;, &lt;code&gt;height&lt;/code&gt; or &lt;code&gt;top&lt;/code&gt; turns your fancy effect into a layout-shift penalty.&lt;/p&gt;
+
+&lt;p&gt;The good news: CLS is the most deterministic of the three. Give every image its real &lt;code&gt;width&lt;/code&gt; and &lt;code&gt;height&lt;/code&gt; &amp;mdash;&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;&amp;lt;img src="hero.jpg" width="1200" height="480" alt="A hero image with a reserved box"/&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&amp;mdash; reserve the exact space for ads and embeds, and use a metric-adjusted fallback for your fonts, and the number drops to zero and stays there. It&amp;rsquo;s also the one metric where a lab score of 0 genuinely predicts a field score near 0, because the causes are structural, not network.&lt;/p&gt;
+
+&lt;h2&gt;TBT, TTFB, SI and INP &amp;mdash; the rest of the scoreboard&lt;/h2&gt;
+
+&lt;p&gt;Four more numbers appear in the report, and none of them is a Core Web Vital &amp;mdash; but all of them feed the performance score, and each one points at a different part of the machine.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Total Blocking Time (lab only)&lt;/b&gt; is the total time your JavaScript kept the main thread busy in chunks over 50 milliseconds. Scale: &lt;b&gt;200ms or less &amp;mdash; good, 200&amp;ndash;600ms &amp;mdash; needs improvement, over 600ms &amp;mdash; poor&lt;/b&gt;. It&amp;rsquo;s the number behind the &amp;ldquo;the site loads but feels dead&amp;rdquo; complaint: the page is there, it just won&amp;rsquo;t respond to you.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Time to First Byte&lt;/b&gt; is the time from &amp;ldquo;visit&amp;rdquo; to &amp;ldquo;the server sends the first byte&amp;rdquo;. Scale: &lt;b&gt;0.8s or less &amp;mdash; good, 0.8&amp;ndash;1.8s &amp;mdash; needs improvement, over 1.8s &amp;mdash; poor&lt;/b&gt;. You can&amp;rsquo;t fix TTFB in your code &amp;mdash; it&amp;rsquo;s hosting, server load, the distance to your visitors, and caching. If TTFB is red, no amount of CSS work will save the score; you need a faster origin or a CDN in front of it.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Speed Index&lt;/b&gt; is how quickly the page &lt;i&gt;looks&lt;/i&gt; filled in &amp;mdash; the rate at which the viewport stops being blank. It catches the &amp;ldquo;everything loads in two seconds but trickles in over five&amp;rdquo; problem that LCP and FCP both miss.&lt;/p&gt;
+
+&lt;p&gt;&lt;b&gt;Interaction to Next Paint&lt;/b&gt; is the newest Core Web Vital (it replaced First Input Delay in March 2024) and the only one about &lt;i&gt;you&lt;/i&gt; rather than the page: how quickly the screen reacts when a real visitor taps or clicks. Scale: &lt;b&gt;200ms or less &amp;mdash; good, 200&amp;ndash;500ms &amp;mdash; needs improvement, over 500ms &amp;mdash; poor&lt;/b&gt;. Long JavaScript tasks are the usual cause, which is why INP and TBT tend to rise and fall together.&lt;/p&gt;
+
+&lt;h2&gt;The opportunities list &amp;mdash; where the quick wins live&lt;/h2&gt;
+
+&lt;p&gt;Now the part most people actually came here for. Under the metrics, PageSpeed Insights lists a set of &lt;b&gt;opportunities&lt;/b&gt; &amp;mdash; concrete diagnostics, each with an estimated time saving &amp;mdash; and the list is different for every page. These rows tell you &lt;i&gt;what&lt;/i&gt; to change, not &lt;i&gt;how slow&lt;/i&gt; you are.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.webp" type="image/webp"/&gt;
+    &lt;img alt="Scissors cutting a greyed-out block of unused JavaScript out of a page's code" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/04-unused-javascript.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Unused JavaScript: downloaded, parsed, and then never run once.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;b&gt;Eliminate unused JavaScript&lt;/b&gt; is the row you&amp;rsquo;re most likely to find, and it&amp;rsquo;s worth understanding properly. Your browser pays for every script it downloads &amp;mdash; parsing and evaluating it even if not a single line ever runs. Unused JavaScript is the code that made the trip but did none of the work: a date-picker library loaded to format one field, an entire cart module on a page that has no cart, a 300-kilobyte plugin bundle where you use one feature. The report shows the biggest offenders by URL; for the detail, Chrome DevTools&amp;rsquo; Coverage tab shades exactly which lines of each file never execute during a visit. The fixes, in order of effort: delete the library or plugin you don&amp;rsquo;t use, defer the rest, split things so only the code the current page needs arrives first, and lazy-load whatever serves content below the fold.&lt;/p&gt;
+
+&lt;p&gt;The other rows that keep showing up on real blogs: &lt;b&gt;reduce unused CSS&lt;/b&gt; (the same idea applied to stylesheets), &lt;b&gt;properly size images&lt;/b&gt; (a 4000-pixel photo displayed in a 600-pixel box is pure waste &amp;mdash; serve an image the size it&amp;rsquo;s shown at), &lt;b&gt;lazy load below-the-fold images&lt;/b&gt;, &lt;b&gt;avoid render-blocking resources&lt;/b&gt;, and &lt;b&gt;avoid long tasks&lt;/b&gt; (the main-thread version of the unused-JS problem: scripts that do run, just for too long). One honesty note: the &amp;ldquo;estimated savings&amp;rdquo; next to each row are a guess, and a confident one at that. Treat the list as a priority order &amp;mdash; fix the biggest rows first, re-test, and let the new numbers tell you what&amp;rsquo;s left &amp;mdash; not as a contract.&lt;/p&gt;
+
+&lt;p&gt;And if your site runs on a platform like Blogger or WordPress, one row will always point at the platform&amp;rsquo;s own scripts. You can&amp;rsquo;t delete what the platform ships, so read the URL before you sweat the number: if the heavy file lives on the platform&amp;rsquo;s domain, that part of the score belongs to the platform, not to you. Work the rows that are actually yours.&lt;/p&gt;
+
+&lt;h2&gt;A routine you can keep: one check, two fixes&lt;/h2&gt;
+
+&lt;p&gt;Here&amp;rsquo;s how I actually use the tool now, and it takes five minutes a week. I run the mobile test on my most important page every Monday. I ignore the performance &lt;i&gt;score&lt;/i&gt; and read the three Core Web Vitals first &amp;mdash; LCP under 2.5 seconds, CLS under 0.1, INP under 200 milliseconds &amp;mdash; because those are the numbers that get ranked. Then I look at the opportunities list, pick the &lt;b&gt;two&lt;/b&gt; rows with the biggest estimated savings, and fix only those. I re-run the lab test the same evening to confirm the numbers moved, and I check the field data in four weeks to confirm my visitors felt it.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.webp" type="image/webp"/&gt;
+    &lt;img alt="A speed checklist of compressed images, lazy loading, clean JavaScript and caching next to a gauge pointing green" decoding="async" height="604" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-pagespeed-insights-scores-explained/images/05-speed-fixes-checklist.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The whole system: two fixes at a time, then re-test. The needle moves when you stop chasing the score and start chasing the rows.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Chasing the score itself is a trap &amp;mdash; it&amp;rsquo;s a weighted average of seven metrics, and you can move it the wrong way by fixing the wrong thing. Chasing the rows is boring and it works. A 42 becomes a 90 in about two weeks of fixing two rows a week, and every fix is permanent: a compressed image doesn&amp;rsquo;t uncompress, and a deleted script doesn&amp;rsquo;t come back.&lt;/p&gt;
+
+&lt;h2&gt;Quick recap&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Run the test at pagespeed.web.dev &amp;mdash; mobile first, because Google&amp;rsquo;s ranking uses the mobile numbers.&lt;/li&gt;
+&lt;li&gt;Know the three Core Web Vitals: LCP &amp;le; 2.5s, CLS &amp;le; 0.1, INP &amp;le; 200ms. These are the ones that get ranked.&lt;/li&gt;
+&lt;li&gt;Keep FCP &amp;le; 1.8s, TBT &amp;le; 200ms and TTFB &amp;le; 0.8s to hold the green performance score.&lt;/li&gt;
+&lt;li&gt;The opportunities list is your to-do list &amp;mdash; start with the biggest estimated saving, usually unused JavaScript or an oversized hero image.&lt;/li&gt;
+&lt;li&gt;Lab data finds the problem, field data proves the fix &amp;mdash; and the field window is 28 days, so give it a month.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Run your site tonight &amp;mdash; it takes a minute, and the score it gives you is the most honest criticism you&amp;rsquo;ll get all week. Drop your mobile score in the comments and I&amp;rsquo;ll tell you which row I&amp;rsquo;d start with. Next up: the image pipeline behind this very blog &amp;mdash; the AVIF, WebP and &lt;code&gt;&amp;lt;picture&amp;gt;&lt;/code&gt; markup that keeps the layout score at zero.&lt;/p&gt;</content>
+    <blogger:metaDescription>Run your site through Google's free PageSpeed Insights and read every score: LCP, FCP, CLS, TBT, TTFB and the unused JavaScript hiding behind each number.</blogger:metaDescription>
+    <blogger:created>2026-09-16T00:00:00.000+00:00</blogger:created>
+    <published>2026-09-16T00:00:00.000+00:00</published>
+    <updated>2026-09-16T00:00:00.000+00:00</updated>
+    <blogger:location/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="PageSpeed Insights"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Core Web Vitals"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Web Performance"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="SEO"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Lighthouse"/>
+    <blogger:filename>/2026/09/pagespeed-insights-scores-explained.html</blogger:filename>
+    <link/>
+    <enclosure/>
+  </entry>
+</feed>
