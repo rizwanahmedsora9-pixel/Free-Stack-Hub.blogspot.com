@@ -55,6 +55,38 @@ Key data tags, and why these ones:
 - `data:post.hasJumpLink` / jump-break text - not needed any more: every card ends in the same
   *Read more* button, whether or not the post has a break. (`POST_RULES.md` §3 requires one.)
 
+## Fix: the social icons wrapped under the wordmark instead of sitting opposite it
+
+The header row used to be a wrapping flex box:
+
+```css
+.brand-row{min-height:100px;display:flex;align-items:center;
+  justify-content:space-between;padding:18px 0;gap:20px;flex-wrap:wrap}
+```
+
+`flex-wrap` is the whole bug. The brand `<a>` sizes to its content (wordmark *plus*
+tagline), so as soon as that and the four icons no longer fit side by side - any phone,
+or a desktop with a long-enough `data:blog.description` - the icons dropped to a second
+line. A wrapped flex line then holds one item, and `justify-content:space-between`
+left-aligns a single item, so they landed *under* "Free Stack Hub", on the same edge as
+the brand. That is the "icons below the title" look.
+
+The bar is now a two-column grid, which has no wrap to fall back on:
+
+```css
+.brand-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+  min-height:100px;padding:18px 0;column-gap:24px}
+.social-row{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+```
+
+- Brand in the left corner, icons pinned to the right edge on every width; under
+  `560px` the row only gets tighter (smaller wordmark, 31px icon buttons), it never
+  re-wraps.
+- `minmax(0,1fr)` + `overflow-wrap` on `.brand-title`/`.brand-tagline` mean a long title
+  squeezes the *brand* column instead of pushing the icons around.
+- Icons are now 34px round buttons (19px glyph inside) with a tint on hover/focus, which
+  also clears the tap-target complaint the 18px bare glyph used to raise on mobile.
+
 ## Performance, accessibility and SEO
 
 What the theme does now, and the reason each piece is there.

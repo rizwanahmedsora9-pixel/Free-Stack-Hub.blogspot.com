@@ -230,7 +230,11 @@ element's text, `aria-label`, `title`, or nested `<img alt>`.
 - The four social icons are SVG-only, so each carries `aria-label` (`Facebook`,
   `Instagram`, `YouTube`, `WhatsApp`) - and now `rel='noopener noreferrer'`,
   because `target='_blank'` without it is a reverse-tabnabbing hole that the
-  Best Practices audit reports.
+  Best Practices audit reports. They are 34px round buttons (`width`/`height`
+  on the anchor, not just the glyph), which is the tap-target item, and the row
+  sits in the right-hand corner of the header bar: `.brand-row` is a
+  `minmax(0,1fr) auto` grid, because a wrapping flex row dropped the icons onto a
+  second line and left-aligned them under the wordmark (see `theme/README.md`).
 - The card image is a second link to the same post as its title, so it stays
   `aria-hidden='true' tabindex='-1'`: a screen reader gets one link, not two.
 - **"Read more" was the real failure.** Repeated once per card, it announces as

@@ -84,13 +84,30 @@
   .skip-link:focus{top:0}
 
   .header{background:var(--surface);border-bottom:1px solid var(--line)}
-  .brand-row{min-height:100px;display:flex;align-items:center;justify-content:space-between;padding:18px 0;gap:20px;flex-wrap:wrap}
-  .brand-title{font-family:var(--font-head);font-size:26px;font-weight:700;letter-spacing:-0.01em}
+  /* Brand in the LEFT corner of the bar, social icons in the RIGHT corner,
+     always on the same line. This used to be a flex row with flex-wrap:wrap:
+     the moment the title + tagline were wider than the space left beside them
+     - any phone, or desktop with a long blog description - the icons wrapped
+     onto a second line, and a wrapped line holds only one item, so
+     justify-content:space-between left-aligned it. Result: the icons sat
+     *under* "Free Stack Hub" instead of opposite it. A two-column grid has no
+     wrap to fall back on, so the icons stay pinned to the right edge and the
+     brand column absorbs the squeeze (minmax(0,1fr) + overflow-wrap). */
+  .brand-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+    min-height:100px;padding:18px 0;column-gap:24px}
+  .brand{display:block;min-width:0}
+  .brand-title{font-family:var(--font-head);font-size:26px;font-weight:700;letter-spacing:-0.01em;
+    line-height:1.2;overflow-wrap:break-word}
   .brand-title span{color:var(--accent)}
-  .brand-tagline{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
-  .social-row{display:flex;gap:14px}
-  .social-row a{color:var(--ink-soft)}
-  .social-row a:hover{color:var(--accent)}
+  .brand-tagline{font-size:12.5px;color:var(--ink-soft);margin-top:3px;overflow-wrap:break-word}
+  .social-row{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+  /* A 34px round hit area around a 19px glyph: the bare icon was an 18px tap
+     target, which is what the mobile Accessibility audit reports as "tap
+     targets are not sized appropriately". */
+  .social-row a{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+    border-radius:50%;color:var(--ink-soft);transition:background-color .16s ease,color .16s ease}
+  .social-row a:hover,.social-row a:focus-visible{color:var(--accent-ink);background:#E4F1ED}
+  .social-row svg{width:19px;height:19px}
 
   .nav-wrap{background:var(--ink)}
   .nav{min-height:46px;display:flex;align-items:center;gap:0;overflow-x:auto;white-space:nowrap}
@@ -162,7 +179,14 @@
       animation-iteration-count:1 !important;scroll-behavior:auto !important}
   }
   @media(max-width:560px){
-    .brand-title{font-size:21px}
+    /* Still one line, still two corners - just tighter, so the icons never
+       crowd the wordmark. Nothing here re-wraps the header. */
+    .brand-row{min-height:76px;padding:12px 0;column-gap:10px}
+    .brand-title{font-size:20px}
+    .brand-tagline{font-size:11.5px}
+    .social-row{gap:0}
+    .social-row a{width:31px;height:31px}
+    .social-row svg{width:17px;height:17px}
     .post-title{font-size:20px}
     .post-outer{padding:18px}
   }
@@ -261,15 +285,18 @@
     <code>/2026/09/stop-deleting-pythonanywhere-files.html</code>).
   </div>
 
-  <header class="header">
-    <div class="container brand-row">
-      <a href="#">
-        <div class="brand-title">Free Stack Hub</div>
-        <div class="brand-tagline">Free PDFs, self-made apps and legit config files</div>
+  <header class='header'>
+    <div class='container brand-row'>
+      <a class='brand' href='#'>
+        <div class='brand-title'>Free Stack Hub</div>
+        <div class='brand-tagline'>Free PDFs, self-made apps and legit config files</div>
       </a>
-      <div class="social-row">
-        <a aria-label="YouTube" href="#">&#9654;</a>
-        <a aria-label="WhatsApp" href="#">&#9993;</a>
+      <div class='social-row' aria-label='Follow Free Stack Hub' role='group'>
+        <!-- Replace # with your real profile/channel URLs -->
+        <a aria-label='Facebook' href='#' rel='noopener noreferrer' target='_blank'><svg fill='none' height='18' viewBox='0 0 24 24' width='18'><path d='M14 9h3V5h-3c-2.2 0-4 1.8-4 4v2H8v4h2v6h4v-6h3l1-4h-4v-2c0-.6.4-1 1-1z' fill='currentColor'/></svg></a>
+        <a aria-label='Instagram' href='#' rel='noopener noreferrer' target='_blank'><svg fill='none' height='18' viewBox='0 0 24 24' width='18'><rect fill='none' height='18' rx='5' stroke='currentColor' stroke-width='1.6' width='18' x='3' y='3'/><circle cx='12' cy='12' fill='none' r='4.2' stroke='currentColor' stroke-width='1.6'/><circle cx='17.2' cy='6.8' r='1.1' fill='currentColor'/></svg></a>
+        <a aria-label='YouTube' href='#' rel='noopener noreferrer' target='_blank'><svg fill='none' height='18' viewBox='0 0 24 24' width='18'><rect fill='none' height='14' rx='3.5' stroke='currentColor' stroke-width='1.6' width='20' x='2' y='5'/><path d='M10 9l6 3-6 3V9z' fill='currentColor'/></svg></a>
+        <a aria-label='WhatsApp' href='#' rel='noopener noreferrer' target='_blank'><svg fill='none' height='18' viewBox='0 0 24 24' width='18'><path d='M12 3a9 9 0 00-7.8 13.5L3 21l4.7-1.2A9 9 0 1012 3z' stroke='currentColor' stroke-width='1.5'/><path d='M8.5 8.8c.2-.5.5-.5.8-.5h.5c.2 0 .4 0 .6.5s.7 1.7.8 1.8c.1.2.1.4 0 .6-.1.2-.2.3-.4.5-.2.2-.4.4-.2.7.2.4 1 1.5 2.1 2.4 1.4 1.2 1.9 1.2 2.2 1.1.3 0 .5-.4.7-.7.2-.3.4-.4.6-.3.2.1 1.5.7 1.7.8.2.1.4.2.4.4 0 .2 0 1-.4 1.4-.4.5-1.4 1-2.5.6-1-.3-2.6-1-4.1-2.5-1.2-1.2-2-2.5-2.3-3.6-.3-1-.1-1.7.2-2.2z' fill='currentColor'/></svg></a>
       </div>
     </div>
   </header>
