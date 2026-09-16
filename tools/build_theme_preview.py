@@ -41,6 +41,7 @@ CARD_IMG_W, CARD_IMG_H = 640, 360        # the 16:9 box the skin renders cards i
 TAG_RE = re.compile(r"<[^>]+>")
 MORE_RE = re.compile(r"<!--\s*more\s*-->", re.I)
 HEADER_RE = re.compile(r"<header class='header'.*?</header>", re.S)
+VISIT_RE = re.compile(r"<!-- visit-strip:start -->(.*?)<!-- visit-strip:end -->", re.S)
 BLOG_TITLE = "Free Stack Hub"
 
 
@@ -65,6 +66,31 @@ def header_html(theme_xml: str) -> str:
     head = head.replace("<data:blog.title/>", BLOG_TITLE)
     head = re.sub(r"<data:[^>]*/>", "", head)
     return head
+
+
+def visit_strip_html(theme_xml: str) -> str:
+    """The theme's live visitor strip, with sample values stood in for the
+    ones the real page fills in by fetch.
+
+    Same reason as header_html: parsing the marked block out of the theme
+    means a strip change shows up in the mock on the next run. On Blogger the
+    b:if keeps this strip on the home page only; here it sits in section 1 -
+    the post-page section below correctly does not show it.
+    """
+    m = VISIT_RE.search(theme_xml)
+    if not m:
+        sys.exit("ERR  could not find the visit-strip markers in theme/freestackhub-theme.xml")
+    strip = m.group(1)
+    # stand-ins for what the after-load fetches write in: a plausible count,
+    # a flag (&#127477;&#127472; = the PK regional-indicator pair), country,
+    # device + the is-mobile class the script would have added
+    strip = strip.replace("id='visitTotal'>&#8212;", "id='visitTotal'>12,482")
+    strip = strip.replace("id='visitFlag'></span>", "id='visitFlag'>&#127479;&#127472; </span>")
+    strip = strip.replace("id='visitCountry'>&#8212;", "id='visitCountry'>Pakistan")
+    strip = strip.replace("class='visit-cell vc-device'", "class='visit-cell vc-device is-mobile'")
+    strip = strip.replace("id='visitDevice'>&#8212;", "id='visitDevice'>Mobile")
+    strip = strip.replace("id='visitTime'>&#8212;", "id='visitTime'>9:41 PM")
+    return strip
 
 
 def skin_css(theme_xml: str) -> str:
@@ -147,6 +173,7 @@ def build(post: dict) -> str:
     theme_xml = THEME.read_text(encoding="utf-8")
     css = skin_css(theme_xml)
     header = header_html(theme_xml)
+    visit_strip = visit_strip_html(theme_xml)
     title = post["title"]
     slug_url = "#"
     labels = post["labels"]
@@ -238,6 +265,8 @@ def build(post: dict) -> str:
     </div>
   </div>
 
+{visit_strip}
+
   <div class="container">
     <div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>
   </div>
@@ -245,11 +274,13 @@ def build(post: dict) -> str:
   <main class="container" id="main-content" tabindex="-1">
 
     <section class="preview-block">
-      <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
-      <p class="preview-hint">Feature image + labels + title + date + <b>Read more</b> &mdash;
-        no body text on the home page any more (the cards used to print the post&rsquo;s own
-        snippet, which read like the full post). The title and the button both open that
-        post&rsquo;s own URL.</p>
+      <div class="preview-tag">1 &mdash; Home page: live visitor strip + teaser cards</div>
+      <p class="preview-hint"><b>The slim strip under the search bar</b> is the live visitor
+        snapshot &mdash; total visits &middot; your country &middot; your device &middot; local time.
+        Its numbers here are stand-ins; on the blog they fill in after page load (two tiny
+        requests), and Blogger sends this strip <b>on the home page only</b>. Cards below:
+        feature image + labels + title + date + <b>Read more</b>, no body text; the title and
+        the button both open that post&rsquo;s own URL.</p>
       <div class="main-layout">
         <section class="content-area">
           <div class="post-list hfeed">

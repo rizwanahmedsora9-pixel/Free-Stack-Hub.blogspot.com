@@ -92,17 +92,25 @@
      justify-content:space-between left-aligned it. Result: the icons sat
      *under* "Free Stack Hub" instead of opposite it. A two-column grid has no
      wrap to fall back on, so the icons stay pinned to the right edge and the
-     brand column absorbs the squeeze (minmax(0,1fr) + overflow-wrap). */
-  .brand-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+     brand column absorbs the squeeze (minmax(0,1fr) + overflow-wrap).
+
+     align-items:start: BOTH columns hug the top edge of the bar together.
+     The icons were moved to the top first (align-self:start) while the grid
+     still centred the brand, so the wordmark floated at the bar's vertical
+     middle, misaligned against the icons. Same top edge for both is the
+     clean version; the content is ~50px + padding, so the bar's leftover
+     slack sits below both equally. If the two ever cannot share the top
+     edge, the fallback is to centre BOTH again - never one top, one middle. */
+  .brand-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;
     min-height:100px;padding:18px 0;column-gap:24px}
   .brand{display:block;min-width:0}
   .brand-title{font-family:var(--font-head);font-size:26px;font-weight:700;letter-spacing:-0.01em;
     line-height:1.2;overflow-wrap:break-word}
   .brand-title span{color:var(--accent)}
   .brand-tagline{font-size:12.5px;color:var(--ink-soft);margin-top:3px;overflow-wrap:break-word}
-  /* align-self:start overrides the grid's align-items:center, so the icons
-     hug the TOP of the bar instead of sitting at its vertical middle. */
-  .social-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;align-self:start}
+  /* no align-self override: the grid's align-items:start pins this row to
+     the TOP of the bar, same edge as the wordmark it sits opposite. */
+  .social-row{display:flex;align-items:center;justify-content:flex-end;gap:6px}
   /* A 34px round hit area around a 19px glyph: the bare icon was an 18px tap
      target, which is what the mobile Accessibility audit reports as "tap
      targets are not sized appropriately". */
@@ -259,7 +267,51 @@
     font-weight:600;color:var(--accent)}
   .comment-link:hover{color:var(--accent-ink)}
 
+  /* ============================================================
+     Live visitor strip - markup goes out ONLY on the home page
+     (the b:if on data:view.isHomepage in the body).
+
+     Weight budget, because PageSpeed: every icon is inline SVG in
+     currentColor (no icon font, no image), the country flag is an
+     emoji built in JS (no flag sprite), the clock is one text update
+     per second, and both data calls are ~300-byte JSON GETs fired
+     after load during browser idle time. The skin reserves the whole
+     strip up front (min-height on .visit-strip, fixed cell padding),
+     so a number swapping an em dash in never shifts layout.
+
+     Animations stay in the two cheapest properties, transform and
+     opacity, and there are exactly two of them: a one-shot rise on
+     entry and a 2px live-dot pulse. The global prefers-reduced-motion
+     block above already collapses both; the JS also skips its count-up
+     under reduced motion.
+     ============================================================ */
+  .visit-wrap{padding-top:16px}
+  .visit-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    min-height:56px;animation:visitIn .5s ease-out both}
+  @keyframes visitIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .visit-cell{display:flex;align-items:center;gap:10px;background:var(--surface);
+    padding:10px 14px;min-width:0}
+  .visit-icon{flex:none;width:30px;height:30px;display:inline-flex;align-items:center;
+    justify-content:center;position:relative;color:var(--accent);background:#EAF3F0;border-radius:50%}
+  .visit-icon svg{width:16px;height:16px}
+  /* the device cell ships both icons; the script adds is-pc / is-mobile
+     and this shows the matching one. Both hidden until then - the slot is
+     fixed, so nothing moves when the class lands. */
+  .vc-device .ic-pc,.vc-device .ic-mobile{display:none}
+  .vc-device.is-pc .ic-pc,.vc-device.is-mobile .ic-mobile{display:block}
+  .live-dot{position:absolute;top:0;right:0;width:8px;height:8px;border-radius:50%;
+    background:#3DBE7A;border:1.5px solid #fff;animation:livePulse 2s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .visit-text{min-width:0;line-height:1.25}
+  .visit-num{display:block;font-family:var(--font-head);font-size:14.5px;font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .visit-label{display:block;font-family:var(--font-head);font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-soft)}
   @media(max-width:760px){
+    /* 2x2 on a phone; still the same reserved cell heights. */
+    .visit-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .visit-cell{padding:9px 12px}
     .card-body{padding:16px 18px 18px}
     .card-title{font-size:19.5px}
   }
@@ -321,6 +373,29 @@
     </div>
   </div>
 
+
+  <div class='container visit-wrap'>
+    <div aria-label='Right now on Free Stack Hub' class='visit-strip' role='group'>
+      <div class='visit-cell'>
+        <span class='visit-icon'><span class='live-dot' aria-hidden='true'></span><svg aria-hidden='true' fill='none' height='16' viewBox='0 0 24 24' width='16'><path d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z' stroke='currentColor' stroke-width='1.6'/><circle cx='12' cy='12' fill='none' r='3' stroke='currentColor' stroke-width='1.6'/></svg></span>
+        <span class='visit-text'><span class='visit-num' id='visitTotal'>12,482</span><span class='visit-label'>total visits</span></span>
+      </div>
+      <div class='visit-cell'>
+        <span class='visit-icon'><svg aria-hidden='true' fill='none' height='16' viewBox='0 0 24 24' width='16'><circle cx='12' cy='12' fill='none' r='9' stroke='currentColor' stroke-width='1.6'/><path d='M3 12h18M12 3c2.5 2.6 3.9 5.7 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.7-3.9-9S9.5 5.6 12 3z' fill='none' stroke='currentColor' stroke-width='1.6'/></svg></span>
+        <span class='visit-text'><span class='visit-num'><span aria-hidden='true' id='visitFlag'>&#127479;&#127472; </span><span id='visitCountry'>Pakistan</span></span><span class='visit-label'>your country</span></span>
+      </div>
+      <div class='visit-cell vc-device is-mobile'>
+        <span class='visit-icon'><svg aria-hidden='true' class='ic-pc' fill='none' height='16' viewBox='0 0 24 24' width='16'><rect fill='none' height='12' rx='2' stroke='currentColor' stroke-width='1.6' width='18' x='3' y='4'/><path d='M8.5 20h7M12 16v4' stroke='currentColor' stroke-width='1.6'/></svg><svg aria-hidden='true' class='ic-mobile' fill='none' height='16' viewBox='0 0 24 24' width='16'><rect fill='none' height='20' rx='2.5' stroke='currentColor' stroke-width='1.6' width='10' x='7' y='2'/><path d='M11 18.5h2' stroke='currentColor' stroke-width='1.6'/></svg></span>
+        <span class='visit-text'><span class='visit-num' id='visitDevice'>Mobile</span><span class='visit-label'>your device</span></span>
+      </div>
+      <div class='visit-cell'>
+        <span class='visit-icon'><svg aria-hidden='true' fill='none' height='16' viewBox='0 0 24 24' width='16'><circle cx='12' cy='12' fill='none' r='9' stroke='currentColor' stroke-width='1.6'/><path d='M12 7v5l3.2 2' stroke='currentColor' stroke-width='1.6'/></svg></span>
+        <span class='visit-text'><span class='visit-num' id='visitTime'>9:41 PM</span><span class='visit-label'>local time</span></span>
+      </div>
+    </div>
+  </div>
+  
+
   <div class="container">
     <div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>
   </div>
@@ -328,11 +403,13 @@
   <main class="container" id="main-content" tabindex="-1">
 
     <section class="preview-block">
-      <div class="preview-tag">1 &mdash; Home page: teaser cards</div>
-      <p class="preview-hint">Feature image + labels + title + date + <b>Read more</b> &mdash;
-        no body text on the home page any more (the cards used to print the post&rsquo;s own
-        snippet, which read like the full post). The title and the button both open that
-        post&rsquo;s own URL.</p>
+      <div class="preview-tag">1 &mdash; Home page: live visitor strip + teaser cards</div>
+      <p class="preview-hint"><b>The slim strip under the search bar</b> is the live visitor
+        snapshot &mdash; total visits &middot; your country &middot; your device &middot; local time.
+        Its numbers here are stand-ins; on the blog they fill in after page load (two tiny
+        requests), and Blogger sends this strip <b>on the home page only</b>. Cards below:
+        feature image + labels + title + date + <b>Read more</b>, no body text; the title and
+        the button both open that post&rsquo;s own URL.</p>
       <div class="main-layout">
         <section class="content-area">
           <div class="post-list hfeed">
