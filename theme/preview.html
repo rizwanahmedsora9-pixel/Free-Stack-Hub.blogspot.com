@@ -100,7 +100,9 @@
     line-height:1.2;overflow-wrap:break-word}
   .brand-title span{color:var(--accent)}
   .brand-tagline{font-size:12.5px;color:var(--ink-soft);margin-top:3px;overflow-wrap:break-word}
-  .social-row{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+  /* align-self:start overrides the grid's align-items:center, so the icons
+     hug the TOP of the bar instead of sitting at its vertical middle. */
+  .social-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;align-self:start}
   /* A 34px round hit area around a 19px glyph: the bare icon was an 18px tap
      target, which is what the mobile Accessibility audit reports as "tap
      targets are not sized appropriately". */
@@ -243,7 +245,9 @@
   .sidebar .popular-list a{display:flex;gap:12px;align-items:center;font-family:var(--font-head);
     font-size:14px;font-weight:600;line-height:1.4;color:var(--ink)}
   .sidebar .popular-list a:hover{color:var(--accent)}
-  .sidebar .popular-list img{width:56px;height:56px;flex:none;object-fit:cover;border-radius:6px;
+  /* object-fit:contain (not cover): the whole thumbnail stays visible inside
+     the 56px box, letterboxed on the grey ground - nothing is cropped. */
+  .sidebar .popular-list img{width:56px;height:56px;flex:none;object-fit:contain;border-radius:6px;
     background:#EAEEF3}
 
   /* labels + comment link on the post page itself */
