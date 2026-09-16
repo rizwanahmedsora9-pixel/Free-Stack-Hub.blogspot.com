@@ -18,6 +18,13 @@ Usage:
   python3 tools/build_import.py <folder>     # build just one post (name or path)
   python3 tools/build_import.py --check      # validate all posts, build nothing
 
+Environment:
+  IMAGE_REF=<commit-sha>   pin image URLs to a commit instead of a branch. Use this if
+                           the blog shows broken images right after publishing: jsDelivr
+                           caches a branch snapshot (@main) for about a week, so files
+                           pushed minutes ago may not be served yet.
+  IMAGE_BRANCH=<branch>    branch to point image URLs at (default: main)
+
 post.html header format:
 
   <!--
@@ -44,13 +51,22 @@ POSTS_DIR = ROOT / "posts"
 
 GITHUB_USER = "rizwanahmedsora9-pixel"
 GITHUB_REPO = "Free-Stack-Hub.blogspot.com"
-GITHUB_BRANCH = os.environ.get("IMAGE_BRANCH", "main")
-BLOG_URL = "https://free-stack-hub.blogspot.com"
+# Blogger's numeric blog id, from Settings > Others. It appears in every <id> and
+# in the label <category scheme="..."> that Blogger's own export/import format uses.
+# Taken from Blogger's real takeout export, so imported labels actually stick.
+BLOG_ID = os.environ.get("BLOG_ID", "7497660712599875944")
+BLOG_URL = "https://freestackhub.blogspot.com"
 AUTHOR_NAME = "Free Stack Hub"
+
+# Image hosting ref. jsDelivr caches a *branch* snapshot (@main) for about a week, so
+# images pushed minutes ago can still 404 on the live blog. Pin a commit SHA instead
+# when that bites: IMAGE_REF=<full-sha> python3 tools/build_import.py
+GITHUB_BRANCH = os.environ.get("IMAGE_BRANCH", "main")
+IMAGE_REF = os.environ.get("IMAGE_REF") or GITHUB_BRANCH
 
 # Public base URL of the repo root. Requires the repo to be PUBLIC.
 REPO_CDN = os.environ.get(
-    "REPO_CDN", f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@{GITHUB_BRANCH}/"
+    "REPO_CDN", f"https://cdn.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@{IMAGE_REF}/"
 )
 
 HEADER_RE = re.compile(r"^\s*<!--(.*?)-->", re.S)
@@ -143,36 +159,48 @@ def load_post(folder: Path) -> dict:
 
 
 def feed_xml(p: dict) -> str:
+    """Blogger-format Atom feed for ONE post.
+
+    Element order and namespaces follow what Blogger itself writes in a
+    Takeout export (see sample export/feed.atom), because the importer is
+    pickiest about that shape: labels only survive when the <category> uses
+    scheme="tag:blogger.com,1999:blog-<blog id>", and the post's permalink
+    comes from <blogger:filename>.
+    """
     ts = p["published"].isoformat(timespec="milliseconds")
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="milliseconds")
+    q = lambda s: escape(s, {chr(34): "&quot;"})  # noqa: E731
     labels = "".join(
-        f'    <category scheme="http://www.blogger.com/atom/ns#" term="{escape(l, {chr(34): "&quot;"})}"/>\n'
+        f'    <category scheme="tag:blogger.com,1999:blog-{BLOG_ID}" term="{q(l)}"/>\n'
         for l in p["labels"]
     )
     fname = f"/{p['published'].year}/{p['published'].month:02d}/{p['slug']}.html"
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
-  <id>tag:blogger.com,1999:blog-freestackhub</id>
+  <id>tag:blogger.com,1999:blog-{BLOG_ID}</id>
   <updated>{now}</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="{BLOG_URL}/"/>
   <author><name>{escape(AUTHOR_NAME)}</name></author>
   <generator>Free-Stack-Hub build_import.py</generator>
   <entry>
-    <id>tag:blogger.com,1999:blog-freestackhub.post-{p['slug']}</id>
-    <published>{ts}</published>
-    <updated>{ts}</updated>
-    <category scheme="http://schemas.google.com/g/2005#kind" term="http://schemas.google.com/blogger/2008/kind#post"/>
-{labels}    <title type="text">{escape(p['title'])}</title>
-    <content type="html">{escape(p['html'])}</content>
-    <author>
-      <name>{escape(AUTHOR_NAME)}</name>
-    </author>
+    <id>tag:blogger.com,1999:blog-{BLOG_ID}.post-{p['slug']}</id>
     <blogger:type>POST</blogger:type>
     <blogger:status>LIVE</blogger:status>
-    <blogger:created>{ts}</blogger:created>
-    <blogger:filename>{fname}</blogger:filename>
+    <author>
+      <name>{escape(AUTHOR_NAME)}</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title type="text">{escape(p['title'])}</title>
+    <content type="html">{escape(p['html'])}</content>
     <blogger:metaDescription>{escape(p['description'])}</blogger:metaDescription>
+    <blogger:created>{ts}</blogger:created>
+    <published>{ts}</published>
+    <updated>{ts}</updated>
+    <blogger:location/>
+{labels}    <blogger:filename>{fname}</blogger:filename>
+    <link/>
+    <enclosure/>
   </entry>
 </feed>
 """
@@ -214,8 +242,13 @@ def main():
     if bad:
         sys.exit(f"\n{bad} post(s) have errors, fix them and re-run.")
     if not a.check:
-        print("\nPublish option A: Blogger > Settings > Manage blog > Import content > pick the post's import.xml")
+        print("\nPublish option A (recommended): Blogger > Settings > Manage blog > Import content")
+        print("  -> pick the post's import.xml. This is the only route that carries the")
+        print("     title, the labels and the search description.")
         print("Publish option B: open the post's paste.html, copy ALL of it into the Blogger editor's HTML view")
+        print("  -> body only. You MUST retype the title, set every label by hand and paste the")
+        print("     search description, or the post goes out with none of them.")
+        print("After publishing: python3 tools/check_published.py   (compares the live blog with posts/)")
         print("WARNING: never paste post.html itself into Blogger - its <img> tags use bare file")
         print("names, so the images would show as broken. Always use import.xml or paste.html.")
 

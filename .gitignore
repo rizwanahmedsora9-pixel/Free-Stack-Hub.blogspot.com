@@ -1,0 +1,3 @@
+# python build/check tool artifacts
+__pycache__/
+*.pyc
