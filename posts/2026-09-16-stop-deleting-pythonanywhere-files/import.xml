@@ -1,37 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
-  <id>tag:blogger.com,1999:blog-freestackhub</id>
-  <updated>2026-09-16T06:42:30.369+00:00</updated>
+  <id>tag:blogger.com,1999:blog-7497660712599875944</id>
+  <updated>2026-09-16T08:12:35.036+00:00</updated>
   <title type="text">Free Stack Hub</title>
-  <link rel="alternate" type="text/html" href="https://free-stack-hub.blogspot.com/"/>
+  <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
   <generator>Free-Stack-Hub build_import.py</generator>
   <entry>
-    <id>tag:blogger.com,1999:blog-freestackhub.post-stop-deleting-pythonanywhere-files</id>
-    <published>2026-09-16T00:00:00.000+00:00</published>
-    <updated>2026-09-16T00:00:00.000+00:00</updated>
-    <category scheme="http://schemas.google.com/g/2005#kind" term="http://schemas.google.com/blogger/2008/kind#post"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="PythonAnywhere"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="Git"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="GitHub"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="Flask"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="Deployment"/>
-    <category scheme="http://www.blogger.com/atom/ns#" term="Web Development"/>
+    <id>tag:blogger.com,1999:blog-7497660712599875944.post-stop-deleting-pythonanywhere-files</id>
+    <blogger:type>POST</blogger:type>
+    <blogger:status>LIVE</blogger:status>
+    <author>
+      <name>Free Stack Hub</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
     <title type="text">Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.</title>
-    <content type="html">&lt;p&gt;I deleted my entire website three times in one month before this lesson finally stuck.&lt;/p&gt;
+    <content type="html">&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" /&gt;
+  &lt;div style="font-size:13px; color:#777; margin-top:6px;"&gt;&lt;i&gt;The old way and the new way, side by side.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I deleted my entire website three times in one month. Every time it worked, which is exactly what made the habit so hard to question. Then four months of data vanished in about six seconds, by me, on purpose, while I was trying to be productive.&lt;/p&gt;
 
 &lt;p&gt;The routine went like this. I'd build a small Flask app on my laptop, upload it to PythonAnywhere through the Files tab, one file at a time. A week later I'd fix a bug or add a page, log back in, select everything in the project folder, hit delete, and upload the whole thing again from scratch.&lt;/p&gt;
 
-&lt;p&gt;And it worked. Every single time, it worked. That's exactly what makes the habit so hard to question.&lt;/p&gt;
+&lt;p&gt;And it worked. Every single time. That's the trap: a habit that keeps paying off never looks like a risk.&lt;/p&gt;
 
 &lt;p&gt;Then one evening I re-uploaded a project and completely forgot that my SQLite database and the whole uploads folder were sitting in that same directory. Gone. Four months of data, wiped in about six seconds, by me, on purpose, while trying to be productive.&lt;/p&gt;
 
 &lt;p&gt;That night I sat down and set up Git properly, and I haven't touched the delete button on a server since. If you're running a Python app on a PythonAnywhere free account and still doing the delete-and-reupload dance, this is the shortcut I wish I'd had. It takes ten minutes to set up once. After that, every update is one command.&lt;/p&gt;
-
-&lt;div style="text-align:center; margin:18px 0;"&gt;
-  &lt;img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" /&gt;
-  &lt;div style="font-size:13px; color:#777; margin-top:6px;"&gt;&lt;i&gt;The old way and the new way, side by side.&lt;/i&gt;&lt;/div&gt;
-&lt;/div&gt;
 
 &lt;h2&gt;Why "delete everything, upload again" eventually blows up&lt;/h2&gt;
 
@@ -168,14 +165,22 @@ git pull origin main&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;Never edit code on the server. Push from local, pull on the server.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your &lt;code&gt;.env&lt;/code&gt; and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.&lt;/p&gt;</content>
-    <author>
-      <name>Free Stack Hub</name>
-    </author>
-    <blogger:type>POST</blogger:type>
-    <blogger:status>LIVE</blogger:status>
-    <blogger:created>2026-09-16T00:00:00.000+00:00</blogger:created>
-    <blogger:filename>/2026/09/stop-deleting-pythonanywhere-files.html</blogger:filename>
+&lt;p&gt;The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your &lt;code&gt;.env&lt;/code&gt; and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.&lt;/p&gt;
+
+&lt;p&gt;If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. Next up: the &lt;code&gt;.gitignore&lt;/code&gt; that keeps your &lt;code&gt;.env&lt;/code&gt; and database off GitHub without breaking your app.&lt;/p&gt;</content>
     <blogger:metaDescription>Still deleting and re-uploading your PythonAnywhere project on every update? Here's the Git workflow that replaces it with one command.</blogger:metaDescription>
+    <blogger:created>2026-09-16T00:00:00.000+00:00</blogger:created>
+    <published>2026-09-16T00:00:00.000+00:00</published>
+    <updated>2026-09-16T00:00:00.000+00:00</updated>
+    <blogger:location/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="PythonAnywhere"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Git"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="GitHub"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Flask"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Deployment"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Web Development"/>
+    <blogger:filename>/2026/09/stop-deleting-pythonanywhere-files.html</blogger:filename>
+    <link/>
+    <enclosure/>
   </entry>
 </feed>

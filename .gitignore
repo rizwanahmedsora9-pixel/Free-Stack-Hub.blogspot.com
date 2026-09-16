@@ -1,0 +1,8 @@
+# build/render artifacts that are always regenerable
+__pycache__/
+*.pyc
+
+# video intermediates (keep video/storyboard.json, video/narration/*.mp3 and the .mp4s)
+posts/*/video/narration_full.m4a
+posts/*/video/list_*.txt
+posts/*/video/frames_*/
