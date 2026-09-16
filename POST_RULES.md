@@ -10,6 +10,8 @@ posts/
     post.md        readable markdown copy (optional)
     images/        only this post's images
     import.xml     GENERATED - the file you import into Blogger
+    paste.html     GENERATED - copy-paste-ready body (full image URLs) for the
+                   Blogger editor's HTML view
   _template/       copy this to start a new post
 ```
 
@@ -46,10 +48,20 @@ python3 tools/build_import.py --check                  # validate only
 The build **fails** if: folder name is wrong, TITLE/LABELS/SEARCH DESCRIPTION missing,
 or an `<img>` points to a file that isn't in `images/`. It warns about unused images.
 
-## 5. Import into Blogger
-Blogger → **Settings → Manage blog → Import content** → choose that post's `import.xml`.
-One file = one post. To update a post already on Blogger, edit it in the Blogger editor
-(re-importing the same file creates a second copy).
+## 5. Publish (two ways)
+**Import (recommended):** Blogger → **Settings → Manage blog → Import content** → choose that
+post's `import.xml`. One file = one post.
+
+**Copy-paste:** open the post's `paste.html`, copy **all** of it, and paste into the Blogger
+post editor with the HTML view active (pencil icon → HTML view). Then set the title, labels
+and search description by hand if you want them.
+
+**Never paste `post.html` itself.** Its `<img>` tags use bare file names (`01-hero.jpg`), so
+Blogger would look for the images on the blog's own domain and show them broken. Only the
+generated `import.xml` / `paste.html` contain the full public image URLs.
+
+To update a post already on Blogger, edit it in the Blogger editor (re-importing the same
+file creates a second copy).
 
 ## 6. Public images (one-time)
 Image URLs are `https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/<folder>/images/<file>`.
@@ -60,4 +72,4 @@ To test from a branch before merging: `IMAGE_BRANCH=<branch-name> python3 tools/
 1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
 2. Write `post.html` (+ `post.md`), generate images into `images/`
 3. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
-4. Commit the whole folder including `import.xml`
+4. Commit the whole folder including `import.xml` and `paste.html`

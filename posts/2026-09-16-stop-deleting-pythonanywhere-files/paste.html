@@ -1,22 +1,3 @@
-<!-- ============================================================
-BLOGGER POST - source for import.xml (built by tools/build_import.py)
-
-TITLE:  Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.
-LABELS: PythonAnywhere, Git, GitHub, Flask, Deployment, Web Development
-PUBLISHED: 2026-09-16
-SEARCH DESCRIPTION (Post settings > Search description):
-Still deleting and re-uploading your PythonAnywhere project on every update?
-Here's the Git workflow that replaces it with one command.
-
-IMAGES: <img> tags use bare file names from ./images/. Running
-python3 tools/build_import.py rewrites them to public URLs in import.xml
-and paste.html.
-
-DO NOT paste this file into Blogger. The bare image names only work after
-the build. Publish with import.xml (Import content) or paste the generated
-paste.html into the post editor's HTML view instead.
-============================================================= -->
-
 <p>I deleted my entire website three times in one month before this lesson finally stuck.</p>
 
 <p>The routine went like this. I'd build a small Flask app on my laptop, upload it to PythonAnywhere through the Files tab, one file at a time. A week later I'd fix a bug or add a page, log back in, select everything in the project folder, hit delete, and upload the whole thing again from scratch.</p>
@@ -28,7 +9,7 @@ paste.html into the post editor's HTML view instead.
 <p>That night I sat down and set up Git properly, and I haven't touched the delete button on a server since. If you're running a Python app on a PythonAnywhere free account and still doing the delete-and-reupload dance, this is the shortcut I wish I'd had. It takes ten minutes to set up once. After that, every update is one command.</p>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" />
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/01-stop-deleting-your-pythonanywhere-files.jpg" alt="A stressed developer deleting files next to one syncing code with the cloud using git" width="1200" style="max-width:100%; height:auto;" />
   <div style="font-size:13px; color:#777; margin-top:6px;"><i>The old way and the new way, side by side.</i></div>
 </div>
 
@@ -51,7 +32,7 @@ paste.html into the post editor's HTML view instead.
 <h2>The mental switch: your server is a copy, not the original</h2>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" />
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/02-local-github-server-workflow.jpg" alt="Diagram of the push and pull workflow between a laptop, GitHub and a PythonAnywhere server" width="1100" style="max-width:100%; height:auto;" />
   <div style="font-size:13px; color:#777; margin-top:6px;"><i>Code flows up to GitHub from your laptop, and down to PythonAnywhere with one pull.</i></div>
 </div>
 
@@ -74,7 +55,7 @@ paste.html into the post editor's HTML view instead.
 <pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>git clone https://github.com/your-username/your-repo.git</code></pre>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" />
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/03-git-clone-pull-terminal.jpg" alt="A bash terminal pulling the latest files from GitHub into a project folder" width="1000" style="max-width:100%; height:auto;" />
   <div style="font-size:13px; color:#777; margin-top:6px;"><i>One command brings the whole project down, history included.</i></div>
 </div>
 
@@ -108,7 +89,7 @@ git pull origin main</code></pre>
 <p>The code is on the disk, but your app is still running the old version from memory. PythonAnywhere keeps your web app alive as a long-running process, and it doesn't watch your files for changes. You have to tell it. Open the <b>Web</b> tab and hit the big green <b>Reload</b> button.</p>
 
 <div style="text-align:center; margin:18px 0;">
-  <img src="04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" />
+  <img src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-stop-deleting-pythonanywhere-files/images/04-reload-web-app.jpg" alt="A browser window with a green reload button in front of a server" width="1000" style="max-width:100%; height:auto;" />
   <div style="font-size:13px; color:#777; margin-top:6px;"><i>Pull, then Reload. Every time.</i></div>
 </div>
 
