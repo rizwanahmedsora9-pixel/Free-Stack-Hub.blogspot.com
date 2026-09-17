@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Requests{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h1>Requests</h1>
+    <p class="lead">Every call this console made to Google — what was sent, when, and what came back.</p>
+  </div>
+  <div class="actions">
+    <a class="btn ghost" href="{{ url_for('export_json') }}">↓ Export JSON</a>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="chips">
+    <a class="chip {{ 'active' if not kind and not errors }}" href="{{ url_for('log') }}">All</a>
+    {% for k in ['publish','inspect','metadata','sites','discover'] %}
+      <a class="chip {{ 'active' if kind == k }}" href="{{ url_for('log', kind=k) }}">{{ k }}</a>
+    {% endfor %}
+    <a class="chip {{ 'active' if errors }}" href="{{ url_for('log', kind=kind, errors=1) }}">errors only</a>
+  </div>
+</div>
+
+<div class="grid main">
+  <section class="card flat table-card col">
+    {% if rows %}
+    <div class="table-scroll">
+    <table class="tbl compact log">
+      <thead><tr><th>When</th><th>Kind</th><th>URL</th><th>HTTP</th><th>Result</th><th>ms</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr class="{{ '' if r.ok else 'row-err' }}">
+          <td class="nowrap" title="{{ r.at | dt }}">{{ r.at | dt }}</td>
+          <td class="nowrap"><span class="kind-tag {{ r.kind }}">{{ r.kind }}</span>{% if r.request_type %}<div class="mono small muted">{{ r.request_type }}</div>{% endif %}</td>
+          <td class="cell-url mono small">{% if r.url %}{{ r.url | host }}{% else %}—{% endif %}</td>
+          <td class="mono">{{ r.http_status if r.http_status is not none else '—' }}</td>
+          <td>{% if r.ok %}<span class="ok-text">✓</span> {{ r.summary }}{% else %}<span class="err-text">✕ {{ r.error or 'failed' }}</span>{% if r.summary %}<div class="small muted">{{ r.summary }}</div>{% endif %}{% endif %}
+            {% if r.raw and not r.ok %}<details class="raw"><summary>raw</summary><pre>{{ r.raw | pretty }}</pre></details>{% endif %}</td>
+          <td class="muted">{{ r.duration_ms or '' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+      <div class="empty big"><p>No requests logged yet.</p></div>
+    {% endif %}
+  </section>
+
+  <aside class="col side">
+    <section class="card">
+      <div class="card-head"><h2>Jobs</h2></div>
+      {% if jobs %}
+      <ul class="activity">
+      {% for j in jobs %}
+        <li class="{{ 'ok' if j.status == 'done' and not j.err_count else ('err' if j.status == 'failed' else 'neutral') }}">
+          <span class="act-kind">{{ j.kind.replace('_',' ') }} <span class="pill xs {{ j.status }}">{{ j.status }}</span></span>
+          <span class="act-what">{{ j.done }}/{{ j.total }} · {{ j.ok_count }} ok · {{ j.err_count }} failed{% if j.message %}<br><span class="muted small">{{ j.message }}</span>{% endif %}</span>
+          <span class="act-when muted">{{ (j.finished_at or j.started_at or j.created_at) | dt }}</span>
+        </li>
+      {% endfor %}
+      </ul>
+      {% else %}<p class="muted">No jobs yet.</p>{% endif %}
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Events</h2></div>
+      <ul class="activity">
+      {% for e in events %}
+        <li class="{{ 'ok' if e.level == 'success' else ('err' if e.level == 'error' else 'neutral') }}">
+          <span class="act-what">{{ e.message }}</span>
+          <span class="act-when muted">{{ e.at | ago }}</span>
+        </li>
+      {% else %}<li class="empty">Nothing yet.</li>{% endfor %}
+      </ul>
+    </section>
+  </aside>
+</div>
+
+{% endblock %}

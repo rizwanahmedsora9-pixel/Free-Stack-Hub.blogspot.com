@@ -6,3 +6,8 @@ __pycache__/
 posts/*/video/narration_full.m4a
 posts/*/video/list_*.txt
 posts/*/video/frames_*/
+
+# Indexing Console private data (service-account key, SQLite DB, secret) — never commit
+API INDEXING/dashboard/instance/*
+!API INDEXING/dashboard/instance/.gitkeep
+API INDEXING/blogger-indexer/instance/

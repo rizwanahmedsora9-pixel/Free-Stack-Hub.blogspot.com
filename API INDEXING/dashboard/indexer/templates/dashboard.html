@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h1>Overview</h1>
+    <p class="lead mono-sm">{{ settings.site_url or 'no property selected' }}
+      {% if settings.last_discovery_at %}· synced {{ settings.last_discovery_at | ago }}{% endif %}</p>
+  </div>
+  <div class="actions">
+    <form method="post" action="{{ url_for('start_job') }}"><input type="hidden" name="kind" value="discover"><button class="btn" type="submit" {{ 'disabled' if job }}>⟳ Discover URLs</button></form>
+    <form method="post" action="{{ url_for('start_job') }}"><input type="hidden" name="kind" value="inspect_all"><button class="btn" type="submit" {{ 'disabled' if job or not s.total }}>◎ Inspect all ({{ s.total }})</button></form>
+    <form method="post" action="{{ url_for('start_job') }}" onsubmit="return confirm('Push {{ s.pushable }} not-indexed URL(s) to the Indexing API?')"><input type="hidden" name="kind" value="push_unindexed"><button class="btn primary" type="submit" {{ 'disabled' if job or not s.pushable }}>↑ Push unindexed ({{ s.pushable }})</button></form>
+  </div>
+</div>
+
+{# ---------- KPI strip ---------- #}
+<section class="kpis">
+  <a class="kpi" href="{{ url_for('urls') }}">
+    <span class="kpi-label">URLs tracked</span>
+    <span class="kpi-value">{{ s.total }}</span>
+    <span class="kpi-sub">{% for k, n in s.kinds.items() %}{{ n }} {{ k }}{{ '' if loop.last else ' · ' }}{% endfor %}</span>
+  </a>
+  <a class="kpi good" href="{{ url_for('urls', filter='indexed') }}">
+    <span class="kpi-label">Indexed</span>
+    <span class="kpi-value">{{ s.indexed }}</span>
+    <span class="kpi-sub">{% if s.index_rate is not none %}{{ s.index_rate }}% of inspected{% else %}nothing inspected yet{% endif %}</span>
+  </a>
+  <a class="kpi warn" href="{{ url_for('urls', filter='notindexed') }}">
+    <span class="kpi-label">Not indexed</span>
+    <span class="kpi-value">{{ s.not_indexed }}</span>
+    <span class="kpi-sub">{{ s.pushable }} pushable · {{ s.blocked }} blocked</span>
+  </a>
+  <a class="kpi" href="{{ url_for('urls', filter='unchecked') }}">
+    <span class="kpi-label">Never inspected</span>
+    <span class="kpi-value">{{ s.unchecked }}</span>
+    <span class="kpi-sub">{{ s.stale }} stale (&gt;{{ s.stale_days }}d) · {{ s.errors }} errors</span>
+  </a>
+  <a class="kpi" href="{{ url_for('urls', filter='crawled') }}">
+    <span class="kpi-label">Crawled by Google</span>
+    <span class="kpi-value">{{ s.crawled }}</span>
+    <span class="kpi-sub">{{ s.recent_crawl }} in last 7d · {{ s.mobile }} mobile / {{ s.desktop }} desktop</span>
+  </a>
+  <a class="kpi" href="{{ url_for('urls', filter='pushed') }}">
+    <span class="kpi-label">Pushed</span>
+    <span class="kpi-value">{{ s.pushed }}</span>
+    <span class="kpi-sub">{{ s.recheck_due }} due re-check · {{ s.push_failed }} failed</span>
+  </a>
+</section>
+
+<div class="grid main">
+  <div class="col">
+    {# ---------- Smart cards ---------- #}
+    <section class="card flat">
+      <div class="card-head"><h2>What needs attention</h2><span class="muted small">{{ cards | length }} insight{{ 's' if cards|length != 1 }}</span></div>
+      {% if not cards %}
+        <p class="empty">✓ Nothing to do. Everything discovered is inspected and indexed.</p>
+      {% else %}
+      <div class="insights">
+        {% for c in cards %}
+        <article class="insight {{ c.level }}">
+          <div class="insight-icon">{{ c.icon }}</div>
+          <div class="insight-body">
+            <h3>{{ c.title }}</h3>
+            <p>{{ c.body }}</p>
+          </div>
+          {% if c.action %}
+            <div class="insight-action">
+              {% if c.action.job %}
+                <form method="post" action="{{ url_for('start_job') }}"><input type="hidden" name="kind" value="{{ c.action.job }}"><button class="btn sm {{ 'primary' if c.level == 'warn' }}" type="submit" {{ 'disabled' if job }}>{{ c.action.label }}</button></form>
+              {% else %}
+                <a class="btn sm" href="{{ c.action.href }}">{{ c.action.label }}</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </section>
+
+    {# ---------- Coverage breakdown ---------- #}
+    <section class="card">
+      <div class="card-head"><h2>Coverage states</h2><span class="muted small">Google's own wording</span></div>
+      {% if s.coverage_top %}
+        {% set checked = s.indexed + s.not_indexed %}
+        <div class="stack-bar" title="Indexed vs not indexed">
+          <div class="seg good" style="width: {{ (s.indexed * 100 / checked) if checked else 0 }}%"></div>
+          <div class="seg warn" style="width: {{ (s.not_indexed * 100 / checked) if checked else 0 }}%"></div>
+        </div>
+        <ul class="bars">
+        {% for cov, n in s.coverage_top %}
+          <li>
+            <a href="{{ url_for('urls', q=cov) }}" class="bar-label">{{ cov }}</a>
+            <span class="bar-track"><span class="bar-fill {{ 'good' if 'indexed' in cov and 'not indexed' not in cov and 'not' not in cov.split(',')[0] else 'warn' }}" style="width: {{ n * 100 / checked if checked else 0 }}%"></span></span>
+            <span class="bar-n">{{ n }}</span>
+          </li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">Inspect some URLs to see how Google classifies them.</p>
+      {% endif %}
+    </section>
+
+    {# ---------- Needs a look table ---------- #}
+    <section class="card">
+      <div class="card-head"><h2>URLs to look at</h2><a class="link" href="{{ url_for('urls', filter='notindexed', sort='status') }}">All not indexed →</a></div>
+      {% if attention %}
+      <table class="tbl compact">
+        <thead><tr><th>URL</th><th>Status</th><th>Crawled</th><th>Pushed</th><th></th></tr></thead>
+        <tbody>
+        {% for u in attention %}
+          <tr data-id="{{ u.id }}">
+            <td class="cell-url"><a href="{{ url_for('url_detail', url_id=u.id) }}" class="title">{{ u.title or u.url }}</a><span class="path mono">{{ u.url | host }}</span></td>
+            <td>{% include "_verdict.html" %}</td>
+            <td class="nowrap">{% if u.last_crawl %}{{ u.last_crawl | ago }} <span class="muted">{{ (u.crawled_as or '')[:1] }}</span>{% else %}<span class="muted">never</span>{% endif %}</td>
+            <td class="nowrap">{% if u.pushed_at %}<span class="{{ 'ok-text' if u.push_status == 'ok' else 'err-text' }}">{{ u.pushed_at | ago }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+            <td class="nowrap row-actions">
+              <button class="btn xs js-act" data-act="inspect" data-id="{{ u.id }}">Inspect</button>
+              <button class="btn xs primary js-act" data-act="push" data-id="{{ u.id }}" {{ 'disabled' if u.verdict == 'PASS' }}>Push</button>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p class="empty">Nothing flagged.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="col side">
+    {# ---------- Quota ---------- #}
+    <section class="card">
+      <div class="card-head"><h2>Quota today</h2></div>
+      <div class="quota">
+        <div class="quota-row">
+          <div class="quota-top"><span>Indexing API (push)</span><span class="mono">{{ q.publish_used }} / {{ q.publish_limit }}</span></div>
+          <div class="meter"><div class="meter-fill {{ 'danger' if q.publish_pct >= 90 else ('warn' if q.publish_pct >= 70) }}" style="width: {{ q.publish_pct }}%"></div></div>
+          <div class="quota-sub">{{ q.publish_left }} left · resets in {{ q.publish_resets_in_h }} h (midnight Pacific)</div>
+        </div>
+        <div class="quota-row">
+          <div class="quota-top"><span>URL Inspection</span><span class="mono">{{ q.inspect_used }} / {{ q.inspect_limit }}</span></div>
+          <div class="meter"><div class="meter-fill {{ 'danger' if q.inspect_pct >= 90 else ('warn' if q.inspect_pct >= 70) }}" style="width: {{ q.inspect_pct }}%"></div></div>
+          <div class="quota-sub">{{ q.inspect_left }} left (rolling 24 h) · {{ q.inspect_minute }}/{{ q.inspect_minute_limit }} this minute</div>
+        </div>
+      </div>
+      <p class="hint">Counted from this console's own log. Other tools using the same Cloud project / property share the same quota.</p>
+    </section>
+
+    {# ---------- Newest posts ---------- #}
+    <section class="card">
+      <div class="card-head"><h2>Newest posts</h2><a class="link" href="{{ url_for('urls', filter='posts') }}">All →</a></div>
+      <ul class="post-list">
+      {% for u in newest %}
+        <li>
+          {% if u.thumbnail %}<img class="thumb" src="{{ u.thumbnail }}" alt="" loading="lazy" onerror="this.style.display='none'">{% else %}<span class="thumb ph">{{ (u.title or 'P')[:1] }}</span>{% endif %}
+          <div class="post-meta">
+            <a href="{{ url_for('url_detail', url_id=u.id) }}" class="title">{{ u.title or u.url }}</a>
+            <div class="small muted">{{ u.published_at | date }} · {% include "_verdict.html" %}</div>
+          </div>
+        </li>
+      {% else %}
+        <li class="empty">No posts discovered yet.</li>
+      {% endfor %}
+      </ul>
+    </section>
+
+    {# ---------- Recent activity ---------- #}
+    <section class="card">
+      <div class="card-head"><h2>Recent requests</h2><a class="link" href="{{ url_for('log') }}">Full log →</a></div>
+      <ul class="activity">
+      {% for r in recent %}
+        <li class="{{ 'ok' if r.ok else 'err' }}">
+          <span class="act-kind">{{ r.kind }}{% if r.request_type %} <span class="muted">{{ r.request_type }}</span>{% endif %}</span>
+          <span class="act-what mono">{{ (r.url or '') | host }}</span>
+          <span class="act-when muted">{{ r.at | ago }}{% if r.http_status %} · {{ r.http_status }}{% endif %}</span>
+        </li>
+      {% else %}
+        <li class="empty">No requests yet.</li>
+      {% endfor %}
+      </ul>
+    </section>
+
+    {% if last_jobs %}
+    <section class="card">
+      <div class="card-head"><h2>Recent jobs</h2></div>
+      <ul class="activity">
+      {% for j in last_jobs %}
+        <li class="{{ 'ok' if j.status == 'done' and not j.err_count else ('err' if j.status == 'failed' else 'neutral') }}">
+          <span class="act-kind">{{ j.kind.replace('_',' ') }} <span class="pill xs {{ j.status }}">{{ j.status }}</span></span>
+          <span class="act-what">{{ j.message or (j.done ~ '/' ~ j.total) }}</span>
+          <span class="act-when muted">{{ (j.finished_at or j.started_at or j.created_at) | ago }}</span>
+        </li>
+      {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+
+{% endblock %}

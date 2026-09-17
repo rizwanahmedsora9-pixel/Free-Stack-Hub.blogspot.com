@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}{{ u.title or u.url }}{% endblock %}
+{% block content %}
+
+<a class="back" href="{{ url_for('urls') }}">← All URLs</a>
+
+<div class="detail-head">
+  {% if u.thumbnail %}<img class="thumb lg" src="{{ u.thumbnail }}" alt="" onerror="this.remove()">{% endif %}
+  <div class="detail-title">
+    <div class="detail-kind"><span class="kind-tag {{ u.kind }}">{{ u.kind }}</span>
+      {% if u.published_at %}<span class="muted">published {{ u.published_at | date }}</span>{% endif %}
+      {% if u.updated_at and u.updated_at != u.published_at %}<span class="muted">· edited {{ u.updated_at | date }}</span>{% endif %}
+      {% if u.author %}<span class="muted">· {{ u.author }}</span>{% endif %}
+      {% if u.word_count %}<span class="muted">· {{ u.word_count }} words</span>{% endif %}
+    </div>
+    <h1>{{ u.title or u.url }}</h1>
+    <a class="mono link" href="{{ u.url }}" target="_blank" rel="noopener">{{ u.url }} ↗</a>
+    {% set ls = u.labels | labels %}
+    {% if ls %}<div class="tags mt-sm">{% for l in ls %}<a class="tag" href="{{ url_for('urls', label=l) }}">{{ l }}</a>{% endfor %}</div>{% endif %}
+    {% if u.summary %}<p class="summary">{{ u.summary }}</p>{% endif %}
+  </div>
+  <div class="detail-actions">
+    <form method="post" action="{{ url_for('action_inspect', url_id=u.id) }}"><button class="btn" type="submit">◎ Inspect now</button></form>
+    <form method="post" action="{{ url_for('action_push', url_id=u.id) }}"><input type="hidden" name="type" value="URL_UPDATED"><button class="btn primary" type="submit">↑ Push URL_UPDATED</button></form>
+    <details class="dropdown right">
+      <summary class="btn ghost">More ▾</summary>
+      <div class="dropdown-panel">
+        <form method="post" action="{{ url_for('action_metadata', url_id=u.id) }}"><button class="btn sm ghost w-full" type="submit" title="Uses 1 Indexing API quota unit">Ask Google for its last notification</button></form>
+        <form method="post" action="{{ url_for('action_push', url_id=u.id) }}" onsubmit="return confirm('Send URL_DELETED? Google will drop this URL from the index.')"><input type="hidden" name="type" value="URL_DELETED"><button class="btn sm ghost w-full danger-text" type="submit">Push URL_DELETED</button></form>
+        <form method="post" action="{{ url_for('action_ignore', url_id=u.id) }}">{% if u.ignored %}<input type="hidden" name="undo" value="1">{% endif %}<button class="btn sm ghost w-full" type="submit">{{ 'Restore (un-ignore)' if u.ignored else 'Ignore this URL' }}</button></form>
+        <form method="post" action="{{ url_for('action_delete', url_id=u.id) }}" onsubmit="return confirm('Remove this URL and its history from the console?')"><button class="btn sm ghost w-full danger-text" type="submit">Remove from console</button></form>
+        {% if mode == 'demo' %}
+        <hr>
+        <form method="post" action="{{ url_for('action_scenario', url_id=u.id) }}" class="form">
+          <label class="small">Demo scenario</label>
+          <select name="scenario" class="sm">
+            {% for sc in ['indexed','indexed_desktop','indexed_no_sitemap','discovered','crawled_not_indexed','unknown','duplicate_canonical','redirect','noindex','robots','server_error','forbidden'] %}<option value="{{ sc }}">{{ sc }}</option>{% endfor %}
+          </select>
+          <button class="btn sm w-full" type="submit">Apply</button>
+        </form>
+        {% endif %}
+      </div>
+    </details>
+  </div>
+</div>
+
+{# ---------- diagnosis + status cards ---------- #}
+<div class="grid two">
+  <section class="card diagnosis {{ diagnosis.level }}">
+    <div class="card-head"><h2>{% include "_verdict.html" %} &nbsp;{{ diagnosis.title }}</h2></div>
+    <p>{{ diagnosis.body }}</p>
+    {% if latest and latest.result_link %}<a class="link small" href="{{ latest.result_link }}" target="_blank" rel="noopener">Open in Search Console ↗</a>{% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Push status</h2></div>
+    {% if u.pushed_at %}
+      <dl class="facts">
+        <dt>Last push</dt><dd><span class="{{ 'ok-text' if u.push_status == 'ok' else 'err-text' }}">{{ '✓ accepted' if u.push_status == 'ok' else '✕ rejected' }}</span> · {{ u.pushed_at | dt }} ({{ u.pushed_at | ago }})</dd>
+        <dt>Type</dt><dd class="mono">{{ u.push_type }}</dd>
+        <dt>Times pushed</dt><dd>{{ u.push_count }}</dd>
+        {% if u.notify_time %}<dt>Google notifyTime</dt><dd class="mono">{{ u.notify_time }}</dd>{% endif %}
+        {% if u.push_error %}<dt>Error</dt><dd class="err-text">{{ u.push_error }}</dd>{% endif %}
+        {% if u.push_status == 'ok' and u.verdict != 'PASS' %}
+          <dt>Crawled since?</dt>
+          <dd>{% if u.last_crawl and u.last_crawl > u.pushed_at %}<span class="ok-text">Yes — {{ u.last_crawl | ago }}</span>{% elif u.inspected_at and u.inspected_at > u.pushed_at %}<span class="warn-text">Not yet (checked {{ u.inspected_at | ago }})</span>{% else %}<span class="muted">Not re-inspected since the push</span>{% endif %}</dd>
+        {% endif %}
+      </dl>
+    {% else %}
+      <p class="muted">Never pushed through the Indexing API from this console.</p>
+    {% endif %}
+  </section>
+</div>
+
+<div class="grid two">
+  <section class="card">
+    <div class="card-head"><h2>Latest inspection</h2>{% if u.inspected_at %}<span class="muted small">{{ u.inspected_at | dt }}</span>{% endif %}</div>
+    {% if latest and latest.verdict != 'ERROR' %}
+    <dl class="facts">
+      <dt>Verdict</dt><dd class="mono">{{ latest.verdict }}</dd>
+      <dt>Coverage</dt><dd>{{ latest.coverage or '—' }}</dd>
+      <dt>Last crawl</dt><dd>{% if latest.last_crawl %}{{ latest.last_crawl | dt }} <span class="muted">({{ latest.last_crawl | ago }})</span>{% else %}<span class="warn-text">never crawled</span>{% endif %}</dd>
+      <dt>Crawled as</dt><dd>{% if latest.crawled_as %}<span class="bot {{ latest.crawled_as|lower }}">{{ '📱' if latest.crawled_as == 'MOBILE' else '🖥' }} {{ latest.crawled_as }}</span>{% else %}—{% endif %}</dd>
+      <dt>Page fetch</dt><dd class="mono {{ 'ok-text' if latest.fetch_state == 'SUCCESSFUL' else ('err-text' if latest.fetch_state) }}">{{ latest.fetch_state or '—' }}</dd>
+      <dt>robots.txt</dt><dd class="mono {{ 'ok-text' if latest.robots_state == 'ALLOWED' else ('err-text' if latest.robots_state) }}">{{ latest.robots_state or '—' }}</dd>
+      <dt>Indexing allowed</dt><dd class="mono {{ 'ok-text' if latest.indexing_state == 'INDEXING_ALLOWED' else ('err-text' if latest.indexing_state) }}">{{ latest.indexing_state or '—' }}</dd>
+      <dt>User canonical</dt><dd class="mono small">{{ latest.user_canonical or '—' }}</dd>
+      <dt>Google canonical</dt><dd class="mono small {{ 'warn-text' if latest.google_canonical and latest.user_canonical and latest.google_canonical != latest.user_canonical }}">{{ latest.google_canonical or '—' }}</dd>
+      {% set sms = latest.sitemaps | jsonl %}
+      <dt>Sitemaps</dt><dd>{% if sms %}{% for s in sms %}<span class="mono small">{{ s }}</span>{{ '<br>' | safe if not loop.last }}{% endfor %}{% else %}<span class="muted">none reported</span>{% endif %}</dd>
+      {% set refs = latest.referring_urls | jsonl %}
+      <dt>Referring URLs</dt><dd>{% if refs %}{% for r in refs %}<span class="mono small">{{ r }}</span>{{ '<br>' | safe if not loop.last }}{% endfor %}{% else %}<span class="muted">none reported</span>{% endif %}</dd>
+      {% set rich = latest.rich_results | jsonl %}
+      {% if rich %}<dt>Rich results</dt><dd>{{ rich.verdict }}{% for d in rich.detectedItems or [] %} · {{ d.richResultType }}{% endfor %}</dd>{% endif %}
+    </dl>
+    {% elif latest %}
+      <p class="err-text">{{ latest.error }}</p>
+    {% else %}
+      <p class="muted">Not inspected yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Timeline</h2></div>
+    <ol class="timeline">
+      {% for at, kind, text in timeline %}
+      <li class="{{ kind }}"><span class="tl-dot"></span><span class="tl-when mono">{{ at | dt }}</span><span class="tl-text">{{ text }}</span></li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head"><h2>Inspection history</h2><span class="muted small">{{ history | length }} check{{ 's' if history|length != 1 }}</span></div>
+  {% if history %}
+  <table class="tbl compact">
+    <thead><tr><th>When</th><th>Verdict</th><th>Coverage</th><th>Last crawl</th><th>Bot</th><th>Fetch</th><th>Raw</th></tr></thead>
+    <tbody>
+    {% for h in history %}
+      <tr>
+        <td class="nowrap">{{ h.checked_at | dt }}</td>
+        <td><span class="pill {{ 'ok' if h.verdict == 'PASS' else ('danger' if h.verdict in ('FAIL','ERROR') else 'warn') }}">{{ h.verdict }}</span></td>
+        <td>{{ h.coverage or h.error or '—' }}</td>
+        <td class="nowrap">{{ h.last_crawl | dt if h.last_crawl else '—' }}</td>
+        <td>{{ h.crawled_as or '—' }}</td>
+        <td class="mono small">{{ h.fetch_state or '—' }}</td>
+        <td><details class="raw"><summary>json</summary><pre>{{ h.raw | pretty }}</pre></details></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No inspections yet.</p>{% endif %}
+</section>
+
+<section class="card">
+  <div class="card-head"><h2>Requests for this URL</h2></div>
+  {% if log %}
+  <table class="tbl compact">
+    <thead><tr><th>When</th><th>Kind</th><th>Type</th><th>HTTP</th><th>Result</th><th>ms</th></tr></thead>
+    <tbody>
+    {% for r in log %}
+      <tr class="{{ '' if r.ok else 'row-err' }}">
+        <td class="nowrap">{{ r.at | dt }}</td>
+        <td>{{ r.kind }}</td>
+        <td class="mono small">{{ r.request_type or '—' }}</td>
+        <td class="mono">{{ r.http_status or '—' }}</td>
+        <td>{% if r.ok %}<span class="ok-text">✓</span> {{ r.summary }}{% else %}<span class="err-text">✕ {{ r.error }}</span>{% if r.summary %}<div class="small muted">{{ r.summary }}</div>{% endif %}{% endif %}</td>
+        <td class="muted">{{ r.duration_ms or '' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">No requests sent for this URL yet.</p>{% endif %}
+</section>
+
+{% endblock %}

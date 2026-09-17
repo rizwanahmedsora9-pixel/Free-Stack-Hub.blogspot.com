@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Indexing Console{% endblock %} · Free Stack Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+<script>
+  (function(){try{var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t)}else if(matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.setAttribute('data-theme','dark')}}catch(e){}})();
+</script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">▲</span>
+      <span class="brand-text">Indexing <b>Console</b></span>
+    </a>
+    <nav class="nav">
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Overview</a>
+      <a href="{{ url_for('urls') }}" class="{{ 'active' if request.endpoint in ('urls','url_detail') }}">URLs</a>
+      <a href="{{ url_for('log') }}" class="{{ 'active' if request.endpoint == 'log' }}">Requests</a>
+      <a href="{{ url_for('settings_page') }}" class="{{ 'active' if request.endpoint == 'settings_page' }}">Settings</a>
+      <a href="{{ url_for('setup') }}" class="{{ 'active' if request.endpoint == 'setup' }}">Setup</a>
+    </nav>
+    <div class="topbar-right">
+      {% if connected %}
+        <span class="conn {{ mode }}" title="{{ account_email }}">
+          <span class="dot"></span>{{ 'DEMO' if mode == 'demo' else 'LIVE' }}
+          <span class="conn-email">{{ account_email }}</span>
+        </span>
+      {% else %}
+        <a class="conn off" href="{{ url_for('setup') }}"><span class="dot"></span>Not connected</a>
+      {% endif %}
+      <button class="icon-btn" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </div>
+  <div id="jobbar" class="jobbar {{ 'show' if job }}">
+    <div class="jobbar-inner">
+      <span class="spinner"></span>
+      <span id="jobText">{% if job %}{{ job.kind.replace('_',' ') }} · {{ job.done }}/{{ job.total }}{% endif %}</span>
+      <div class="jobtrack"><div id="jobFill" class="jobfill" style="width: {{ (job.done * 100 / job.total) if job and job.total else 0 }}%"></div></div>
+      <form method="post" action="{{ url_for('cancel_job') }}"><button class="btn ghost xs" type="submit">Cancel</button></form>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}"><span>{{ msg }}</span><button class="flash-x" onclick="this.parentElement.remove()" aria-label="Dismiss">×</button></div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <span>Indexing Console for freestackhub.blogspot.com · Google Indexing API + Search Console URL Inspection</span>
+  <span class="muted">Quotas: {{ QUOTA.publish_per_day }} publish/day · {{ QUOTA.inspect_per_day }} inspect/day</span>
+</footer>
+
+<script>
+  window.__JOB_ACTIVE__ = {{ 'true' if job else 'false' }};
+</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
