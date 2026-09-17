@@ -5,8 +5,10 @@ theme/freestackhub-theme.xml renders.
 
 Blogger is the only place the real theme runs, so this file exists to answer
 "what will my blog look like?" *before* uploading anything: it reuses the exact
-skin (CSS) from the theme file, the exact card markup the Blog1 widget emits,
-and the real title / labels / hook / body of a post from posts/.
+skin (CSS) from the theme file, the exact card markup the Blog1 widget emits, the
+theme's own <header>, search combo box and visitor strip (parsed out of their
+marked blocks, so a change there cannot be missed here), the suggestion script
+verbatim, and the real title / labels / hook / body of a post from posts/.
 
 Usage:
   python3 tools/build_theme_preview.py                     # newest post folder
@@ -18,13 +20,18 @@ run this again.
 """
 
 import argparse
+import datetime as dt
 import html
+import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_import import GITHUB_REPO, GITHUB_USER, IMAGE_REF, POSTS_DIR, load_post  # noqa: E402
+from build_import import (  # noqa: E402
+    FOLDER_RE, GITHUB_REPO, GITHUB_USER, HEADER_RE as POST_HEADER_RE, IMAGE_REF,
+    POSTS_DIR, load_post, parse_header,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 THEME = ROOT / "theme" / "freestackhub-theme.xml"
@@ -42,6 +49,8 @@ TAG_RE = re.compile(r"<[^>]+>")
 MORE_RE = re.compile(r"<!--\s*more\s*-->", re.I)
 HEADER_RE = re.compile(r"<header class='header'.*?</header>", re.S)
 VISIT_RE = re.compile(r"<!-- visit-strip:start -->(.*?)<!-- visit-strip:end -->", re.S)
+SEARCH_RE = re.compile(r"<!-- search-bar:start -->(.*?)<!-- search-bar:end -->", re.S)
+SEARCH_JS_RE = re.compile(r"<!-- search-suggest:start -->(.*?)<!-- search-suggest:end -->", re.S)
 BLOG_TITLE = "Free Stack Hub"
 
 
@@ -91,6 +100,89 @@ def visit_strip_html(theme_xml: str) -> str:
     strip = strip.replace("id='visitDevice'>&#8212;", "id='visitDevice'>Mobile")
     strip = strip.replace("id='visitTime'>&#8212;", "id='visitTime'>9:41 PM")
     return strip
+
+
+def search_html(theme_xml: str) -> str:
+    """The theme's search combo box, with its one Blogger expression resolved.
+
+    Parsed out of the marked block in theme/freestackhub-theme.xml for the same
+    reason as the header and the visitor strip: the mock used to carry a second,
+    hand-written search form, and a hand-written copy is how the two drift. The
+    field sits ABOVE the navbar here exactly as it does in the theme.
+    """
+    m = SEARCH_RE.search(theme_xml)
+    if not m:
+        sys.exit("ERR  could not find the search-bar markers in theme/freestackhub-theme.xml")
+    box = m.group(1)
+    # the one Blogger tag in the block: <homepageUrl>search -> the mock's own
+    # action. The suggestion script reads the homepage back out of this
+    # attribute, so the value has to keep its trailing "search".
+    box = box.replace("expr:action='data:blog.homepageUrl + &quot;search&quot;'", 'action="/search"')
+    return box
+
+
+def search_sample() -> list:
+    """The suggestion index the mock feeds the script, built from posts/.
+
+    On Blogger the script fetches the blog's own summary feed; a static file on
+    disk has no feed to ask, so the preview injects the same three fields per
+    post (title, permalink, labels) out of the post headers instead. Real
+    titles, so typing a real word in the mock returns a real row.
+
+    Only the header comment is read - no image work, no validation - because
+    this is an index of what exists, not a build of it.
+    """
+    sample = []
+    for folder in sorted(POSTS_DIR.iterdir(), reverse=True):
+        if not folder.is_dir() or folder.name.startswith("_"):
+            continue
+        fm = FOLDER_RE.match(folder.name)
+        src = folder / "post.html"
+        if not fm or not src.exists():
+            continue
+        m = POST_HEADER_RE.match(src.read_text(encoding="utf-8"))
+        if not m:
+            continue
+        meta = parse_header(m.group(1))
+        title = meta.get("TITLE", "").strip()
+        if not title:
+            continue
+        try:
+            when = dt.datetime.fromisoformat(meta.get("PUBLISHED") or fm.group(1))
+        except ValueError:
+            continue
+        sample.append({
+            "t": title,
+            "u": f"/{when.strftime('%Y/%m')}/{fm.group(2)}.html",
+            "l": [l.strip() for l in meta.get("LABELS", "").split(",") if l.strip()],
+            "d": when.strftime("%Y-%m-%d"),
+        })
+    return sample
+
+
+def search_script(theme_xml: str) -> str:
+    """The theme's suggestion script verbatim, plus the mock's sample index.
+
+    Copied rather than retyped so the preview exercises the real code: whatever
+    the script does on the blog - the word-by-word narrowing, the arrow keys,
+    the aria-activedescendant wiring - is what you can try in the mock. The
+    `//<![CDATA[` markers around it are JavaScript comments in plain HTML, so
+    the block runs unchanged outside Blogger.
+    """
+    m = SEARCH_JS_RE.search(theme_xml)
+    if not m:
+        sys.exit("ERR  could not find the search-suggest markers in theme/freestackhub-theme.xml")
+    sample = json.dumps(search_sample(), ensure_ascii=False)
+    return (
+        "  <script>\n"
+        "  /* preview.html only: the index the suggestion script below uses instead\n"
+        "     of fetching the blog's own feed (a static mock has no feed to ask).\n"
+        "     Generated from the headers in posts/ - real titles, real labels. */\n"
+        f"  window.FSH_SEARCH_SAMPLE = {sample};\n"
+        "  </script>\n\n"
+        + m.group(1).strip("\n")
+        + "\n"
+    )
 
 
 def skin_css(theme_xml: str) -> str:
@@ -165,7 +257,9 @@ def sidebar(popular_item: str) -> str:
         + '<div class="ad-slot"><div class="ad-inner"><div class="ad-label">Advertisement</div></div></div>'
         + widget("Categories", "<ul><li><a href='#'>PDFs</a></li><li><a href='#'>Apps</a></li>"
                                "<li><a href='#'>Configs &amp; Patches</a></li></ul>")
-        + widget("Most Downloaded", f'<ul class="popular-list">{popular_item}</ul>')
+        # PopularPosts ranks by page views, so the widget says "Most Viewed
+        # Stories" - it was "Most Downloaded", a counter this blog does not keep.
+        + widget("Most Viewed Stories", f'<ul class="popular-list">{popular_item}</ul>')
     )
 
 
@@ -174,6 +268,8 @@ def build(post: dict) -> str:
     css = skin_css(theme_xml)
     header = header_html(theme_xml)
     visit_strip = visit_strip_html(theme_xml)
+    search_bar = search_html(theme_xml)
+    suggest_js = search_script(theme_xml)
     title = post["title"]
     slug_url = "#"
     labels = post["labels"]
@@ -198,7 +294,7 @@ def build(post: dict) -> str:
     demo_title = "Your next post shows up as the second card in this list"
     demo_label = labels[:1] or ["PythonAnywhere"]
 
-    # the "Most Downloaded" sidebar widget: thumbnail + title only, the way
+    # the "Most Viewed Stories" sidebar widget: thumbnail + title only, the way
     # the theme's custom PopularPosts includable renders it
     popular_item = ""
     if image:
@@ -208,7 +304,7 @@ def build(post: dict) -> str:
             f"<span>{html.escape(title)}</span></a></li>"
         )
 
-    return f"""<!DOCTYPE html>
+    page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -248,10 +344,17 @@ def build(post: dict) -> str:
     <code>theme/freestackhub-theme.xml</code> renders, not the live blog.
     The card below is built from the real post <b>{html.escape(title)}</b>, and
     &ldquo;Read more&rdquo; opens that post&rsquo;s own URL (on Blogger:
-    <code>{html.escape(post_url)}</code>).
+    <code>{html.escape(post_url)}</code>).<br/>
+    <b>Try the search box above the navbar</b> &mdash; it is a combo box: type a
+    word and a list drops down, keep typing and it narrows word by word. Here it
+    reads a sample index built from <code>posts/</code>; on the blog the same
+    script reads the blog&rsquo;s own feed. Arrow keys walk the list, Enter opens
+    the row, Escape closes it.
   </div>
 
   {header}
+
+  <!--SEARCH_BAR-->
 
   <nav class="nav-wrap">
     <div class="container nav">
@@ -259,15 +362,6 @@ def build(post: dict) -> str:
       <a href="#">Configs &amp; Patches</a><a href="#">About Us</a>
     </div>
   </nav>
-
-  <div class="search-wrap">
-    <div class="container">
-      <form class="search">
-        <input aria-label="Search" placeholder="Search PDFs, apps, configs&hellip;" type="search"/>
-        <button aria-label="Search this blog" type="submit">Search</button>
-      </form>
-    </div>
-  </div>
 
 {visit_strip}
 
@@ -279,12 +373,14 @@ def build(post: dict) -> str:
 
     <section class="preview-block">
       <div class="preview-tag">1 &mdash; Home page: live visitor strip + teaser cards</div>
-      <p class="preview-hint"><b>The slim strip under the search bar</b> is the live visitor
+      <p class="preview-hint"><b>The slim strip under the navbar</b> is the live visitor
         snapshot &mdash; total visits &middot; your country &middot; your device &middot; local time.
         Its numbers here are stand-ins; on the blog they fill in after page load (two tiny
         requests), and Blogger sends this strip <b>on the home page only</b>. Cards below:
         feature image + labels + title + date + <b>Read more</b>, no body text; the title and
-        the button both open that post&rsquo;s own URL.</p>
+        the button both open that post&rsquo;s own URL. In the sidebar, <b>Most Viewed
+        Stories</b> is Blogger&rsquo;s PopularPosts widget &mdash; it ranks by page views,
+        which is why it no longer says &ldquo;Most Downloaded&rdquo;.</p>
       <div class="main-layout">
         <section class="content-area">
           <div class="post-list hfeed">
@@ -340,9 +436,17 @@ def build(post: dict) -> str:
     </div>
   </footer>
 
+<!--SEARCH_SCRIPT-->
 </body>
 </html>
 """
+
+    # The two blocks lifted out of theme/freestackhub-theme.xml go in last, as
+    # verbatim copies: the suggestion script is full of the braces an f-string
+    # would otherwise try to read as placeholders.
+    return (page
+            .replace("<!--SEARCH_BAR-->", search_bar.strip("\n"))
+            .replace("<!--SEARCH_SCRIPT-->", suggest_js.rstrip("\n")))
 
 
 def main() -> None:

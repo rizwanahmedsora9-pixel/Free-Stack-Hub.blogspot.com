@@ -14,7 +14,9 @@ checkable from the source files. That is what this does:
                 fetchpriority=high, everything below the fold is lazy
                 every raster image has an AVIF/WebP variant and a JPG fallback
   Accessibility every <a>/<button> has an accessible name, one <h1>, headings
-                do not skip levels, visible focus, skip link, contrast >= 4.5:1
+                do not skip levels, visible focus, skip link, contrast >= 4.5:1,
+                and the search combo box is wired as a real combobox (role,
+                aria-expanded, aria-controls, listbox) above the navbar
   Best practice target=_blank carries rel=noopener, the theme parses as XML
   SEO           exactly one <meta name=description>, 120-160 characters
 
@@ -159,6 +161,13 @@ CONTRAST_PAIRS = [
     ("post label chips",           ".post-labels a::color",             ".post-labels a::background",       4.5),
     ("search field placeholder",   ".search input::placeholder::color", "var(--surface)",                   4.5),
     ("code block",                 ".post-body pre::color",             ".post-body pre::background",       4.5),
+    # the search combo box's drop-down (see "The search bar" in theme/README.md)
+    ("suggestion rows",            ".suggest a::color",                 ".suggest::background",             4.5),
+    ("active suggestion row",      ".suggest li.is-active>a::color",    ".suggest li.is-active>a::background", 4.5),
+    ("suggestion match highlight", ".sg-title mark::color",             ".suggest::background",             4.5),
+    ("suggestion meta line",       ".sg-meta::color",                   ".suggest::background",             4.5),
+    ("label suggestion row",       ".suggest .sg-label .sg-title::color", ".suggest::background",           4.5),
+    ("see-every-result row",       ".suggest .sg-all a::color",         ".suggest::background",             4.5),
 ]
 
 
@@ -494,6 +503,21 @@ def check_html(rep: Report, path: Path, raw: str):
     check_contrast(rep, "".join(STYLE_RE.findall(doc)) or doc, path.name)
 
 
+SEARCH_BAR_RE = re.compile(r"<div class=['\"]search-wrap['\"]")
+NAV_RE = re.compile(r"<nav class=['\"]nav-wrap['\"]")
+
+
+def search_before_nav(doc: str) -> bool:
+    """True when the search bar's markup comes before the navbar's.
+
+    Read off the body only: the skin (which lives in <head>) names both classes
+    in its rules and in its comments, and there .nav-wrap is written first.
+    """
+    body = CSS_COMMENT_RE.sub(" ", doc.split("</head>", 1)[-1])
+    bar, nav = SEARCH_BAR_RE.search(body), NAV_RE.search(body)
+    return bool(bar and nav and bar.start() < nav.start())
+
+
 def check_theme(rep: Report):
     rep.head("[theme] Blogger can only be given well-formed XML")
     try:
@@ -584,6 +608,32 @@ def check_theme(rep: Report):
         rep.ok("visible :focus-visible ring")
     else:
         rep.fail("no :focus-visible styling")
+
+    rep.head("[theme] the search combo box above the navbar")
+    if search_before_nav(doc):
+        rep.ok("the search bar sits just above the navbar")
+    else:
+        rep.fail("the search bar is not above <nav class='nav-wrap'> - that is where it belongs")
+    for need, why in (
+        ("role='combobox'", "the field has to announce itself as a combo box"),
+        ("aria-controls='search-suggest'", "the field has to point at its own suggestion list"),
+        ("aria-expanded=", "a screen reader is told whether that list is open"),
+        ("aria-autocomplete='list'", "...and that typing fills a list of suggestions"),
+        ("role='listbox'", "the suggestion list has to be a listbox"),
+        ("id='search-suggest'", "the list needs the id aria-controls points at"),
+    ):
+        if need in doc:
+            rep.ok(f"combobox wiring: {need}")
+        else:
+            rep.fail(f"combobox wiring missing {need} - {why}")
+    if re.search(r"<!-- search-suggest:start -->.*?//<!\[CDATA\[", doc, re.S):
+        rep.ok("the suggestion script is inline, in the marked block at the end of <body>")
+    else:
+        rep.fail("no inline suggestion script between the search-suggest markers")
+    if SCRIPT_SRC_RE.findall(doc):
+        rep.fail("the theme adds a <script src> of its own - a request on every page's critical path")
+    else:
+        rep.ok("the theme still ships no external script of its own")
 
     rep.head("[theme] accessibility - link and button names")
     unnamed = []
@@ -723,6 +773,18 @@ def check_drift(rep: Report, theme_doc: str):
         rep.ok("preview.html embeds the theme's current skin CSS")
     elif theme_skin:
         rep.fail("preview.html is stale - run python3 tools/build_theme_preview.py")
+    # The search bar and its suggestion script are parsed out of the theme by
+    # build_theme_preview.py, so the mock can show (and exercise) the real thing.
+    if "id='search-suggest'" in theme_doc:
+        if "id='search-suggest'" in preview and "FSH_SEARCH_SAMPLE" in preview:
+            rep.ok("preview.html carries the theme's search combo box and its suggestion script")
+        else:
+            rep.fail("preview.html is missing the search combo box or its script - "
+                     "run python3 tools/build_theme_preview.py")
+        if search_before_nav(preview):
+            rep.ok("the mock keeps the search bar above the navbar too")
+        else:
+            rep.fail("preview.html has the search bar below the navbar - the theme has it above")
 
 
 def main() -> int:
