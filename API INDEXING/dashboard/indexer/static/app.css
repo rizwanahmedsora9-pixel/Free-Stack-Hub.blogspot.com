@@ -309,3 +309,17 @@ details.raw pre{margin:6px 0 0;padding:10px;background:var(--bg-2);border-radius
 .toast{padding:11px 14px;border-radius:10px;background:var(--ink);color:var(--surface);font-size:13px;box-shadow:var(--shadow-lg);max-width:380px;animation:pop .2s ease}
 .toast.err{background:var(--danger);color:#fff}
 .toast.ok{background:var(--ok);color:#fff}
+
+/* ---------- stored key box & remove options (setup) ---------- */
+.keybox{border:1px solid color-mix(in srgb,var(--ok) 35%,var(--line));background:var(--ok-soft);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:4px}
+.keybox.bad{border-color:color-mix(in srgb,var(--danger) 40%,var(--line));background:var(--danger-soft)}
+.keybox-row{display:flex;gap:12px;align-items:center}
+.keybox-icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--surface);font-size:16px;font-weight:700;flex:none}
+.keybox.bad .keybox-icon{color:var(--danger)}
+.keybox-main{min-width:0}
+.keybox-main b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.keybox-foot{margin-top:8px;padding-top:8px;border-top:1px dashed color-mix(in srgb,var(--ok) 30%,transparent)}
+.remove-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.remove-opt{padding:14px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2)}
+.remove-opt.danger-zone{border-color:color-mix(in srgb,var(--danger) 30%,var(--line))}
+.remove-opt p{margin:4px 0 10px}

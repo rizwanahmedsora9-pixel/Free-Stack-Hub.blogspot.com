@@ -11,7 +11,7 @@ from flask import (Flask, abort, flash, jsonify, redirect, render_template, requ
 from . import db
 from .config import INSTANCE_DIR, KEY_PATH, PKG_DIR, QUOTA
 from .discovery import blog_url_from_property
-from .google_client import DemoClient, forget_client, get_client, validate_key_file
+from .google_client import DemoClient, forget_client, get_client, key_info, key_problem, validate_key_file
 from .service import (hours_since, insights, inspect_url, metadata_url, parse_dt, push_url, quota_status,
                       recheck_ids, refresh_properties, scheduler, stale_ids, stats, unindexed_ids, worker)
 
@@ -130,11 +130,22 @@ def create_app() -> Flask:
             "settings": settings,
             "mode": settings["mode"],
             "connected": c is not None,
+            "key_problem": key_problem() if settings["mode"] == "live" and c is None else None,
             "account_email": getattr(c, "email", None) if c else None,
             "job": db.active_job(),
             "FILTERS": FILTERS,
             "QUOTA": QUOTA,
         }
+
+    @app.before_request
+    def _guard_live_without_key():
+        """Live mode but the key is gone/corrupt: everything except Setup and static goes to Setup."""
+        if request.endpoint in ("setup", "static", "api_job") or request.endpoint is None:
+            return None
+        if db.get_setting("mode") == "live" and get_client("live") is None:
+            flash(key_problem() or "The service-account key is missing. Upload it again.", "error")
+            return redirect(url_for("setup"))
+        return None
 
     # ------------------------------------------------------------ setup
     @app.route("/setup", methods=["GET", "POST"])
@@ -154,24 +165,34 @@ def create_app() -> Flask:
                     os.remove(tmp)
                     flash(msg, "error")
                     return redirect(url_for("setup"))
+                previous = key_info()
                 os.replace(tmp, KEY_PATH)
                 os.chmod(KEY_PATH, 0o600)
                 forget_client()
                 if db.get_setting("mode") == "demo":
                     db.reset_db()
                 db.set_setting("mode", "live")
-                db.log_event(f"Connected service account {email}", "success")
+                replaced = bool(previous.get("email")) and previous.get("email") != email
+                db.log_event((f"Replaced key {previous.get('email')} with {email}" if replaced else f"Connected service account {email}"), "success")
                 r = refresh_properties()
                 if r.get("ok"):
                     sites = r["sites"]
+                    visible = {s["siteUrl"] for s in sites}
+                    current = db.get_setting("site_url")
+                    if current and current not in visible:
+                        # New account can't see the old property: don't silently keep a selection that will 403.
+                        _select_property("")
+                        flash(f"The previously selected property {current} is not visible to {email}. Pick one below.", "warn")
                     if len(sites) == 1:
                         _select_property(sites[0]["siteUrl"])
                         flash(f"Connected as {email}. Property {sites[0]['siteUrl']} selected.", "success")
                     elif not sites:
                         flash(f"Connected as {email}, but this account cannot see any Search Console property yet. "
                               f"Add {email} as an Owner in Search Console → Settings → Users and permissions, then click Refresh.", "warn")
-                    else:
+                    elif not db.get_setting("site_url"):
                         flash(f"Connected as {email}. Choose the property below.", "success")
+                    else:
+                        flash(f"Connected as {email}.", "success")
                 else:
                     flash(f"Key accepted ({email}) but listing properties failed: {r.get('error')} — {r.get('hint')}", "error")
                 return redirect(url_for("setup"))
@@ -199,6 +220,19 @@ def create_app() -> Flask:
                 r = refresh_properties()
                 flash("Property list refreshed." if r.get("ok") else f"{r.get('error')} — {r.get('hint')}", "success" if r.get("ok") else "error")
                 return redirect(url_for("setup"))
+            if action == "remove_key":
+                # Remove only the credential. URLs, inspections and the request log stay, so
+                # uploading a key later (same or a different account) continues the history.
+                worker.cancel()
+                if os.path.exists(KEY_PATH):
+                    os.remove(KEY_PATH)
+                forget_client()
+                db.set_setting("mode", "")
+                with db.tx() as conn:
+                    conn.execute("DELETE FROM properties")
+                db.log_event("Service-account key removed (data kept)", "warn")
+                flash("Key removed. Your URLs and history are kept — upload a key to reconnect.", "success")
+                return redirect(url_for("setup"))
             if action == "disconnect":
                 worker.cancel()
                 if os.path.exists(KEY_PATH):
@@ -212,7 +246,13 @@ def create_app() -> Flask:
                 flash("Disconnected. The key file and all local data were deleted.", "success")
                 return redirect(url_for("setup"))
         props = db.query("SELECT * FROM properties ORDER BY site_url")
-        return render_template("setup.html", properties=props, key_present=os.path.exists(KEY_PATH))
+        data_counts = {
+            "urls": db.scalar("SELECT COUNT(*) FROM urls") or 0,
+            "inspections": db.scalar("SELECT COUNT(*) FROM inspections") or 0,
+            "requests": db.scalar("SELECT COUNT(*) FROM requests_log") or 0,
+        }
+        return render_template("setup.html", properties=props, key_present=os.path.exists(KEY_PATH),
+                               key=key_info(), data_counts=data_counts)
 
     def _select_property(site_url):
         db.set_settings({"site_url": site_url, "blog_url": blog_url_from_property(site_url)})

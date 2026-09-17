@@ -321,27 +321,58 @@ class DemoClient:
 
 # ---------------------------------------------------------------- factory
 
-_cache = {"client": None, "mode": None, "key_mtime": None}
+_cache = {"client": None, "mode": None, "key_mtime": None, "problem": None}
 
 
 def get_client(mode: str):
-    """Return the client for the configured mode, or None when not connected."""
+    """Return the client for the configured mode, or None when not connected.
+
+    Never raises: a missing or unreadable key file simply means "not connected", so the
+    app falls back to the Setup page instead of crashing. `key_problem()` explains why.
+    """
     if mode == "demo":
         if _cache["mode"] != "demo" or _cache["client"] is None:
             _cache.update(client=DemoClient(), mode="demo", key_mtime=None)
         return _cache["client"]
     if mode == "live":
         if not os.path.exists(KEY_PATH):
+            _cache["problem"] = "No key file found. Upload the service-account JSON again."
             return None
         mtime = os.path.getmtime(KEY_PATH)
         if _cache["mode"] != "live" or _cache["client"] is None or _cache["key_mtime"] != mtime:
-            _cache.update(client=LiveClient(KEY_PATH), mode="live", key_mtime=mtime)
+            try:
+                _cache.update(client=LiveClient(KEY_PATH), mode="live", key_mtime=mtime, problem=None)
+            except Exception as e:  # corrupt / hand-edited / wrong file
+                _cache.update(client=None, mode="live", key_mtime=mtime,
+                              problem=f"The stored key file could not be loaded ({type(e).__name__}: {str(e)[:120]}). Upload it again.")
+                return None
         return _cache["client"]
     return None
 
 
+def key_problem():
+    """Why the live client is unavailable (None when everything is fine)."""
+    return _cache.get("problem")
+
+
+def key_info() -> dict:
+    """Non-secret facts about the stored key, for the Setup page."""
+    if not os.path.exists(KEY_PATH):
+        return {}
+    info = {"added_at": datetime.fromtimestamp(os.path.getmtime(KEY_PATH), tz=timezone.utc).replace(microsecond=0).isoformat(),
+            "size": os.path.getsize(KEY_PATH)}
+    try:
+        with open(KEY_PATH) as f:
+            data = json.load(f)
+        info.update(email=data.get("client_email"), project_id=data.get("project_id"),
+                    key_id=(data.get("private_key_id") or "")[:8])
+    except Exception:
+        info["corrupt"] = True
+    return info
+
+
 def forget_client():
-    _cache.update(client=None, mode=None, key_mtime=None)
+    _cache.update(client=None, mode=None, key_mtime=None, problem=None)
 
 
 def validate_key_file(path) -> tuple:

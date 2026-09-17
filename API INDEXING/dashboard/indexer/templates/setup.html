@@ -13,22 +13,41 @@
   <section class="card">
     <div class="card-head">
       <h2>1 · Service account key</h2>
-      {% if key_present and mode == 'live' %}<span class="pill ok">Connected</span>{% elif mode == 'demo' %}<span class="pill info">Demo</span>{% else %}<span class="pill muted">Not connected</span>{% endif %}
+      {% if connected and mode == 'live' %}<span class="pill ok">Connected</span>{% elif key_problem %}<span class="pill danger">Key problem</span>{% elif mode == 'demo' %}<span class="pill info">Demo</span>{% else %}<span class="pill muted">Not connected</span>{% endif %}
     </div>
-    {% if connected and mode == 'live' %}
-      <p class="ok-line">✓ <strong>{{ account_email }}</strong></p>
+
+    {% if key_problem %}
+      <div class="keybox bad">
+        <div class="keybox-row"><span class="keybox-icon">!</span><div><b>Stored key can't be used</b><div class="small">{{ key_problem }}</div></div></div>
+      </div>
+    {% elif key.email %}
+      <div class="keybox">
+        <div class="keybox-row">
+          <span class="keybox-icon">🔑</span>
+          <div class="keybox-main">
+            <b class="mono">{{ key.email }}</b>
+            <div class="small muted">project <span class="mono">{{ key.project_id or '—' }}</span> · key id <span class="mono">{{ key.key_id }}…</span> · saved {{ key.added_at | ago }}</div>
+          </div>
+        </div>
+        <div class="keybox-foot small muted">Saved on this machine as <code>instance/service_account.json</code>. It stays there when you close the app — no need to upload again next time.</div>
+      </div>
       <p class="hint">This email must be an <strong>Owner</strong> of the property in Search Console → Settings → Users and permissions. The Indexing API refuses anything less.</p>
     {% endif %}
+
     <form method="post" enctype="multipart/form-data" class="form">
       <input type="hidden" name="action" value="upload">
       <label class="filedrop" id="filedrop">
         <input type="file" name="keyfile" accept=".json,application/json" required>
         <span class="filedrop-icon">⇪</span>
-        <span class="filedrop-text"><b>Choose the JSON key</b> or drop it here<br><small>Downloaded from Google Cloud → IAM → Service Accounts → Keys</small></span>
+        <span class="filedrop-text"><b>{{ 'Choose a different JSON key' if key.email else 'Choose the JSON key' }}</b> or drop it here<br><small>Downloaded from Google Cloud → IAM → Service Accounts → Keys</small></span>
       </label>
-      <button class="btn primary" type="submit">{{ 'Replace key & connect' if connected and mode == 'live' else 'Upload & connect' }}</button>
+      <button class="btn primary" type="submit">{{ 'Replace key' if key.email else 'Upload & connect' }}</button>
     </form>
-    <p class="hint">The key is stored only in <code>instance/service_account.json</code> on this machine (git-ignored, mode 600). Uploading a key while in demo mode wipes the demo data.</p>
+    {% if key.email %}
+      <p class="hint">Replacing the key keeps all your URLs and history. If the new account can't see the current property you'll be asked to pick another one.</p>
+    {% elif mode == 'demo' %}
+      <p class="hint">Uploading a real key ends the demo and clears the simulated data.</p>
+    {% endif %}
   </section>
 
   <section class="card">
@@ -92,14 +111,25 @@
       <li>IAM &amp; Admin → Service Accounts → Create → Keys → <b>Add key → JSON</b></li>
       <li>Search Console → property → Settings → Users and permissions → add the service-account email as <b>Owner</b></li>
     </ol>
-    {% if connected %}
-    <details class="mt danger-zone">
-      <summary>Disconnect &amp; wipe</summary>
-      <p class="hint">Deletes the key file and every local record (URLs, inspections, request log).</p>
-      <form method="post" onsubmit="return confirm('Delete the key and all local data?')"><input type="hidden" name="action" value="disconnect"><button class="btn danger" type="submit">Disconnect and delete everything</button></form>
-    </details>
-    {% endif %}
   </section>
 </div>
+
+{% if key_present or mode or data_counts.urls %}
+<section class="card">
+  <div class="card-head"><h2>Remove or reset</h2><span class="muted small">{{ data_counts.urls }} URLs · {{ data_counts.inspections }} inspections · {{ data_counts.requests }} requests stored</span></div>
+  <div class="remove-grid">
+    <div class="remove-opt">
+      <b>Remove the key only</b>
+      <p class="small muted">Deletes <code>service_account.json</code>. Keeps every URL, inspection and the request log, so you can upload the same or another key later and carry on.</p>
+      <form method="post" onsubmit="return confirm('Remove the stored key? Your data stays.')"><input type="hidden" name="action" value="remove_key"><button class="btn" type="submit" {{ 'disabled' if not key_present }}>Remove key</button></form>
+    </div>
+    <div class="remove-opt danger-zone">
+      <b class="danger-text">Disconnect and wipe everything</b>
+      <p class="small muted">Deletes the key <em>and</em> the whole local database (URLs, inspection history, request log, settings). Start from zero.</p>
+      <form method="post" onsubmit="return confirm('Delete the key AND all local data? This cannot be undone.')"><input type="hidden" name="action" value="disconnect"><button class="btn danger" type="submit">Wipe everything</button></form>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 {% endblock %}

@@ -37,6 +37,20 @@ Options: `--host 0.0.0.0 --port 8080 --debug`. Env: `PORT`, `HOST`, `SECRET_KEY`
 3. **Search Console** → property → *Settings → Users and permissions → Add user* → the `client_email` from the JSON → permission **Owner** (the Indexing API rejects anything less; inspection works with Full too).
 4. Setup page → upload the JSON. The property is picked automatically when the account can see exactly one.
 
+### The key stays put
+
+The uploaded key is written to `instance/service_account.json` (mode 600) and the app reads it
+on every start — close and reopen as often as you like, you are still connected. On the Setup page:
+
+- **Replace key** — upload a different JSON; all URLs and history are kept. If the new account
+  can't see the current property you're asked to pick another one.
+- **Remove key** — deletes only the credential; URLs, inspections and the request log stay, so a
+  later upload continues where you left off.
+- **Wipe everything** — deletes the key and the whole local database.
+
+If the file on disk ever becomes unreadable, every page redirects to Setup with the reason
+instead of crashing; re-uploading fixes it.
+
 ## Daily use
 
 1. **Discover URLs** — pulls sitemap + feed. New posts appear automatically on the next run.
