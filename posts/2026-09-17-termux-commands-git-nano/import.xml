@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
+  <id>tag:blogger.com,1999:blog-7497660712599875944</id>
+  <updated>2026-09-17T08:22:33.536+00:00</updated>
+  <title type="text">Free Stack Hub</title>
+  <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
+  <author><name>Free Stack Hub</name></author>
+  <generator>Free-Stack-Hub build_import.py</generator>
+  <entry>
+    <id>tag:blogger.com,1999:blog-7497660712599875944.post-termux-commands-git-nano</id>
+    <blogger:type>POST</blogger:type>
+    <blogger:status>LIVE</blogger:status>
+    <author>
+      <name>Free Stack Hub</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title type="text">Termux Commands Worth Memorising: Basics, Git Cloning and Nano on Android</title>
+    <content type="html">&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/01-termux-terminal-on-your-phone.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/01-termux-terminal-on-your-phone.webp" type="image/webp"/&gt;
+    &lt;img alt="A hand holding an Android phone running a Termux terminal, surrounded by icons for folders, git branches, editing and deleting files" decoding="async" fetchpriority="high" height="675" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/01-termux-terminal-on-your-phone.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;One app, and your phone becomes a pocket Linux machine.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I typed my first &lt;code&gt;ls&lt;/code&gt; into Termux on a bus ride and felt like a hacker in a movie. Twenty minutes later I had deleted a folder I actually needed, because a phone terminal never warns you twice. Everything I now do daily on Android, from cloning repositories to editing config files with nano, came from fixing mistakes exactly like that one.&lt;/p&gt;
+
+&lt;p&gt;Termux is a terminal emulator that gives you a real Linux environment on Android: a shell, a package manager, a file system and thousands of the same tools you would use on a desktop or a server. No root required, no custom ROM, just an app and a keyboard. The catch is that nobody hands you a map, so most people install it, type two commands, get lost, and uninstall it the same evening.&lt;/p&gt;
+
+&lt;p&gt;This is the map I wish I had had: the basic commands that cover ninety percent of daily work, how to install packages, how to clone and use Git repositories, and how to create, edit and delete files with nano. Every command here was typed on a phone, and every one of them still lives in my muscle memory.&lt;/p&gt;
+
+&lt;h2&gt;Install Termux from the right place first&lt;/h2&gt;
+
+&lt;p&gt;Before any command, one warning that saves hours: the Termux build in the Google Play Store is years out of date and no longer maintained. Install the current version from &lt;a href="https://f-droid.org/packages/com.termux/"&gt;F-Droid&lt;/a&gt; or from the official &lt;a href="https://github.com/termux/termux-app/releases"&gt;Termux releases on GitHub&lt;/a&gt;. Same app, same interface, but the Play Store copy fails on modern Android versions in ways that look like your fault and are not.&lt;/p&gt;
+
+&lt;p&gt;Once it is installed, open it and run these three lines, one at a time:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pkg update
+pkg upgrade
+termux-setup-storage&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;pkg update&lt;/code&gt; refreshes the list of available packages, &lt;code&gt;pkg upgrade&lt;/code&gt; updates everything already installed, and &lt;code&gt;termux-setup-storage&lt;/code&gt; asks for permission to see your phone's shared storage, then mounts it under &lt;code&gt;~/storage/shared&lt;/code&gt;. Skip that last one and your terminal lives in a sealed box: real, but unable to hand files to the rest of your phone.&lt;/p&gt;
+
+&lt;h2&gt;The basic commands you will type every single day&lt;/h2&gt;
+
+&lt;p&gt;A terminal is mostly two jobs: knowing where you are, and moving files around. These commands cover both, and they are identical to the ones you would use on any Linux machine:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pwd
+ls
+ls -la
+cd projects
+cd ..
+cd ~
+clear
+mkdir notes
+touch notes/todo.txt
+cp notes/todo.txt notes/todo-backup.txt
+mv notes/todo.txt notes/tasks.txt
+rm notes/tasks.txt&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Read them out loud and they explain themselves. &lt;code&gt;pwd&lt;/code&gt; prints the directory you are standing in. &lt;code&gt;ls&lt;/code&gt; lists what is inside it, and &lt;code&gt;ls -la&lt;/code&gt; adds hidden files and details like sizes and dates. &lt;code&gt;cd&lt;/code&gt; walks you into a folder, &lt;code&gt;cd ..&lt;/code&gt; steps one level back out, and &lt;code&gt;cd ~&lt;/code&gt; teleports you home, which in Termux means &lt;code&gt;/data/data/com.termux/files/home&lt;/code&gt;. &lt;code&gt;clear&lt;/code&gt; wipes the scrollback when the screen gets noisy.&lt;/p&gt;
+
+&lt;p&gt;The second half is file work. &lt;code&gt;mkdir notes&lt;/code&gt; creates a directory called &lt;code&gt;notes&lt;/code&gt;. &lt;code&gt;touch notes/todo.txt&lt;/code&gt; creates an empty file, or updates the timestamp if it already exists. &lt;code&gt;cp&lt;/code&gt; copies a file, &lt;code&gt;mv&lt;/code&gt; moves or renames it, and &lt;code&gt;rm&lt;/code&gt; deletes it. Those four verbs, plus &lt;code&gt;mkdir&lt;/code&gt;, are the entire vocabulary of everyday file management. Learn them and the terminal stops feeling like a foreign country.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/02-termux-everyday-file-commands.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/02-termux-everyday-file-commands.webp" type="image/webp"/&gt;
+    &lt;img alt="A terminal window beside a folder tree with badges for creating, editing and deleting files" decoding="async" height="619" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/02-termux-everyday-file-commands.jpg" style="max-width:100%; height:auto;" width="1100"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Create, edit, delete: five commands cover the whole tree.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;Installing packages: pkg is your app store now&lt;/h2&gt;
+
+&lt;p&gt;Termux ships small on purpose. Everything else arrives through &lt;code&gt;pkg&lt;/code&gt;, the package manager. Want Git, a text editor, Python or a chess game in your terminal? One line each:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pkg install git nano
+pkg install python neofetch
+pkg list-all
+pkg uninstall neofetch&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For this post, &lt;code&gt;git&lt;/code&gt; and &lt;code&gt;nano&lt;/code&gt; are the two that matter. &lt;code&gt;neofetch&lt;/code&gt; prints a colourful summary of your device and exists purely to make you feel like the terminal is worth it, which, to be fair, it is. &lt;code&gt;pkg list-all&lt;/code&gt; shows everything available when you want to browse, and &lt;code&gt;pkg uninstall&lt;/code&gt; removes what you no longer need.&lt;/p&gt;
+
+&lt;h2&gt;Git on a phone: clone a repository and use it&lt;/h2&gt;
+
+&lt;p&gt;Tell Git who you are once, and it stamps every commit you make from then on:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;git config --global user.name "Your Name"
+git config --global user.email "you@example.com"&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now clone. Point Git at any public repository and it downloads the whole project, history included, into a new folder named after the repo:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;git clone https://github.com/your-username/your-repo.git
+cd your-repo
+ls&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/03-termux-git-clone-from-cloud.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/03-termux-git-clone-from-cloud.webp" type="image/webp"/&gt;
+    &lt;img alt="Files flowing from a cloud with a git branch symbol down into a folder next to a terminal window" decoding="async" height="563" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/03-termux-git-clone-from-cloud.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;One clone command pulls the project and its full history onto your phone.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;From inside that folder, the daily Git loop is five commands, and it never changes:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;git status
+git add .
+git commit -m "fixed the readme"
+git pull origin main
+git push origin main&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;git status&lt;/code&gt; tells you what changed since the last commit. &lt;code&gt;git add .&lt;/code&gt; stages everything in the folder, &lt;code&gt;git commit&lt;/code&gt; records it with a message, &lt;code&gt;git pull&lt;/code&gt; brings down changes made elsewhere, and &lt;code&gt;git push&lt;/code&gt; sends yours up. If the repository is private, GitHub no longer accepts your account password there: create a personal access token in GitHub's settings and paste it when Git asks for a password. You do that once per clone and forget about it.&lt;/p&gt;
+
+&lt;h2&gt;Creating and editing files with nano&lt;/h2&gt;
+
+&lt;p&gt;Cloning a repo is half the story; sooner or later you have to change a file on a phone keyboard. That is what nano is for. It is the friendliest editor in Termux: no modes, no memorised choreography, just text and a row of shortcuts along the bottom of the screen.&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;nano notes.txt&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If &lt;code&gt;notes.txt&lt;/code&gt; does not exist yet, nano opens a blank buffer and creates the file the moment you first save. Type normally, exactly like in any text field. The shortcuts that matter are four:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Ctrl+O&lt;/b&gt; writes the file to disk (save), then press Enter to confirm the name.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Ctrl+X&lt;/b&gt; exits nano, asking to save first if you changed something.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Ctrl+K&lt;/b&gt; cuts the current line, and &lt;b&gt;Ctrl+U&lt;/b&gt; pastes it back wherever the cursor is.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Ctrl+W&lt;/b&gt; searches the file, which beats scrolling once a config grows past a screen.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/04-termux-nano-editor-shortcuts.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/04-termux-nano-editor-shortcuts.webp" type="image/webp"/&gt;
+    &lt;img alt="A nano style editor window with highlighted lines, a pencil and a row of shortcut keys along the bottom" decoding="async" height="563" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/04-termux-nano-editor-shortcuts.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Nano keeps its shortcuts on screen, so you never have to remember them all.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;On a phone keyboard, Ctrl lives in Termux's extra keys row. If you do not see that row above your keyboard, switch it on once and it stays on:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;mkdir -p ~/.termux
+nano ~/.termux/termux.properties
+termux-reload-settings&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Inside that file, uncomment or add one line defining the extra keys, save with Ctrl+O, exit with Ctrl+X, then run &lt;code&gt;termux-reload-settings&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;extra-keys = [['ESC','/','-','HOME','UP','END','PGUP'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That single line is the difference between editing a file on your phone and wrestling your phone. CTRL, ALT, ESC and the arrow keys, always one tap above the keyboard.&lt;/p&gt;
+
+&lt;h2&gt;Deleting files and folders without regrets&lt;/h2&gt;
+
+&lt;p&gt;Deletion is where my bus-ride story went wrong, so here is the part most tutorials skip. There is no trash bin in a terminal. &lt;code&gt;rm&lt;/code&gt; removes a file immediately and silently, and &lt;code&gt;rm -r&lt;/code&gt; does the same to a folder and everything inside it:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;rm draft.txt
+rm -r old-folder
+rmdir empty-folder
+rm -i important.txt&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;rmdir&lt;/code&gt; only deletes a directory that is already empty, which makes it the safe choice when you are not sure what is inside. &lt;code&gt;rm -i&lt;/code&gt; asks for confirmation before every single file, slow but forgiving. And the habit that would have saved my folder: before any risky &lt;code&gt;rm -r&lt;/code&gt;, copy the folder somewhere with &lt;code&gt;cp -r&lt;/code&gt;, or commit it to Git. A delete you can undo is just a move.&lt;/p&gt;
+
+&lt;h2&gt;Small habits that make Termux feel like a real machine&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Learn the volume-key shortcuts.&lt;/b&gt; Volume Up + E sends ESC, Volume Up + T sends Tab, and Volume Up + W, A, S, D are the arrow keys. Four combinations and nano stops fighting you.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Long-press the terminal&lt;/b&gt; for the context menu: select text, paste, share output, and a More entry with the rest.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Swipe from the left edge&lt;/b&gt; to open the sessions drawer and run several terminals at once, one for Git and one for editing.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Keep your setup in a repo.&lt;/b&gt; Put &lt;code&gt;termux.properties&lt;/code&gt;, your shell config and your nano config in a dotfiles repository; a fresh phone becomes yours again after one &lt;code&gt;git clone&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/05-termux-command-checklist-recap.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/05-termux-command-checklist-recap.webp" type="image/webp"/&gt;
+    &lt;img alt="A hand holding a phone showing a five item checklist, surrounded by icons for packages, git, editing and folders" decoding="async" height="563" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-17-termux-commands-git-nano/images/05-termux-command-checklist-recap.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The whole workflow fits on one screen: install, navigate, clone, edit, back up.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;Quick recap&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Install Termux from F-Droid or the GitHub releases, never the stale Play Store build, then run &lt;code&gt;pkg update&lt;/code&gt;, &lt;code&gt;pkg upgrade&lt;/code&gt; and &lt;code&gt;termux-setup-storage&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Eight commands cover daily file work: &lt;code&gt;pwd&lt;/code&gt;, &lt;code&gt;ls&lt;/code&gt;, &lt;code&gt;cd&lt;/code&gt;, &lt;code&gt;mkdir&lt;/code&gt;, &lt;code&gt;touch&lt;/code&gt;, &lt;code&gt;cp&lt;/code&gt;, &lt;code&gt;mv&lt;/code&gt; and &lt;code&gt;rm&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pkg install git nano&lt;/code&gt; adds version control and a text editor in one line.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;git clone&lt;/code&gt; once, then live in the loop: &lt;code&gt;git status&lt;/code&gt;, &lt;code&gt;git add&lt;/code&gt;, &lt;code&gt;git commit&lt;/code&gt;, &lt;code&gt;git pull&lt;/code&gt;, &lt;code&gt;git push&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;nano filename&lt;/code&gt; creates or edits a file; Ctrl+O saves, Ctrl+X exits. Delete with care, because &lt;code&gt;rm&lt;/code&gt; has no undo.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;None of this needs a computer, a root hack or a paid app, just ten minutes with a keyboard on your phone. Open Termux tonight, clone one repository and change one line with nano; that single loop is the entire skill. Next up: the Termux packages worth installing after the basics, from Python and OpenSSH to running a small web server from your pocket.&lt;/p&gt;</content>
+    <blogger:metaDescription>New to Termux? These are the everyday commands that matter, from storage setup to git clone and editing files with nano, all typed on your phone.</blogger:metaDescription>
+    <blogger:created>2026-09-17T00:00:00.000+00:00</blogger:created>
+    <published>2026-09-17T00:00:00.000+00:00</published>
+    <updated>2026-09-17T00:00:00.000+00:00</updated>
+    <blogger:location/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Termux"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Android"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Command Line"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Git"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="GitHub"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Nano"/>
+    <blogger:filename>/2026/09/termux-commands-git-nano.html</blogger:filename>
+    <link/>
+    <enclosure/>
+  </entry>
+</feed>
