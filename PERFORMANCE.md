@@ -78,47 +78,51 @@ the end of `<body>` (§1.8): inline, so it is not a request, not a parser pause,
 and not on any page but the home page - so there is still nothing that
 `defer`/`async` would help.
 
-### 1.2 Resource hints
+### 1.2 Resource hints and Preload
 
 ```html
 <link crossorigin='anonymous' href='https://fonts.gstatic.com' rel='preconnect'/>
+<link crossorigin='anonymous' href='https://lh3.googleusercontent.com' rel='preconnect'/>
+<link href='https://lh3.googleusercontent.com' rel='dns-prefetch'/>
 <link crossorigin='anonymous' href='https://cdn.jsdelivr.net' rel='preconnect'/>
 <link href='https://cdn.jsdelivr.net' rel='dns-prefetch'/>
+<link as='font' crossorigin='anonymous' href='https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2' rel='preload' type='font/woff2'/>
 ```
 
-`cdn.jsdelivr.net` serves the hero image, i.e. the LCP element, so its handshake
-now happens in parallel with the HTML instead of after it. `crossorigin` is
-required for the font origin - fonts are always fetched in CORS mode, and
-without it the preconnect opens a connection the browser cannot reuse.
+- **`lh3.googleusercontent.com`**: Blogger's image proxy serves all card thumbnails (`data:post.featuredImage`).
+  Preconnecting to this origin saves ~300-450 ms of DNS/TLS handshake latency on mobile for the homepage LCP image.
+- **`fonts.gstatic.com`**: Font origin. `crossorigin` is required because fonts are always fetched in CORS mode.
+- **`cdn.jsdelivr.net`**: Serves post body images.
+- **Font Preload**: Preloads the primary latin variable font (`Space Grotesk`) directly in `<head>` so text painting
+  (FCP) begins as soon as the font file downloads, without waiting for DOM construction and stylesheet parsing.
 
 ### 1.3 LCP: the hero image
 
-Two different LCP elements, both fixed:
+Two different LCP elements, both optimized:
 
-**Home page** - the first card's image. It was `loading='lazy'`, which is the
-single most damaging thing you can do to an LCP candidate: a lazy image is not
-requested until after layout, so the browser discovers its own largest element
-last. The card loop now exposes its index:
+**Home page** - the first card's image:
+1. It is eager loaded with high priority:
+   ```xml
+   expr:fetchpriority='data:isFirst ? "high" : "auto"'
+   expr:loading='data:isFirst ? "eager" : "lazy"'
+   ```
+2. It uses Blogger's built-in image resizing operator:
+   ```xml
+   expr:src='resizeImage(data:post.featuredImage, 640, "16:9")'
+   ```
+   Instead of downloading the uncompressed raw 1200px+ original, Google's proxy crops and scales the image to 640px,
+   cutting transfer size by over 60%.
+3. In the sidebar, `PopularPosts` uses `resizeImage(data:post.featuredImage, 72, "1:1")` to serve ~1.5 KB thumbnails
+   instead of full 50-100 KB images.
 
-```xml
-<b:loop index='i' values='data:posts' var='post'>
-  <b:with value='data:i == 0' var='isFirst'>
-    <b:include data='post' name='indexCard'/>
-  </b:with>
-```
-
-and `cardImage` renders the first card eager at high priority, every later card
-lazy:
-
-```xml
-expr:fetchpriority='data:isFirst ? "high" : "auto"'
-expr:loading='data:isFirst ? "eager" : "lazy"'
-```
-
-**Post page** - the feature image. `build_import.py` marks the first `<img>` in
-the body `loading="eager" fetchpriority="high"` and every later one
-`loading="lazy" decoding="async"`. The build *enforces* this (`perf_checks()`),
-so a post cannot ship with a lazy hero.
+**Post page** - the feature image:
+1. `build_import.py` marks the first `<img>` in the body `loading="eager" fetchpriority="high"` and every later one
+   `loading="lazy" decoding="async"`.
+2. **Strict Hero Image Size Budget**:
+   - Max width: **1200px** (never upload 1400px+ images).
+   - Max JPG size: **≤ 70 KB** (warning at 60 KB; build/check_perf fails if > 80 KB).
+   - Max AVIF size: **≤ 30 KB** (build/check_perf fails if > 30 KB).
+   This ensures that under throttled mobile Slow 4G (1.6 Mbps), the image transfer completes in under 150 ms.
 
 ### 1.4 CLS: reserving space
 
@@ -232,11 +236,10 @@ metrics above. Budget, line by line:
   `<b:if cond='data:view.isHomepage'>`; every other view ships neither. Item
   pages keep exactly the weight they had.
 - **FCP / LCP: untouched.** The script is inline at the end of `<body>`, so it
-  is neither a request nor a parser pause, and the two data fetches wait for
-  `window.load` + `requestIdleCallback` - they start after LCP has already
-  resolved. No `<link>` hints were added for their origins: an idle-time
-  connection does not need a preconnect, and the head stays exactly as audited.
-  (Do not be tempted to "speed them up" - idle is the point.)
+  is neither a request nor a parser pause. The two network fetches (`abacus.jasoncameron.dev`
+  and `ipwho.is`) are deferred to true browser idle via `requestIdleCallback` (with a 3.5s timeout /
+  2.5s fallback) so they never contest bandwidth with the LCP image or critical path assets during
+  initial page load.
 - **Zero image/font cost.** Icons are inline SVG in `currentColor`; the country
   flag is an emoji composed from the ISO code with `String.fromCodePoint`
   (each regional indicator letter = codepoint + 127397), so there is no flag

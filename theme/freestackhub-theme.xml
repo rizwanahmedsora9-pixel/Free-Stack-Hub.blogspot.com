@@ -12,13 +12,18 @@
   <meta content='#1F6F5C' name='theme-color'/>
   <title><data:blog.pageTitle/></title>
 
-  <!-- Open the two sockets this page actually fetches from before anything asks
-       for them: fonts.gstatic.com for the two woff2 files declared in the skin
-       below, and cdn.jsdelivr.net, which serves every post image - including the
-       home page's first card image, i.e. the LCP element. -->
+  <!-- Open the sockets this page actually fetches from before anything asks
+       for them: fonts.gstatic.com for the woff2 files declared in the skin below,
+       lh3.googleusercontent.com which serves Blogger's image proxy for homepage cards
+       (the LCP element on home/listing views), and cdn.jsdelivr.net which serves
+       post body images. Preload the primary UI/heading font (Space Grotesk) so FCP
+       paints without waiting for CSS/DOM discovery. -->
   <link crossorigin='anonymous' href='https://fonts.gstatic.com' rel='preconnect'/>
+  <link crossorigin='anonymous' href='https://lh3.googleusercontent.com' rel='preconnect'/>
+  <link href='https://lh3.googleusercontent.com' rel='dns-prefetch'/>
   <link crossorigin='anonymous' href='https://cdn.jsdelivr.net' rel='preconnect'/>
   <link href='https://cdn.jsdelivr.net' rel='dns-prefetch'/>
+  <link as='font' crossorigin='anonymous' href='https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2' rel='preload' type='font/woff2'/>
 
   <b:include data='blog' name='all-head-content'/>
 
@@ -521,12 +526,12 @@
           <b:includable id='cardImage' var='post'>
             <b:if cond='data:post.featuredImage'>
               <a aria-hidden='true' class='card-media' expr:href='data:post.url' tabindex='-1'>
-                <img decoding='async' expr:alt='data:post.title' expr:fetchpriority='data:isFirst ? &quot;high&quot; : &quot;auto&quot;' expr:loading='data:isFirst ? &quot;eager&quot; : &quot;lazy&quot;' expr:src='data:post.featuredImage' height='360' width='640'/>
+                <img decoding='async' expr:alt='data:post.title' expr:fetchpriority='data:isFirst ? &quot;high&quot; : &quot;auto&quot;' expr:loading='data:isFirst ? &quot;eager&quot; : &quot;lazy&quot;' expr:src='resizeImage(data:post.featuredImage, 640, &quot;16:9&quot;)' height='360' width='640'/>
               </a>
             <b:else/>
               <b:if cond='data:post.thumbnailUrl'>
                 <a aria-hidden='true' class='card-media' expr:href='data:post.url' tabindex='-1'>
-                  <img decoding='async' expr:alt='data:post.title' expr:fetchpriority='data:isFirst ? &quot;high&quot; : &quot;auto&quot;' expr:loading='data:isFirst ? &quot;eager&quot; : &quot;lazy&quot;' expr:src='data:post.thumbnailUrl' height='360' width='640'/>
+                  <img decoding='async' expr:alt='data:post.title' expr:fetchpriority='data:isFirst ? &quot;high&quot; : &quot;auto&quot;' expr:loading='data:isFirst ? &quot;eager&quot; : &quot;lazy&quot;' expr:src='resizeImage(data:post.thumbnailUrl, 640, &quot;16:9&quot;)' height='360' width='640'/>
                 </a>
               </b:if>
             </b:if>
@@ -632,7 +637,7 @@
                     <li>
                       <a expr:href='data:post.href' expr:title='data:post.title'>
                         <b:if cond='data:post.featuredImage'>
-                          <img aria-hidden='true' decoding='async' expr:alt='data:post.title' expr:src='data:post.featuredImage' height='56' loading='lazy' width='56'/>
+                          <img aria-hidden='true' decoding='async' expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 72, &quot;1:1&quot;)' height='56' loading='lazy' width='56'/>
                         </b:if>
                         <span><data:post.title/></span>
                       </a>
@@ -726,32 +731,39 @@
     setInterval(tick, 1000);
 
     addEventListener('load', function () {
-      (window.requestIdleCallback || function (f) { setTimeout(f, 400); })(function () {
-        /* total visits: Abacus, a free open page-view counter - one
-           ~300-byte JSON GET; /hit/ creates the counter on first call,
-           no key and no account. Failure leaves the em dash, no retry. */
-        fetch('https://abacus.jasoncameron.dev/hit/freestackhub/visits')
-          .then(function (r) { return r.json(); })
-          .then(function (d) { if (d && d.value) { countUp(byId('visitTotal'), +d.value); } })
-          .catch(function () {});
+      var deferFetches = function () {
+        (window.requestIdleCallback || function (f) { setTimeout(f, 1000); })(function () {
+          /* total visits: Abacus, a free open page-view counter - one
+             ~300-byte JSON GET; /hit/ creates the counter on first call,
+             no key and no account. Failure leaves the em dash, no retry. */
+          fetch('https://abacus.jasoncameron.dev/hit/freestackhub/visits')
+            .then(function (r) { return r.json(); })
+            .then(function (d) { if (d && d.value) { countUp(byId('visitTotal'), +d.value); } })
+            .catch(function () {});
 
-        /* the visitor's own country: ipwho.is free geo lookup - one
-           ~500-byte JSON GET. The flag is an emoji built from the ISO
-           code: no flag sprite, no image request. */
-        fetch('https://ipwho.is/')
-          .then(function (r) { return r.json(); })
-          .then(function (d) {
-            if (!d || !d.success) { return; }
-            var name = byId('visitCountry');
-            if (name && d.country) { name.textContent = d.country; }
-            var code = (d.country_code || '').toUpperCase();
-            if (/^[A-Z]{2}$/.test(code) && byId('visitFlag')) {
-              byId('visitFlag').textContent = String.fromCodePoint(
-                code.charCodeAt(0) + 127397, code.charCodeAt(1) + 127397) + ' ';
-            }
-          })
-          .catch(function () {});
-      });
+          /* the visitor's own country: ipwho.is free geo lookup - one
+             ~500-byte JSON GET. The flag is an emoji built from the ISO
+             code: no flag sprite, no image request. */
+          fetch('https://ipwho.is/')
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (!d || !d.success) { return; }
+              var name = byId('visitCountry');
+              if (name && d.country) { name.textContent = d.country; }
+              var code = (d.country_code || '').toUpperCase();
+              if (/^[A-Z]{2}$/.test(code) && byId('visitFlag')) {
+                byId('visitFlag').textContent = String.fromCodePoint(
+                  code.charCodeAt(0) + 127397, code.charCodeAt(1) + 127397) + ' ';
+              }
+            })
+            .catch(function () {});
+        });
+      };
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(deferFetches, { timeout: 3500 });
+      } else {
+        setTimeout(deferFetches, 2500);
+      }
     });
   })();
   //]]>

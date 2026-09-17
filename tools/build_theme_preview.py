@@ -217,7 +217,11 @@ def build(post: dict) -> str:
   <meta content="{SITE_DESCRIPTION}" name="description"/>
   <meta content="#1F6F5C" name="theme-color"/>
   <link crossorigin="anonymous" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link crossorigin="anonymous" href="https://lh3.googleusercontent.com" rel="preconnect"/>
+  <link href="https://lh3.googleusercontent.com" rel="dns-prefetch"/>
   <link crossorigin="anonymous" href="https://cdn.jsdelivr.net" rel="preconnect"/>
+  <link href="https://cdn.jsdelivr.net" rel="dns-prefetch"/>
+  <link as="font" crossorigin="anonymous" href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2" rel="preload" type="font/woff2"/>
   <!-- No <link rel=stylesheet> to Google Fonts here: the @font-face rules are
        inlined in the skin CSS just below, exactly like in the Blogger theme. -->
   <style>
