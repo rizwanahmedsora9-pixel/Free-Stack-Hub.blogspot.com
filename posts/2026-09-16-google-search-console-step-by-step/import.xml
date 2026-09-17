@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-16T20:57:27.495+00:00</updated>
+  <updated>2026-09-17T04:51:57.502+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -19,7 +19,7 @@
   &lt;picture&gt;
     &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-google-search-console-step-by-step/images/01-search-console-first-look.avif" type="image/avif"/&gt;
     &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-google-search-console-step-by-step/images/01-search-console-first-look.webp" type="image/webp"/&gt;
-    &lt;img alt="A blog writer at a laptop watching a Search Console dashboard where the page just turned green and shows up on Google" decoding="async" fetchpriority="high" height="768" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-google-search-console-step-by-step/images/01-search-console-first-look.jpg" style="max-width:100%; height:auto;" width="1408"/&gt;
+    &lt;img alt="A blog writer at a laptop watching a Search Console dashboard where the page just turned green and shows up on Google" decoding="async" fetchpriority="high" height="655" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-16-google-search-console-step-by-step/images/01-search-console-first-look.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The moment the dashboard stops guessing and tells you, in so many words, that Google has your page.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;

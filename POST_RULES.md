@@ -68,8 +68,14 @@ still matters for feeds and for any view Blogger trims at the break, so keep wri
 - In `post.html` reference them by **bare file name only**: `<img src="01-hero.jpg" alt="…">`.
   Write **no** `width`, `height`, `<picture>`, `loading` or `fetchpriority` - the build adds all
   of them from the file itself, and overwrites anything you typed (section 5).
-- Every image needs `alt` text. Keep files under ~150 KB (JPG for photos/illustrations); the hero
-  image is the post page's LCP element, so the smaller it is the faster the page measures.
+- Every image needs `alt` text.
+- **Strict Hero Image (01-hero) LCP Budget (enforced by build & audit)**:
+  The first image (`01-hero.jpg`) is the post page's **LCP element** and feeds Blogger's homepage card.
+  To ensure mobile and desktop LCP stays consistently low (under 2.5s on mobile Slow 4G):
+  1. **Maximum width: 1200px** (e.g., 1200x675 for 16:9, or 1200x480). Never save 1400px+ images.
+  2. **Hero JPG size limit: ≤ 70 KB** (warns above 60 KB; hard fail by `build_import.py` and `check_perf.py` at > 80 KB).
+  3. **Hero AVIF variant size: ≤ 30 KB** (hard fail at > 30 KB).
+  4. Subsequent body images: keep under ~100 KB JPG.
 - Generate the modern-format variants, and commit them next to the JPGs:
 
   ```bash
@@ -192,16 +198,22 @@ of truth, and `check_published.py` reports the pair as a mismatch (exit 1).
 
 ## 10. Performance, accessibility and SEO (check before every merge)
 ```bash
-python3 tools/check_perf.py             # 88 checks; exit 1 if one would fail a Lighthouse audit
+python3 tools/check_perf.py             # 128+ checks; exit 1 if one would fail a Lighthouse audit
 python3 tools/check_perf.py --verbose   # list the passing checks too
 ```
 It runs offline with nothing but the standard library, and audits `theme/freestackhub-theme.xml`,
-`theme/preview.html` and every post against the four PageSpeed categories: no render-blocking
-resource in the head, fonts inlined with `font-display:swap` plus metric-adjusted fallbacks,
-preconnect to both origins, explicit `width`/`height` on every image, the LCP image eager at high
-priority, AVIF ahead of WebP with a JPG fallback, an accessible name on every link and button,
-contrast ≥ 4.5:1 (including the inline colours in a post body), one `<h1>`, no skipped heading
-level, a skip link, and exactly one 120-160 character meta description.
+`theme/preview.html` and every post against Core Web Vitals and PageSpeed categories:
+- **Low FCP**: No render-blocking stylesheets in head, fonts inlined with `font-display:swap`,
+  primary font `Space Grotesk` preloaded in `<head>`, and preconnects to Google Fonts,
+  Blogger image CDN (`lh3.googleusercontent.com`), and jsDelivr.
+- **Low LCP**: Hero image strictly capped (≤ 1200px width, ≤ 70 KB JPG, ≤ 30 KB AVIF), marked
+  `loading="eager"` + `fetchpriority="high"`, homepage cards scaled via `resizeImage(..., 640, "16:9")`,
+  sidebar thumbnails scaled via `resizeImage(..., 72, "1:1")`, and third-party analytics deferred to idle.
+- **Zero CLS**: Explicit `width`/`height` on every image derived from the file's real pixels,
+  metric-adjusted font fallbacks to absorb font-swap reflow, and fixed 16:9 aspect-ratio containers.
+- **Accessibility, SEO & Best Practices**: Accessible names on every link and button, contrast ≥ 4.5:1
+  (including inline colours in post bodies), exactly one `<h1>`, no skipped headings, skip link,
+  and 120-160 character meta description.
 
 What it cannot check is Blogger's own widget CSS/JS, which is not ours to remove. **[PERFORMANCE.md](PERFORMANCE.md)
 has the full reasoning, the measured numbers, and what to do if the live report still fails.**

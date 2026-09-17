@@ -198,7 +198,12 @@ def upgrade_picture(block: str, img_dir: Path, rel: str, hero: str, indent: str,
             + f"\n{indent}</picture>", referenced)
 
 
-def perf_checks(body: str) -> list:
+HERO_MAX_BYTES = 80_000        # 80 KB max for hero JPG
+HERO_MAX_WIDTH = 1200          # 1200px max width for hero image
+HERO_AVIF_MAX_BYTES = 30_000   # 30 KB max for hero AVIF variant
+
+
+def perf_checks(body: str, img_dir: Path = None, hero: str = "") -> list:
     """Fail the build on the Core Web Vitals mistakes a post could still make.
 
     These are the audits upgrade_picture() exists to pass; the checks stay here
@@ -218,6 +223,27 @@ def perf_checks(body: str) -> list:
                 problems.append("the first image is the LCP element - it must not be loading=lazy")
             if attr(tag, "fetchpriority").lower() != "high":
                 problems.append("the first image is the LCP element - it needs fetchpriority=high")
+            if img_dir and hero:
+                hero_path = img_dir / hero
+                if hero_path.exists():
+                    sz = hero_path.stat().st_size
+                    if sz > HERO_MAX_BYTES:
+                        problems.append(
+                            f"hero image {hero} is {sz / 1024:.1f} KB (exceeds {HERO_MAX_BYTES / 1024:.0f} KB limit). "
+                            f"Compress it to keep mobile LCP fast."
+                        )
+                    dims = identify(hero_path)
+                    if dims and dims[0] > HERO_MAX_WIDTH:
+                        problems.append(
+                            f"hero image {hero} width is {dims[0]}px (exceeds {HERO_MAX_WIDTH}px limit). "
+                            f"Resize it to max 1200px width."
+                        )
+                    avif_variant = hero_path.with_suffix(".avif")
+                    if avif_variant.exists() and avif_variant.stat().st_size > HERO_AVIF_MAX_BYTES:
+                        problems.append(
+                            f"hero AVIF variant {avif_variant.name} is {avif_variant.stat().st_size / 1024:.1f} KB "
+                            f"(exceeds {HERO_AVIF_MAX_BYTES / 1024:.0f} KB limit)."
+                        )
         elif loading != "lazy":
             problems.append(f"{name} is below the fold - give it loading=lazy")
     return problems
@@ -284,7 +310,7 @@ def load_post(folder: Path) -> dict:
     used = set(assets)
     unused = sorted(p.name for p in img_dir.glob("*") if p.is_file()) if img_dir.exists() else []
     unused = [n for n in unused if n not in used and not n.startswith(".")]
-    problems.extend(perf_checks(body))
+    problems.extend(perf_checks(body, img_dir, hero))
 
     # --- jump break (the "Read More" split Blogger renders on the homepage) ---
     teaser, jump_after = body, ""

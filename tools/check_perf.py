@@ -42,7 +42,10 @@ THEME = ROOT / "theme" / "freestackhub-theme.xml"
 PREVIEW = ROOT / "theme" / "preview.html"
 
 DESC_MIN, DESC_MAX = 120, 160
-LCP_IMAGE_WIDTH_LIMIT = 160_000     # ~160 KB: above this an LCP image is a problem
+HERO_IMAGE_WARN_BYTES = 60_000      # ~60 KB: warn to compress
+HERO_IMAGE_MAX_BYTES = 80_000       # ~80 KB: hard cap for LCP hero image
+HERO_IMAGE_MAX_WIDTH = 1200         # 1200px: max width for hero images
+HERO_AVIF_MAX_BYTES = 30_000        # ~30 KB: AVIF variant hard cap
 
 TAG_RE = re.compile(r"<[^>]+>")
 COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
@@ -324,13 +327,23 @@ def check_html(rep: Report, path: Path, raw: str):
     else:
         rep.warn("no @font-face found - is the skin inlined?")
 
-    rep.head(f"[{path.name}] performance - preconnect")
-    for origin in ("fonts.gstatic.com", "cdn.jsdelivr.net"):
+    rep.head(f"[{path.name}] performance - preconnect and preload")
+    for origin in ("fonts.gstatic.com", "cdn.jsdelivr.net", "lh3.googleusercontent.com"):
         if re.search(rf"<link\b[^>]*href=['\"]https://{re.escape(origin)}['\"][^>]*rel=['\"]?preconnect", doc, re.I) \
            or re.search(rf"<link\b[^>]*rel=['\"]?preconnect['\"]?[^>]*href=['\"]https://{re.escape(origin)}", doc, re.I):
             rep.ok(f"preconnect to {origin}")
         else:
             rep.fail(f"no preconnect to {origin} - the LCP image and the fonts pay DNS+TLS on the critical path")
+    has_font_preload = any(
+        re.search(r"\brel=['\"]?preload['\"]?", tag, re.I)
+        and re.search(r"\bas=['\"]?font['\"]?", tag, re.I)
+        and "spacegrotesk" in tag.lower()
+        for tag in re.findall(r"<link\b[^>]*>", head, re.I)
+    )
+    if has_font_preload:
+        rep.ok("primary font (Space Grotesk) preloaded for fast FCP")
+    else:
+        rep.fail("no preload for primary font in <head> - FCP waits on CSS/DOM font discovery")
 
     rep.head(f"[{path.name}] performance - CLS / image dimensions")
     imgs = IMG_RE.findall(doc)
@@ -534,12 +547,17 @@ def check_theme(rep: Report):
         rep.fail("the theme adds a parser-blocking <script src> to <head>")
     else:
         rep.ok("the theme adds no <script src> of its own")
-    for origin in ("fonts.gstatic.com", "cdn.jsdelivr.net"):
+    for origin in ("fonts.gstatic.com", "cdn.jsdelivr.net", "lh3.googleusercontent.com"):
         links = re.findall(r"<link\b[^>]*>", head, re.I)
         if any(ATTR(l, "rel").lower() == "preconnect" and origin in ATTR(l, "href") for l in links):
             rep.ok(f"preconnect to {origin}")
         else:
             rep.fail(f"no preconnect to {origin} in the theme head")
+    links = re.findall(r"<link\b[^>]*>", head, re.I)
+    if any(ATTR(l, "rel").lower() == "preload" and ATTR(l, "as").lower() == "font" and "spacegrotesk" in ATTR(l, "href").lower() for l in links):
+        rep.ok("primary font (Space Grotesk) preloaded in theme head for fast FCP")
+    else:
+        rep.fail("no preload for primary font in theme head - FCP waits on CSS/DOM font discovery")
 
     rep.head("[theme] performance - fonts and motion")
     webfonts = re.findall(r"font-family:'([^']+)'", skin)
@@ -673,8 +691,19 @@ def check_post(rep: Report, folder: Path):
             avif = stem.with_suffix(".avif")
             saved = 100 - 100 * avif.stat().st_size / local.stat().st_size
             rep.ok(f"{local.name} has AVIF (-{saved:.0f}%) and WebP variants")
-        if tag is imgs[0] and local.stat().st_size > LCP_IMAGE_WIDTH_LIMIT:
-            rep.warn(f"the LCP image is {local.stat().st_size / 1024:.0f} KB - worth compressing further")
+        if tag is imgs[0]:
+            if local.stat().st_size > HERO_IMAGE_MAX_BYTES:
+                rep.fail(f"the LCP hero image {local.name} is {local.stat().st_size / 1024:.1f} KB - "
+                         f"exceeds {HERO_IMAGE_MAX_BYTES / 1024:.0f} KB limit; ruins mobile LCP")
+            elif local.stat().st_size > HERO_IMAGE_WARN_BYTES:
+                rep.warn(f"the LCP hero image is {local.stat().st_size / 1024:.1f} KB - worth compressing further")
+            else:
+                rep.ok(f"the LCP hero image is {local.stat().st_size / 1024:.1f} KB (under budget)")
+            if size and size[0] > HERO_IMAGE_MAX_WIDTH:
+                rep.fail(f"the LCP hero image width is {size[0]}px - exceeds {HERO_IMAGE_MAX_WIDTH}px limit")
+            avif = stem.with_suffix(".avif")
+            if avif.exists() and avif.stat().st_size > HERO_AVIF_MAX_BYTES:
+                rep.fail(f"the LCP hero AVIF is {avif.stat().st_size / 1024:.1f} KB - exceeds {HERO_AVIF_MAX_BYTES / 1024:.0f} KB limit")
 
 
 def check_drift(rep: Report, theme_doc: str):
