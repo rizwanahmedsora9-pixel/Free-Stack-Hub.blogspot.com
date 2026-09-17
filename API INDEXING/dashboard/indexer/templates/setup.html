@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Setup{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h1>Setup</h1>
+    <p class="lead">Connect a Google service account, choose the Search Console property, and you're done. Or try the console with simulated data first.</p>
+  </div>
+</div>
+
+<div class="grid two">
+  <section class="card">
+    <div class="card-head">
+      <h2>1 · Service account key</h2>
+      {% if key_present and mode == 'live' %}<span class="pill ok">Connected</span>{% elif mode == 'demo' %}<span class="pill info">Demo</span>{% else %}<span class="pill muted">Not connected</span>{% endif %}
+    </div>
+    {% if connected and mode == 'live' %}
+      <p class="ok-line">✓ <strong>{{ account_email }}</strong></p>
+      <p class="hint">This email must be an <strong>Owner</strong> of the property in Search Console → Settings → Users and permissions. The Indexing API refuses anything less.</p>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" class="form">
+      <input type="hidden" name="action" value="upload">
+      <label class="filedrop" id="filedrop">
+        <input type="file" name="keyfile" accept=".json,application/json" required>
+        <span class="filedrop-icon">⇪</span>
+        <span class="filedrop-text"><b>Choose the JSON key</b> or drop it here<br><small>Downloaded from Google Cloud → IAM → Service Accounts → Keys</small></span>
+      </label>
+      <button class="btn primary" type="submit">{{ 'Replace key & connect' if connected and mode == 'live' else 'Upload & connect' }}</button>
+    </form>
+    <p class="hint">The key is stored only in <code>instance/service_account.json</code> on this machine (git-ignored, mode 600). Uploading a key while in demo mode wipes the demo data.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>2 · Search Console property</h2>
+      {% if connected %}<form method="post"><input type="hidden" name="action" value="refresh"><button class="btn ghost xs" type="submit">Refresh list</button></form>{% endif %}
+    </div>
+    {% if not connected %}
+      <p class="muted">Upload a key first — the list of properties this account can see appears here.</p>
+    {% elif properties %}
+      <form method="post" class="form">
+        <input type="hidden" name="action" value="select">
+        <div class="radio-list">
+        {% for p in properties %}
+          <label class="radio-row {{ 'checked' if p.site_url == settings.site_url }}">
+            <input type="radio" name="site_url" value="{{ p.site_url }}" {{ 'checked' if p.site_url == settings.site_url }}>
+            <span class="mono">{{ p.site_url }}</span>
+            <span class="pill {{ 'ok' if p.permission_level == 'siteOwner' else 'warn' }}">{{ p.permission_level }}</span>
+          </label>
+        {% endfor %}
+        </div>
+        <button class="btn primary" type="submit">Use selected property</button>
+      </form>
+      {% for p in properties if p.permission_level != 'siteOwner' %}
+        {% if loop.first %}<p class="hint warn-text">⚠ Properties without <b>siteOwner</b> can be inspected but not pushed — the Indexing API needs Owner.</p>{% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="warn-text">This account cannot see any property yet.</p>
+      <ol class="steps">
+        <li>Open Search Console → the property → <b>Settings → Users and permissions</b></li>
+        <li>Add user: <code>{{ account_email }}</code></li>
+        <li>Permission: <b>Owner</b></li>
+        <li>Click <b>Refresh list</b> above</li>
+      </ol>
+    {% endif %}
+    {% if connected %}
+    <details class="mt">
+      <summary>Type the property manually</summary>
+      <form method="post" class="form inline">
+        <input type="hidden" name="action" value="manual">
+        <input type="text" name="site_url" placeholder="https://freestackhub.blogspot.com/ or sc-domain:example.com" value="{{ settings.site_url }}">
+        <button class="btn" type="submit">Save</button>
+      </form>
+      <p class="hint">Must match Google's string exactly (trailing slash included). The list above is safer.</p>
+    </details>
+    {% endif %}
+  </section>
+</div>
+
+<div class="grid two">
+  <section class="card">
+    <div class="card-head"><h2>Try it without a key</h2><span class="pill info">Demo</span></div>
+    <p>Loads this blog's real post list plus a few sample posts, and simulates Google's answers. Pushed URLs get "crawled" after about a minute and "indexed" after three, so you can watch the whole flow.</p>
+    <form method="post"><input type="hidden" name="action" value="demo"><button class="btn" type="submit">{{ 'Restart demo' if mode == 'demo' else 'Start demo mode' }}</button></form>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Google Cloud checklist</h2></div>
+    <ol class="steps">
+      <li>console.cloud.google.com → create / pick a project</li>
+      <li>APIs &amp; Services → Library → enable <b>Web Search Indexing API</b> and <b>Google Search Console API</b></li>
+      <li>IAM &amp; Admin → Service Accounts → Create → Keys → <b>Add key → JSON</b></li>
+      <li>Search Console → property → Settings → Users and permissions → add the service-account email as <b>Owner</b></li>
+    </ol>
+    {% if connected %}
+    <details class="mt danger-zone">
+      <summary>Disconnect &amp; wipe</summary>
+      <p class="hint">Deletes the key file and every local record (URLs, inspections, request log).</p>
+      <form method="post" onsubmit="return confirm('Delete the key and all local data?')"><input type="hidden" name="action" value="disconnect"><button class="btn danger" type="submit">Disconnect and delete everything</button></form>
+    </details>
+    {% endif %}
+  </section>
+</div>
+
+{% endblock %}

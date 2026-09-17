@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h1>Settings</h1>
+    <p class="lead">Pacing, quota reserves and optional automation. Defaults are safe for a Blogger blog.</p>
+  </div>
+</div>
+
+<form method="post" class="grid two">
+  <section class="card">
+    <div class="card-head"><h2>Pacing &amp; quota</h2></div>
+    <div class="form">
+      <label>Delay between inspections (ms) <small>Google allows 600/min; 300 ms ≈ 200/min</small></label>
+      <input type="number" name="inspect_delay_ms" min="100" step="50" value="{{ settings.inspect_delay_ms }}">
+      <label>Delay between pushes (ms)</label>
+      <input type="number" name="publish_delay_ms" min="0" step="50" value="{{ settings.publish_delay_ms }}">
+      <label>Publish reserve <small>bulk push jobs stop when this many of the 200 daily calls are left</small></label>
+      <input type="number" name="publish_reserve" min="0" max="200" value="{{ settings.publish_reserve }}">
+      <label>Inspection reserve <small>bulk inspect jobs stop when this many of the 2,000 daily calls are left</small></label>
+      <input type="number" name="inspect_reserve" min="0" max="2000" value="{{ settings.inspect_reserve }}">
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Logic</h2></div>
+    <div class="form">
+      <label>Push wait window (hours) <small>a URL pushed less than this long ago is not pushed again by bulk jobs, and becomes "due for re-check" after it</small></label>
+      <input type="number" name="push_wait_hours" min="1" value="{{ settings.push_wait_hours }}">
+      <label>Inspection is stale after (days)</label>
+      <input type="number" name="stale_inspection_days" min="1" value="{{ settings.stale_inspection_days }}">
+    </div>
+    <div class="card-head mt"><h2>Automation <span class="pill info">optional</span></h2></div>
+    <div class="form">
+      <label>Auto re-check pushed URLs every (hours) <small>0 = off. Runs while the app is running.</small></label>
+      <input type="number" name="auto_recheck_hours" min="0" value="{{ settings.auto_recheck_hours }}">
+      <label>Auto discover new posts every (hours) <small>0 = off. Pulls sitemap + feed so new posts appear without clicking.</small></label>
+      <input type="number" name="auto_discover_hours" min="0" value="{{ settings.auto_discover_hours }}">
+    </div>
+    <button class="btn primary mt" type="submit">Save settings</button>
+  </section>
+</form>
+
+<div class="grid two">
+  <section class="card">
+    <div class="card-head"><h2>Quota right now</h2></div>
+    <dl class="facts">
+      <dt>Indexing API</dt><dd>{{ q.publish_used }} used · {{ q.publish_left }} left · resets in {{ q.publish_resets_in_h }} h</dd>
+      <dt>URL Inspection</dt><dd>{{ q.inspect_used }} used in 24 h · {{ q.inspect_left }} left · {{ q.inspect_minute }} this minute</dd>
+    </dl>
+    <p class="hint">Metadata lookups ("Ask Google for its last notification") count against the Indexing API quota, not Inspection.</p>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Storage</h2></div>
+    <dl class="facts">
+      <dt>Database</dt><dd class="mono small">{{ db_path }}</dd>
+      <dt>Mode</dt><dd>{{ mode or 'not connected' }}</dd>
+    </dl>
+    <div class="actions mt">
+      <a class="btn ghost" href="{{ url_for('export_json') }}">↓ Export JSON</a>
+      <a class="btn ghost" href="{{ url_for('export_csv') }}">↓ Export CSV</a>
+    </div>
+    <p class="hint">Back up the <code>instance/</code> folder to keep history. Never commit it.</p>
+  </section>
+</div>
+
+{% endblock %}

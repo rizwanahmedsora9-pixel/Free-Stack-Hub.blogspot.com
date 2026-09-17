@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}URLs{% endblock %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h1>URLs <span class="count">{{ rows | length }}</span></h1>
+    <p class="lead">Every post and page found in the sitemap and feed, with Google's latest verdict for each.</p>
+  </div>
+  <div class="actions">
+    <form method="post" action="{{ url_for('start_job') }}"><input type="hidden" name="kind" value="discover"><button class="btn" type="submit" {{ 'disabled' if job }}>⟳ Discover</button></form>
+    <details class="dropdown">
+      <summary class="btn">＋ Add URLs</summary>
+      <form method="post" action="{{ url_for('add_url') }}" class="dropdown-panel form">
+        <label>One URL per line</label>
+        <textarea name="urls" rows="5" placeholder="https://freestackhub.blogspot.com/2026/09/example.html"></textarea>
+        <button class="btn primary sm" type="submit">Add</button>
+      </form>
+    </details>
+    <a class="btn ghost" href="{{ url_for('export_csv') }}">↓ CSV</a>
+    <a class="btn ghost" href="{{ url_for('export_json') }}">↓ JSON</a>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="chips">
+    {% for key, (name, _) in FILTERS.items() %}
+      {% if counts[key] or key in ('all','indexed','notindexed','unchecked') %}
+      <a class="chip {{ 'active' if flt == key }} {{ 'zero' if not counts[key] }}" href="{{ url_for('urls', filter=key, sort=sort, q=q, label=label) }}">{{ name }} <b>{{ counts[key] }}</b></a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <form method="get" class="filter-form">
+    <input type="hidden" name="filter" value="{{ flt }}">
+    {% if label %}<input type="hidden" name="label" value="{{ label }}">{% endif %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Search title, URL or coverage…">
+    <select name="sort" onchange="this.form.submit()">
+      {% for k in SORTS %}<option value="{{ k }}" {{ 'selected' if k == sort }}>Sort: {{ k }}</option>{% endfor %}
+    </select>
+    <button class="btn sm" type="submit">Go</button>
+  </form>
+</div>
+{% if top_labels %}
+<div class="labels-row">
+  <span class="muted small">Labels:</span>
+  {% for l, n in top_labels %}
+    <a class="tag {{ 'active' if label == l }}" href="{{ url_for('urls', filter=flt, sort=sort, q=q, label=('' if label == l else l)) }}">{{ l }} <span>{{ n }}</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('start_job') }}" id="bulkForm">
+<div class="bulkbar" id="bulkbar">
+  <span><b id="selCount">0</b> selected</span>
+  <button class="btn sm" type="submit" name="kind" value="inspect_selected" {{ 'disabled' if job }}>Inspect selected</button>
+  <button class="btn sm primary" type="submit" name="kind" value="push_selected" {{ 'disabled' if job }}>Push selected</button>
+  <select name="request_type" class="sm"><option value="URL_UPDATED">URL_UPDATED</option><option value="URL_DELETED">URL_DELETED</option></select>
+  <button class="btn sm ghost" type="button" id="selNone">Clear</button>
+</div>
+
+<section class="card flat table-card">
+{% if rows %}
+<div class="table-scroll">
+<table class="tbl urls">
+  <thead>
+    <tr>
+      <th class="w-check"><input type="checkbox" id="selAll" aria-label="Select all"></th>
+      <th>URL</th>
+      <th>Index status</th>
+      <th>Last crawl</th>
+      <th>Bot</th>
+      <th>Inspected</th>
+      <th>Pushed</th>
+      <th>Source</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in rows %}
+    <tr data-id="{{ u.id }}" class="{{ 'is-ignored' if u.ignored }}">
+      <td class="w-check"><input type="checkbox" name="ids" value="{{ u.id }}" class="sel"></td>
+      <td class="cell-url">
+        {% if u.thumbnail %}<img class="thumb xs" src="{{ u.thumbnail }}" alt="" loading="lazy" onerror="this.remove()">{% endif %}
+        <div>
+          <a href="{{ url_for('url_detail', url_id=u.id) }}" class="title">{{ u.title or u.url }}</a>
+          <div class="path mono">
+            <span class="kind-tag {{ u.kind }}">{{ u.kind }}</span>
+            <a href="{{ u.url }}" target="_blank" rel="noopener" title="Open on the blog">{{ u.url | host }}</a>
+            {% if u.published_at %}<span class="muted">· {{ u.published_at | date }}</span>{% endif %}
+          </div>
+          {% set ls = u.labels | labels %}
+          {% if ls %}<div class="tags">{% for l in ls[:4] %}<a class="tag xs" href="{{ url_for('urls', label=l) }}">{{ l }}</a>{% endfor %}{% if ls|length > 4 %}<span class="tag xs muted">+{{ ls|length - 4 }}</span>{% endif %}</div>{% endif %}
+        </div>
+      </td>
+      <td class="cell-status">
+        {% include "_verdict.html" %}
+        {% if u.coverage %}<div class="small muted cov">{{ u.coverage }}</div>{% endif %}
+        {% if u.google_canonical and u.user_canonical and u.google_canonical != u.user_canonical %}<div class="small warn-text">canonical differs</div>{% endif %}
+      </td>
+      <td class="nowrap cell-crawl">{% if u.last_crawl %}<span title="{{ u.last_crawl | dt }}">{{ u.last_crawl | ago }}</span>{% elif u.verdict and u.verdict != 'ERROR' %}<span class="warn-text">never</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+      <td class="nowrap cell-bot">{% if u.crawled_as %}<span class="bot {{ u.crawled_as|lower }}">{{ '📱' if u.crawled_as == 'MOBILE' else '🖥' }} {{ u.crawled_as|lower }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+      <td class="nowrap cell-insp">{% if u.inspected_at %}<span title="{{ u.inspected_at | dt }}">{{ u.inspected_at | ago }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+      <td class="nowrap cell-push">
+        {% if u.pushed_at %}
+          <span class="{{ 'ok-text' if u.push_status == 'ok' else 'err-text' }}" title="{{ u.pushed_at | dt }}{% if u.push_error %} · {{ u.push_error }}{% endif %}">{{ '✓' if u.push_status == 'ok' else '✕' }} {{ u.pushed_at | ago }}</span>
+          {% if u.push_count > 1 %}<span class="muted small">×{{ u.push_count }}</span>{% endif %}
+        {% else %}<span class="muted">—</span>{% endif %}
+      </td>
+      <td class="nowrap cell-src"><span class="src {{ 'on' if u.in_sitemap }}" title="in sitemap.xml">S</span><span class="src {{ 'on' if u.in_feed }}" title="in feed">F</span></td>
+      <td class="nowrap row-actions">
+        <button class="btn xs js-act" data-act="inspect" data-id="{{ u.id }}" type="button">Inspect</button>
+        <button class="btn xs primary js-act" data-act="push" data-id="{{ u.id }}" type="button" {{ 'disabled' if u.verdict == 'PASS' }}>Push</button>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+  <div class="empty big">
+    {% if counts.all == 0 %}
+      <p>No URLs yet.</p>
+      <button class="btn primary" type="submit" name="kind" value="discover">⟳ Discover URLs from the blog</button>
+    {% else %}
+      <p>Nothing matches this filter.</p>
+    {% endif %}
+  </div>
+{% endif %}
+</section>
+</form>
+
+{% endblock %}

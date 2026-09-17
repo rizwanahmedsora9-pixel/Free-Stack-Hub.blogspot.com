@@ -1,0 +1,5 @@
+# private: service-account key, database, secret, demo state
+instance/*
+!instance/.gitkeep
+__pycache__/
+*.pyc

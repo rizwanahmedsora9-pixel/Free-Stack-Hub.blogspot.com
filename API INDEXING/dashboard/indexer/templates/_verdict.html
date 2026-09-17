@@ -1,0 +1,11 @@
+{%- if u.verdict == 'PASS' -%}
+<span class="pill ok" title="{{ u.coverage }}">Indexed</span>
+{%- elif u.verdict == 'FAIL' -%}
+<span class="pill danger" title="{{ u.coverage }}">Blocked</span>
+{%- elif u.verdict == 'NEUTRAL' -%}
+<span class="pill warn" title="{{ u.coverage }}">Not indexed</span>
+{%- elif u.verdict == 'ERROR' -%}
+<span class="pill danger" title="{{ u.inspect_error }}">Error</span>
+{%- else -%}
+<span class="pill muted">Unchecked</span>
+{%- endif -%}
