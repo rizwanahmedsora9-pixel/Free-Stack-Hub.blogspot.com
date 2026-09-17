@@ -1,0 +1,1 @@
+Termux Commands Worth Memorising: Basics, Git Cloning and Nano on Android
