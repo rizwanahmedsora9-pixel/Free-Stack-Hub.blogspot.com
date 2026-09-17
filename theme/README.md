@@ -97,9 +97,60 @@ on the top edge (the leftover slack of the `min-height:100px` bar sits below bot
 If the two ever cannot share the top edge, the rule is to centre **both** again - never one
 top, one middle.
 
+## The search bar: a combo box above the navbar
+
+The search field moved from under the navbar to **just above it**, and it is no longer a bare
+input: it is a combo box. Type one word and a list drops under the field; keep typing and the
+list narrows, word by word - **every word you have typed has to appear in a title or a label**,
+the last one only as far as you have got, so `git` → `git hub` → `git hub pythonanywhere`
+refines instead of starting over. Word order does not matter, a word matched at the start of a
+title word outranks one matched inside it, and the phrase you typed comes back highlighted in
+`<mark>`.
+
+```
+header  →  search bar (combo box)  →  navbar  →  visitor strip (home only)  →  ad  →  cards
+```
+
+What is in the list, most relevant first: up to **7 posts** (title + its labels), up to **2
+matching labels** ("Category · every post filed under it"), and always **one last row** that
+opens Blogger's own results page for the phrase - so a query that matches nothing still has
+somewhere to go, and the `listbox` always holds at least one `option`, which its role requires.
+Focus the field without typing and it lists the 5 newest posts instead of nothing.
+
+**Where the suggestions come from.** This blog's own feed,
+`<homepageUrl>feeds/posts/summary?alt=json&max-results=250` - the homepage is read back out of
+the form's own `action`, so there is nothing per-blog to configure. It is **same-origin**: no
+CORS handshake, no new origin to preconnect, no third party sees the query. One request,
+fetched on the *first focus or first keystroke* and never during page load, so it cannot
+contest bandwidth with the LCP image; only title, permalink and labels are kept (the feed's
+post text is discarded) and the index then lives in memory for the life of the page. That is
+why every later keystroke is instant and costs **zero requests** - it is local filtering, not
+a search-per-keystroke. Nothing is written to a cookie or to localStorage.
+
+**It is a search form first.** The markup is `role='search'` + one field named `q` + one submit
+button, and the script only adds the list. JavaScript off, no `fetch`, an offline visitor, a
+404 or a blog with nothing published yet all leave exactly what was there before: press Enter
+and Blogger's own `/search?q=` page answers. (With no index loaded the last row says "Search
+the blog for …" rather than "No title matches …", because it would be lying otherwise.)
+
+**Keyboard and screen readers** follow the combobox pattern, which is the part that is easy to
+get wrong: the `input` is `role='combobox'` with `aria-expanded`, `aria-controls` and
+`aria-autocomplete='list'`; the `<ul>` is the `listbox`; the rows are `role='option'` with
+`aria-selected`; and **focus never leaves the field** - rows are reached through
+`aria-activedescendant` and their links are `tabindex='-1'`, so Tab still moves on to the
+navbar instead of walking through nine suggestions. ↑/↓ (either one opens a closed list, and
+they wrap), Enter opens the row you are on, Enter with no row active submits the form, Esc
+closes, and the active row is scrolled inside the panel by hand - `scrollIntoView` can scroll
+the *page* on some browsers, which would move the field out from under the visitor.
+
+`check_perf.py` guards the wiring (the six ARIA attributes, the script being inline between its
+markers, the bar being above the navbar, and six more contrast pairs for the panel), and
+`preview.html` carries the **same script verbatim** plus a sample index built from `posts/`, so
+you can type in the mock and see the real behaviour before uploading.
+
 ## The live visitor strip (home page only)
 
-A slim four-cell strip sits between the search bar and the first ad slot: **total visits ·
+A slim four-cell strip sits between the navbar and the first ad slot: **total visits ·
 your country · your device · local time**, with a pulsing green live dot. Blogger only sends
 it on the main page - the markup and its script are both wrapped in
 `<b:if cond='data:view.isHomepage'>`, so posts, pages, label, search and archive views carry
@@ -137,9 +188,12 @@ families are variable fonts, so a single file covers `font-weight: 400 700` (Spa
 `400 600` (Source Serif 4); the old link asked for four discrete weights that all resolved to the
 same file. `unicode-range` keeps an English page down to the two `latin` files. The theme adds no
 `<script src>` of its own: the cards are pure server-rendered HTML (image + labels + title + date
-+ Read more, no post text), and the only first-party JavaScript anywhere is the live visitor
-strip's ~1 KB inline script - it sits at the end of `<body>`, does nothing until after `load`,
-and is sent on the home page only (see "The live visitor strip" below).
++ Read more, no post text), and the only first-party JavaScript anywhere is two inline scripts at
+the end of `<body>` - the live visitor strip's ~1 KB (home page only, does nothing until after
+`load`) and the search combo box's ~4 KB (every page, does nothing until the field is focused or
+typed in). Neither is a request, neither blocks the parser, and neither runs during page load;
+`check_perf.py` fails the build if a `<script src>` ever appears in the theme. See "The search
+bar" and "The live visitor strip" above.
 
 **Both origins the page fetches from are preconnected:** `fonts.gstatic.com` for the woff2 files
 (with `crossorigin`, which fonts require or the connection cannot be reused) and `cdn.jsdelivr.net`,
@@ -171,8 +225,10 @@ stays "Read more →".
 the page with no focus indicator - and now has a ring, with a global `:focus-visible` rule (light
 ring on the dark nav and footer). Every `target='_blank'` link carries `rel='noopener noreferrer'`.
 The footer copyright moved `#8991A0` → `#A8B0BE`, the placeholder is darkened to `#4A5160`, and all
-13 pairs `check_perf.py` computes from this file now clear 4.5:1. `@media(prefers-reduced-motion)`
-collapses the card and button transitions.
+19 pairs `check_perf.py` computes from this file now clear 4.5:1 - 13 for the page plus the six the
+search drop-down added (rows, the active row, the `<mark>` highlight, the meta line, label rows, the
+see-every-result row). `@media(prefers-reduced-motion)` collapses the card and button transitions;
+the suggestion panel has no animation at all to collapse.
 
 **SEO.** `<b:if cond='not data:blog.metaDescription'>` emits a 146-character description when
 Blogger does not - and this blog does not, because `blog_description` is empty *and*
@@ -195,6 +251,15 @@ the blank line an empty `data:blog.description` leaves.
    Or: **Theme → Edit HTML**, select everything (Ctrl+A) and paste the whole file in, then **Save**.
 3. Open the blog: home page, one label page, and one post page (`/2026/09/…html`). Widgets in the
    sidebar are untouched by the upload - Blogger rebuilds them from the file's `<b:section>`s.
+4. Type a word in the search bar above the navbar and check the list drops, narrows as you keep
+   typing, and that ↑/↓ + Enter open a post. The first keystroke is what fires the one feed
+   request, so a blog that has just been made private or a feed that is off will simply leave the
+   field as a plain search form.
+5. The sidebar widget now reads **Most Viewed Stories**. Its heading is hardcoded in the theme
+   (not `<data:title/>`) precisely because Blogger keeps a widget's *stored* title when a theme is
+   uploaded over an existing layout - so the page cannot come back still saying "Most Downloaded".
+   The `title` attribute is renamed too, which is what the Layout panel shows; if the two ever
+   disagree, the page wins.
 
 Nothing here depends on a Blogger-hosted image, so publishing keeps working exactly as before:
 write the post, build `import.xml`, import it, and the home page picks up the new card.
@@ -217,15 +282,17 @@ mock, not a second copy of the blog: edit the theme or the post, re-run, refresh
   expanded widget back if you re-download it - keep editing this file, not that one.
 - Cards show **no post text**: only the feature image (full width, 16:9, `object-fit: cover`),
   labels, title, date and the Read more button. Captions under the feature image therefore never
-  leak onto the home page. The "Most Downloaded" sidebar widget has a custom includable that
-  renders thumbnail + title only - Blogger's default PopularPosts markup dumps a long snippet
-  under every entry, which is the "dozens of lines" the sidebar used to show.
+  leak onto the home page. The **Most Viewed Stories** sidebar widget (Blogger's `PopularPosts`,
+  which ranks by page views - it was titled "Most Downloaded", a counter this blog does not keep)
+  has a custom includable that renders thumbnail + title only - Blogger's default PopularPosts
+  markup dumps a long snippet under every entry, which is the "dozens of lines" the sidebar used
+  to show. Its heading is hardcoded in the includable, so the rename survives an upload.
 - CSS lives in the `<b:skin>` block: the inlined `@font-face` rules and their metric-adjusted
   fallbacks come first, then the layout, then the additions labelled "List cards (home / label /
   search / archive)". Blogger's own share buttons are hidden in both the widget (`shareButtons`)
   and the CSS.
 - If you change a colour, re-run `python3 tools/check_perf.py`: it reads the palette out of this
-  file and recomputes all 13 contrast pairs, so a recolour that drops under 4.5:1 fails the build
+  file and recomputes all 19 contrast pairs, so a recolour that drops under 4.5:1 fails the build
   rather than the audit.
 - Blogger's own widget CSS and JavaScript arrive through `<b:include name='all-head-content'/>` and
   are not removable from a theme. If PageSpeed still reports unused JavaScript after uploading,

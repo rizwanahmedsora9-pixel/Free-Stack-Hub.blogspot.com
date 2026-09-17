@@ -220,7 +220,11 @@ SHA instead of a branch that jsDelivr caches for a week (POST_RULES.md §7).
 ### 1.7 Unused code
 
 There is no bundle to split: no framework, no route-level chunks, and the only
-first-party JavaScript is the visitor strip's inline ~1 KB (§1.8). The
+first-party JavaScript is two inline scripts at the end of `<body>` - the
+visitor strip's ~1 KB (§1.8, home page only) and the search combo box's ~4 KB
+(§1.9, every page, but inert until the field is used). Neither is a request and
+neither runs during page load; `check_perf.py` fails the build if the theme ever
+grows a `<script src>`. The
 reduction that was available was in CSS and fonts, and both were taken - the
 four discrete Space Grotesk weights collapsed into one variable range, the
 unused subsets stay unfetched thanks to `unicode-range`, and the Google Fonts
@@ -228,7 +232,7 @@ stylesheet request is gone entirely.
 
 ### 1.8 The live visitor strip (home page only)
 
-The strip under the search bar - total visits · your country · your device ·
+The strip under the navbar - total visits · your country · your device ·
 local time - was added with the explicit requirement of not moving any of the
 metrics above. Budget, line by line:
 
@@ -258,6 +262,51 @@ metrics above. Budget, line by line:
   The Abacus hit increments one page-view counter; ipwho.is sees the visitor's
   IP to answer the country, as any fetched server does. The strip is also why
   the Privacy Policy page should not claim "no third-party requests".
+
+### 1.9 The search combo box (every page)
+
+The search bar moved above the navbar and became a combo box: type a word and a
+list of matching posts and labels drops under the field, narrowing on every
+keystroke. It is the second piece of first-party JavaScript in the theme, and it
+was built to the same budget as §1.8 - one request, no requests while typing, no
+layout movement, and no cost at all for a visitor who never touches the field.
+
+- **FCP / LCP: untouched.** The script is inline at the end of `<body>`, so it
+  is neither a request nor a parser pause, and it does nothing on load: no
+  timer, no idle callback, no fetch. It wakes on the field's first `focus` or
+  `input`. A visitor who scrolls and reads never runs more than the
+  `querySelector`s at the top of the IIFE.
+- **One request, same origin, on interaction.** The index is this blog's own
+  `feeds/posts/summary?alt=json&max-results=250`, with the homepage read back
+  out of the form's `action` (so nothing is hardcoded per blog). Same origin
+  means no CORS handshake, no new preconnect, and no third party that could see
+  what a visitor types - which a hosted "search suggestions" service would.
+  Size scales with the blog at roughly 1.5 KB per post (the feed's own shape);
+  at today's three posts that is ~6 KB, and only the title, permalink and
+  labels are kept - the post text in the response is discarded.
+- **Zero requests while typing.** The parsed index is cached in memory for the
+  life of the page and every keystroke after that is local filtering, which is
+  why the list narrows instantly instead of a spinner appearing per word. There
+  is deliberately no debounce to tune and no per-keystroke query to rate-limit.
+- **TBT / INP: ~0.** Per keystroke the work is `indexOf` over at most 250
+  pre-lowercased titles plus ≤10 DOM rows rebuilt with `createElement` /
+  `textContent`. The lowercase haystack and word list per post are computed once
+  at ingest, not per keystroke. No framework, no virtual list, no `innerHTML`.
+- **CLS: 0.** The panel is `position:absolute` inside `.search-field` and only
+  toggles `display`, so it overlaps the page instead of adding height to it -
+  the navbar, the visitor strip and the cards never move. The search strip keeps
+  a fixed padding, and the field's own box is unchanged from the old bar.
+- **No animation to pay for.** The panel appears; there is no keyframe, no
+  transition, and therefore nothing for `prefers-reduced-motion` to collapse.
+- **Failure is invisible.** No `fetch`, an offline visitor, a 404, a non-200 or
+  a blog with nothing published yet all leave the field as the plain Blogger
+  search form it is in the markup: Enter submits to `/search?q=`. There is no
+  retry loop and no error UI, and the last row of the list always offers
+  Blogger's own results page, so the listbox is never empty while it is open.
+- **Privacy.** No cookies, no localStorage, no sessionStorage - the index lives
+  in memory and dies with the tab. The only party that sees a query is the blog
+  itself, through the one feed request, which carries no query at all (the words
+  never leave the browser).
 
 ---
 
@@ -293,7 +342,25 @@ search field had `outline:0`, which removed the focus indicator from the one
 input on the page - it now has a visible ring, and a global `:focus-visible`
 rule covers every interactive element (light ring on the dark nav and footer).
 
-**Contrast (WCAG AA, 4.5:1).** All 13 text/background pairs the skin paints now
+The search field is now a **combobox**, which is the widget most likely to be
+built inaccessible, so it follows the pattern rather than improvising: the input
+carries `role='combobox'` + `aria-expanded` + `aria-controls` +
+`aria-autocomplete='list'`, the `<ul>` is the `listbox`, each row is
+`role='option'` with `aria-selected`, and **focus never leaves the input** - the
+active row is announced through `aria-activedescendant` and the row links are
+`tabindex='-1'`. Tab therefore still moves from the field to the Search button
+and on to the navbar instead of walking through up to ten suggestions, which is
+the failure a naive "list of links under the input" produces. ↑/↓ walk the list
+(either one opens it if Escape closed it, and both wrap), Enter opens the row
+you are on, Enter with no row active submits the form to Blogger's own search,
+Esc closes, and the active row is scrolled inside the panel by hand because
+`scrollIntoView` scrolls the *page* too on some browsers - which would move the
+field out from under the visitor. The typed words come back highlighted in
+`<mark>`; rows are built with `textContent`/`createTextNode` only, so a post
+title is never parsed as markup. `check_perf.py` asserts the six ARIA attributes
+and that the bar sits above the navbar.
+
+**Contrast (WCAG AA, 4.5:1).** All 19 text/background pairs the skin paints now
 pass, computed live from the stylesheet rather than from a table, so recolouring
 a variable fails the check:
 
@@ -307,6 +374,10 @@ a variable fails the check:
 | card tag chips | 5.33:1 |
 | footer copyright | 7.56:1 (was `#8991A0`) |
 | search placeholder | 7.96:1 |
+| suggestion rows (search drop-down) | 16.51:1 |
+| active suggestion row | 14.61:1 |
+| `<mark>` highlight / label rows / see-every-result row | 10.17:1 |
+| suggestion meta line | 6.13:1 |
 
 The post bodies carry their own inline colours, which the skin audit cannot see.
 The image captions used `color:#777` on white = **4.48:1** - just under the
