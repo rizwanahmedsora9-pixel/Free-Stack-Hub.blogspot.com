@@ -72,18 +72,35 @@ rules out the site's own signals and leaves the failed crawl as the whole story.
 
 ### 2.3 What was verified on the live page instead of guessed
 
-Fetched through the W3C validator (which reads the page server-side), the live `<head>` for
-report B's post contains:
+**Nothing in this repo produces the canonical, and nothing in this repo was changed to produce
+it.** Blogger emits `<link rel='canonical'>` itself, from the one line the theme keeps:
 
-```html
-<link href='https://freestackhub.blogspot.com/2026/09/google-search-console-from-zero-add.html' rel='canonical'/>
+```xml
+<b:include data='blog' name='all-head-content'/>
 ```
 
-- **The canonical is present and correct** - the clean desktop URL, no `?m=1`. Blogger emits it
-  from `<b:include data='blog' name='all-head-content'/>`, which this theme keeps.
-- **No `<meta name='robots'>` with noindex** anywhere in the head.
-- The same URL returns **200** and renders the full post for a normal client, on desktop and at
-  `?m=1`.
+Fetched live on 2026-09-19, every published post declares **its own clean URL** - no `?m=1`, and no
+robots `noindex` on any of them:
+
+| Post (live URL) | live `rel=canonical` |
+|---|---|
+| `/2026/09/install-python-in-termux-build-and-run.html` | itself |
+| `/2026/09/google-search-console-from-zero-add.html` | itself |
+| `/2026/09/termux-commands-worth-memorising-basics.html` | itself |
+| `/2026/09/check-your-websites-vital-scores-with.html` | itself |
+| `/2026/09/stop-deleting-your-pythonanywhere-files.html` | itself |
+
+That includes report B's post, whose inspection says **`User-declared canonical: N/A`**. N/A there
+is not "this post has no canonical" - it is the *same failed fetch* as `Page fetch: Failed` and
+`Indexing allowed? N/A`. Google read nothing, so it could report nothing. On the newest post the
+crawl succeeded and the same field was filled in. Same theme, same tag, different crawl outcome:
+**the difference between the two reports is the crawl, not the page.**
+
+Also worth knowing, because it is the mechanism behind report B: a request that looks like a mobile
+client to Blogger is served a **302 from the clean URL to `...html?m=1`** - reproduced while
+checking these pages. A desktop fetch sees no redirect at all, which is why the page "works fine"
+when you open it yourself. The canonical tag is what tells Google the two URLs are one page, and
+because Blogger emits it correctly here, the redirect itself is not a defect - the failed crawl is.
 
 And from the blog's own Takeout export (`sample export/`):
 

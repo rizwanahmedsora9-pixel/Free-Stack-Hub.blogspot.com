@@ -28,6 +28,14 @@ typed into the editor, and a `_<number>` suffix if that URL was already taken.
 Never rename a folder after import: `check_published.py` matches repo → live on the slug, and a
 post's images are served from its folder path, so renaming breaks every image already published.
 
+**What you do NOT have to do per post:** the canonical tag. Blogger emits
+`<link rel='canonical'>` itself for every page from the theme's
+`<b:include data='blog' name='all-head-content'/>`, and it always points at the post's own URL
+(the mobile `...html?m=1` variant included), on all five published posts. `tools/check_perf.py`
+fails if that include ever goes missing, if a second canonical is hand-written, or if a `noindex`
+appears, and `tools/check_published.py` re-reads the live `<head>` after every publish - so the tag
+is checked, not assumed. Do not add one by hand: two canonicals conflict.
+
 **When the live URL is not the folder slug, record it** — add a `PERMALINK:` line to the header,
 next to `PUBLISHED:`:
 
