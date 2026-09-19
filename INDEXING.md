@@ -41,9 +41,11 @@ URL from the post's **title**, so **not one live URL matches its folder slug** i
 That is not cosmetic. Everything in the repo was written against the folder slugs, so:
 
 1. **The inspected post's four internal links were all 404.** It linked to the Termux, PythonAnywhere,
-   PageSpeed and Search Console posts using their folder slugs. Checked live:
-   `…/2026/09/termux-commands-git-nano.html` → **404**. A new post whose outbound links all land on
-   Blogger's "page not found" page is exactly the kind of page Google leaves out.
+   PageSpeed and Search Console posts using their folder slugs. Opened live, three of the four answer
+   Blogger's 404 page (`/2026/09/termux-commands-git-nano.html`, `/2026/09/stop-deleting-pythonanywhere-files.html`,
+   `/2026/09/pagespeed-insights-scores-explained.html`), and the fourth is absent from the feed and the
+   sitemap too. A new post whose outbound links all land on Blogger's "page not found" page is exactly
+   the kind of page Google leaves out.
 2. **Nothing linked back to it.** The four sister posts contain no internal links at all, so the
    newest post had *zero* inbound internal links - hence **Referring page: None detected**.
 3. **The live post has no labels.** The other four posts have labels; this one was published without
@@ -132,9 +134,11 @@ Do the fixes **before** the re-crawl requests. A re-crawl of the broken state ju
 
 ### 4.5 Optional, but worth it
 
-- Upload the hero image of the newest post inside Blogger once. Images hosted off-blog get no
-  `media$thumbnail`, which is why Blogger's own Popular Posts / Featured Post widgets show a
-  picture for other posts and none for this one. The theme's home-page cards are unaffected.
+- Nothing to do about thumbnails on this blog: the theme's Popular Posts widget and the home-page
+  cards both use the post's own first image (`data:post.featuredImage`), and Blogger proxies it
+  through `lh3.googleusercontent.com` - the newest post shows a picture in the sidebar already.
+  Images hosted off-blog only lack Blogger's `media$thumbnail`, which is what a feed reader's
+  thumbnail or a Blogger widget outside this theme would look for.
 - `API INDEXING/dashboard` can push unindexed URLs and read their inspection state. Treat it as a
   monitor: Google documents the Indexing API for `JobPosting`/`BroadcastEvent` only, so a `200`
   there is not a promise about a blog post. The real levers are the internal links and Search
