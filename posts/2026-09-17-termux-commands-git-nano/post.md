@@ -163,4 +163,4 @@ rm -i important.txt
 4. `git clone` once, then live in the loop: `git status`, `git add`, `git commit`, `git pull`, `git push`.
 5. `nano filename` creates or edits a file; Ctrl+O saves, Ctrl+X exits. Delete with care, because `rm` has no undo.
 
-None of this needs a computer, a root hack or a paid app, just ten minutes with a keyboard on your phone. Open Termux tonight, clone one repository and change one line with nano; that single loop is the entire skill. Next up: the Termux packages worth installing after the basics, from Python and OpenSSH to running a small web server from your pocket.
+None of this needs a computer, a root hack or a paid app, just ten minutes with a keyboard on your phone. Open Termux tonight, clone one repository and change one line with nano; that single loop is the entire skill. Next up: [installing Python in Termux and building your first Python app with nano](https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html), then the packages worth adding after the basics, from OpenSSH to running a small web server from your pocket.

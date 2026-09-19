@@ -31,11 +31,20 @@ post.html header format:
   TITLE:  Post title
   LABELS: Label One, Label Two
   PUBLISHED: 2026-09-16          (optional; defaults to the date in the folder name)
+  PERMALINK: the-slug-it-lives-at   (optional; see below)
   SEARCH DESCRIPTION:
   One or two sentences.
   -->
   <p>body...</p>
   <img src="01-hero.jpg" alt="..."/>     <- bare file name, file lives in ./images/
+
+PERMALINK is the slug the post is published under. Leave it out and the folder
+name's slug is used, which is what <blogger:filename> writes - so importing the
+post's import.xml puts it at that URL. Set it when Blogger generated a different
+permalink (a post that was pasted or pushed through the API instead of imported:
+Blogger builds the slug from the title). Without it the repo keeps claiming a
+URL the post does not live at, and every internal link written from the folder
+slug 404s. Accepts a bare slug, /2026/09/slug.html or a full URL.
 """
 
 import argparse
@@ -74,7 +83,7 @@ REPO_CDN = os.environ.get(
 
 HEADER_RE = re.compile(r"^\s*<!--(.*?)^[ \t]*[-=]*[ \t]*-->[ \t]*$", re.S | re.M)
 KEY_RE = re.compile(r"^\s*([A-Z][A-Z ]+?)(?:\s*\(.*?\))?\s*:\s*(.*)$")
-KEYS = {"TITLE", "LABELS", "SEARCH DESCRIPTION", "PUBLISHED", "IMAGES", "BLOGGER POST"}
+KEYS = {"TITLE", "LABELS", "SEARCH DESCRIPTION", "PUBLISHED", "PERMALINK", "IMAGES", "BLOGGER POST"}
 IMG_SRC_RE = re.compile(r'(<img\b[^>]*\bsrc=")([^"]+)(")', re.I)
 # <img src> and <source srcset> both carry file names the build has to make public
 TAG_SRC_RE = re.compile(r'(<img\b[^>]*?(?<![\w-])src=|<source\b[^>]*?(?<![\w-])srcset=)"([^"]+)"', re.I)
@@ -101,6 +110,21 @@ def stamp(feed: str) -> str:
     """The feed's own timestamp, so two builds can be compared ignoring it."""
     m = FEED_UPDATED_RE.search(feed)
     return m.group(0) if m else ""
+
+
+def permalink_slug(value: str, fallback: str) -> str:
+    """The slug a post actually lives at on the blog.
+
+    `PERMALINK:` may be written as a bare slug, as a path (/2026/09/slug.html)
+    or as a full URL; only the last path segment matters, because that is the
+    part Blogger's <blogger:filename> carries. Anything unparsable, or a missing
+    key, falls back to the folder name's slug - the pre-existing behaviour.
+    """
+    seg = (value or "").strip().split("#")[0].split("?")[0].rstrip("/")
+    seg = seg.rsplit("/", 1)[-1]
+    if seg.lower().endswith(".html"):
+        seg = seg[:-5]
+    return seg or fallback
 
 
 def parse_header(header: str) -> dict:
@@ -280,6 +304,7 @@ def load_post(folder: Path) -> dict:
         when = when.replace(tzinfo=dt.timezone.utc)
 
     slug = fm.group(2) if fm else folder.name
+    permalink = permalink_slug(meta.get("PERMALINK", ""), slug)
     img_dir = folder / "images"
     rel = f"posts/{folder.name}/images/"
 
@@ -346,6 +371,7 @@ def load_post(folder: Path) -> dict:
         "teaser": teaser,
         "jump_after": jump_after,
         "slug": slug,
+        "permalink": permalink,
         "title": meta.get("TITLE", ""),
         "labels": [l.strip() for l in meta.get("LABELS", "").split(",") if l.strip()],
         "description": meta.get("SEARCH DESCRIPTION", ""),
@@ -373,7 +399,7 @@ def feed_xml(p: dict) -> str:
         f'    <category scheme="tag:blogger.com,1999:blog-{BLOG_ID}" term="{q(l)}"/>\n'
         for l in p["labels"]
     )
-    fname = f"/{p['published'].year}/{p['published'].month:02d}/{p['slug']}.html"
+    fname = f"/{p['published'].year}/{p['published'].month:02d}/{p['permalink']}.html"
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-{BLOG_ID}</id>
@@ -430,6 +456,11 @@ def main():
             continue
         print(f"   title   {p['title']}")
         print(f"   labels  {', '.join(p['labels'])}")
+        if p["permalink"] != p["slug"]:
+            print(
+                f"   permalink {p['permalink']}  (from PERMALINK:; folder slug is "
+                f"{p['slug']} - links must use the permalink, it is the URL that exists)"
+            )
         print(f"   images  {len(p['images'])}  ->  {REPO_CDN}posts/{folder.name}/images/")
         if not a.check:
             (folder / "title.txt").write_text(p["title"] + "\n", encoding="utf-8")

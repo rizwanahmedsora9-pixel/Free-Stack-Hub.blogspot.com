@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-17T08:22:33.536+00:00</updated>
+  <updated>2026-09-19T17:51:09.138+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -190,7 +190,7 @@ rm -i important.txt&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;&lt;code&gt;nano filename&lt;/code&gt; creates or edits a file; Ctrl+O saves, Ctrl+X exits. Delete with care, because &lt;code&gt;rm&lt;/code&gt; has no undo.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;None of this needs a computer, a root hack or a paid app, just ten minutes with a keyboard on your phone. Open Termux tonight, clone one repository and change one line with nano; that single loop is the entire skill. Next up: the Termux packages worth installing after the basics, from Python and OpenSSH to running a small web server from your pocket.&lt;/p&gt;</content>
+&lt;p&gt;None of this needs a computer, a root hack or a paid app, just ten minutes with a keyboard on your phone. Open Termux tonight, clone one repository and change one line with nano; that single loop is the entire skill. Next up: &lt;a href="https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html"&gt;installing Python in Termux and building your first Python app with nano&lt;/a&gt;, then the packages worth adding after the basics, from OpenSSH to running a small web server from your pocket.&lt;/p&gt;</content>
     <blogger:metaDescription>New to Termux? These are the everyday commands that matter, from storage setup to git clone and editing files with nano, all typed on your phone.</blogger:metaDescription>
     <blogger:created>2026-09-17T00:00:00.000+00:00</blogger:created>
     <published>2026-09-17T00:00:00.000+00:00</published>
@@ -202,7 +202,7 @@ rm -i important.txt&lt;/code&gt;&lt;/pre&gt;
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Git"/>
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="GitHub"/>
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Nano"/>
-    <blogger:filename>/2026/09/termux-commands-git-nano.html</blogger:filename>
+    <blogger:filename>/2026/09/termux-commands-worth-memorising-basics.html</blogger:filename>
     <link/>
     <enclosure/>
   </entry>

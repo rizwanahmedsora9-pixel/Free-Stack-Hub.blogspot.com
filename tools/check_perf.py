@@ -532,6 +532,37 @@ def check_theme(rep: Report):
         rep.fail("no <b:skin> block found")
         return None
 
+    rep.head("[theme] indexing - the tags only Blogger can emit")
+    # all-head-content is what prints <link rel='canonical'>, the favicon, the
+    # generator meta and the feed links. Checked against the live page: the
+    # canonical it emits is the clean desktop URL (.../slug.html), which is what
+    # ties Blogger's mobile ?m=1 variant to the same page. Blogger's own guidance
+    # for a custom template is to keep it - drop the one line and every page
+    # loses its canonical.
+    if "name='all-head-content'" in doc or 'name="all-head-content"' in doc:
+        rep.ok("all-head-content kept: Blogger still emits rel=canonical, the favicon and the feeds")
+    else:
+        rep.fail(
+            "no <b:include name='all-head-content'/> - the page then ships without "
+            "rel=canonical (Blogger emits it there), so Blogger's mobile ?m=1 URL and the "
+            "desktop URL stop being declared as the same page"
+        )
+    if re.search(r"<link\b[^>]*\brel=['\"]canonical['\"]", doc):
+        rep.fail("a hand-written rel=canonical - Blogger already emits one, and two canonicals conflict")
+    else:
+        rep.ok("no second, hand-written rel=canonical")
+    # attribute order is not significant in HTML, so match each attribute on its
+    # own rather than name-then-content in one expression
+    noindex = [
+        tag for tag in re.findall(r"<meta\b[^>]*>", doc, re.I)
+        if re.search(r"\bname=['\"]robots['\"]", tag, re.I)
+        and re.search(r"\bcontent=['\"][^'\"]*noindex", tag, re.I)
+    ]
+    if noindex:
+        rep.fail(f"a robots meta with noindex in the theme - that de-indexes every page: {noindex[0][:80]}")
+    else:
+        rep.ok("no noindex robots meta in the theme")
+
     rep.head("[theme] performance - the card list")
     if re.search(r"expr:loading='data:isFirst \? &quot;eager&quot; : &quot;lazy&quot;'", doc):
         rep.ok("card image: first card eager, the rest lazy")

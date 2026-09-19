@@ -19,13 +19,35 @@ posts/
   _template/       copy this to start a new post
 ```
 
-## 1. Folder name
+## 1. Folder name, and the URL the post actually has
 `YYYY-MM-DD-slug` — date first, then a short lowercase slug with dashes.
 The date becomes the post's publish date (unless `PUBLISHED:` overrides it) and the slug
 becomes the Blogger URL (`/2026/09/slug.html`) — **but only when you publish with `import.xml`**,
 which writes `<blogger:filename>`. Paste-published posts get a URL built from whatever title was
 typed into the editor, and a `_<number>` suffix if that URL was already taken.
-Never rename a folder after import: `check_published.py` matches repo → live on the slug.
+Never rename a folder after import: `check_published.py` matches repo → live on the slug, and a
+post's images are served from its folder path, so renaming breaks every image already published.
+
+**What you do NOT have to do per post:** the canonical tag. Blogger emits
+`<link rel='canonical'>` itself for every page from the theme's
+`<b:include data='blog' name='all-head-content'/>`, and it always points at the post's own URL
+(the mobile `...html?m=1` variant included), on all five published posts. `tools/check_perf.py`
+fails if that include ever goes missing, if a second canonical is hand-written, or if a `noindex`
+appears, and `tools/check_published.py` re-reads the live `<head>` after every publish - so the tag
+is checked, not assumed. Do not add one by hand: two canonicals conflict.
+
+**When the live URL is not the folder slug, record it** — add a `PERMALINK:` line to the header,
+next to `PUBLISHED:`:
+
+```html
+PERMALINK: install-python-in-termux-build-and-run
+```
+
+A bare slug, `/2026/09/slug.html` or a full URL are all accepted. The build then writes that URL
+into `<blogger:filename>` (so a later import lands on it) and `check_published.py` compares the
+live post against it instead of against the folder slug. Set it for every post that is already
+live at a Blogger-generated URL, and **write every link to that post with that URL** — the
+folder-slug URL is a 404, and a post full of 404 links reads to Google like a broken page.
 
 ## 2. post.html header (required)
 ```html
@@ -33,6 +55,7 @@ Never rename a folder after import: `check_published.py` matches repo → live o
 TITLE:  Post title
 LABELS: Label One, Label Two          (comma separated, these become Blogger labels)
 PUBLISHED: 2026-09-16                 (optional)
+PERMALINK: the-live-slug              (optional, section 1 - only when Blogger's URL is not the folder slug)
 SEARCH DESCRIPTION:
 One or two sentences for search engines.
 -->
@@ -154,14 +177,23 @@ python3 tools/check_published.py            # every post vs the live Blogger fee
 python3 tools/check_published.py <folder>   # one post
 ```
 It reads the public feed (`<blog>/feeds/posts/default?alt=json`) — no login, no API key —
-and fails (`exit 1`) on the four things that only ever go wrong on Blogger's side:
+and fails (`exit 1`) on the things that only ever go wrong on Blogger's side:
 
 - the live **title** differs from `TITLE:` in `post.html` (someone retyped it, or pasted instead of imported)
-- **labels** missing on the live post (empty `/search/label/...` pages)
-- **permalink** not matching the folder slug (Blogger generated the URL from the title at
-  publish time and may have added a `_<number>` suffix — set a custom permalink if it matters)
+- **labels** missing on the live post (empty `/search/label/...` pages, and nothing filing the post
+  under its topic)
+- **permalink** not matching the folder slug, or not matching the `PERMALINK:` recorded in `post.html`
+  (Blogger generated the URL from the title at publish time and may have added a `_<number>` suffix)
 - **images** present in the post but not served by the CDN yet, or images in the repo that the
   published post never references
+- **internal links that 404** — every link the post makes back to the blog is fetched, and one that
+  lands on Blogger's not-found page fails the post (`--no-links` skips the fetching)
+- a post **no other published post links to**: a warning, not a failure, but it is the state Search
+  Console describes as *Referring page: None detected*
+
+The internal-link check exists because of a real miss: the posts went live at Blogger-generated
+URLs while the links inside them were written from the folder slugs, so four links in one post —
+and all four example links in section 12 — pointed at 404s. Nothing in the repo could see it.
 
 It also notes when a post has no Blogger `media$thumbnail`: images hosted off-blog never get one.
 That only affects Blogger's own widgets (Popular Posts, Featured Post, the `/feeds` thumbnail) -
@@ -188,6 +220,18 @@ each one silently drops something the build files carry:
 - **Settings → Posts, comments and media → Convert line breaks = On** (`blog_convert_line_breaks`
   is `true`). Right for typed text; for pasted `paste.html` it can add blank space between blocks
   that already have `<p>` tags.
+- **Theme → Mobile:** Blogger serves one responsive template to both desktop and mobile
+  (`show_mobile_view` is `false` in the blog's own export), which is what a `b:responsive='true'`
+  theme wants - keep it. The mobile variant of a URL is still reachable as `...html?m=1`, and because
+  Googlebot smartphone is now the primary crawler it is the bot that meets Blogger's redirect between
+  the two. Two rules follow:
+  - **Never remove `<b:include data='blog' name='all-head-content'/>` from the theme.** That one line
+    is what emits `<link rel='canonical'>`, which is the tag that declares the `?m=1` URL and the
+    clean URL to be the same page. `tools/check_perf.py` fails the theme if it is missing, if a
+    second canonical is hand-written, or if a `noindex` appears.
+  - **Never "fix" the `?m=1` reports** by disallowing `?m=1` in robots.txt, noindexing it, or
+    stripping it with JavaScript - all three break the mobile/desktop relationship. See
+    [INDEXING.md](INDEXING.md) section 2.
 - **Time zone is `America/Los_Angeles`** while `PUBLISHED:` is read as midnight UTC, so a post
   dated `2026-09-16` shows and links as **Sep 15** unless you write the date with that offset in
   mind. The blog also has no **description** set (`blog_description` is empty), so page titles end
@@ -253,23 +297,34 @@ Every post published on Free Stack Hub must actively participate in an interconn
 
 - **Mandatory interlinking:** Every post **must** include natural, contextual links to other published posts on the blog.
 - **Related posts are mandatory links ("specially related must"):** Whenever a post touches on a related topic, tool, or stack layer, it is strictly required to link to the existing sister posts. For example:
-  - Any mobile/terminal post must link to [Termux Commands Worth Memorising: Basics, Git Cloning and Nano on Android](https://freestackhub.blogspot.com/2026/09/termux-commands-git-nano.html).
-  - Any Python or deployment post must link to [Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead](https://freestackhub.blogspot.com/2026/09/stop-deleting-pythonanywhere-files.html).
-  - Any performance or web speed post must link to [Check Your Website's Vital Scores with PageSpeed Insights](https://freestackhub.blogspot.com/2026/09/pagespeed-insights-scores-explained.html).
-  - Any SEO or site discovery post must link to [Google Search Console from Zero](https://freestackhub.blogspot.com/2026/09/google-search-console-step-by-step.html).
-- **Descriptive anchor text:** Always use descriptive, human-readable anchor text that clearly identifies the target topic (e.g., `<a href="/2026/09/termux-commands-git-nano.html">our step-by-step Termux terminal commands and nano guide</a>`). Never use generic text like "click here", "read more", or unformatted raw URLs.
+  - Any mobile/terminal post must link to [Termux Commands Worth Memorising: Basics, Git Cloning and Nano on Android](https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html).
+  - Any Python or deployment post must link to [Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead](https://freestackhub.blogspot.com/2026/09/stop-deleting-your-pythonanywhere-files.html).
+  - Any performance or web speed post must link to [Check Your Website's Vital Scores with PageSpeed Insights](https://freestackhub.blogspot.com/2026/09/check-your-websites-vital-scores-with.html).
+  - Any SEO or site discovery post must link to [Google Search Console from Zero](https://freestackhub.blogspot.com/2026/09/google-search-console-from-zero-add.html).
+- **Use the target's real URL.** Those links are the posts' live permalinks, not their folder names.
+  Every post's `PERMALINK:` in `post.html` is the URL that exists on the blog; a link built from the
+  folder slug is a 404, and `check_published.py` now fails the post for it.
+- **Link both ways.** Linking out to four related posts while nothing links back leaves the newest
+  post with no inbound internal link at all — Search Console reports that as
+  *Referring page: None detected*, and a page nothing links to is the easiest one to leave out of
+  the index. When a new post goes up, go back and add a contextual link to it from the sister post
+  it continues (one sentence is enough).
+- **Descriptive anchor text:** Always use descriptive, human-readable anchor text that clearly identifies the target topic (e.g., `<a href="https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html">our step-by-step Termux terminal commands and nano guide</a>`). Never use generic text like "click here", "read more", or unformatted raw URLs.
 - **Future posts commitment:** In every future post, interlinking to existing posts (especially related ones) is a required quality gate before merging.
 
 ## Checklist for the agent when adding a post
 1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
 2. Write `post.html` (+ `post.md`), generate images into `images/` - bare `<img src alt>`, no sizes
 3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker
-4. Apply the section 12 interlinking rule: contextually interlink to related and existing posts on the blog
+4. Apply the section 12 interlinking rule: contextually interlink to related and existing posts on the blog, using each target's live URL (its `PERMALINK:`)
 5. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
 6. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
 7. `python3 tools/check_perf.py` → must print `clean`
 8. Commit the whole folder including the image variants, `import.xml`, `paste.html` and `title.txt`
 9. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels by hand)
-10. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL
+10. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL. It follows every
+    internal link the post makes and fails the ones that 404, and it warns when no other post links
+    here. If Blogger gave the post a different URL than the folder slug, check what it actually got
+    and put it in the header as `PERMALINK:` (see section 1), then fix the links that used the slug.
 11. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos
 

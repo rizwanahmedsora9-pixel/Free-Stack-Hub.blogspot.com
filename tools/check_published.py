@@ -10,7 +10,13 @@ It catches the failures that are invisible from the repo:
   * a post that was pasted in by hand, so the live TITLE differs from the repo one
   * LABELS that never made it to Blogger (empty /search/label/... pages, no "Filed under")
   * a permalink that does not match the folder slug (Blogger rewrites the URL when the
-    title is edited or a same-titled post existed, leaving ..._0745083948.html)
+    title is edited or a same-titled post existed, leaving ..._0745083948.html) - or
+    does not match the "PERMALINK:" recorded in post.html, which means the post moved
+  * an internal link inside a post that 404s: the href looks fine in post.html, but a
+    paste-published post lives at Blogger's title-derived slug, so every link written
+    from the folder slug leads to Blogger's not-found page
+  * a post that no other published post links to, which is the state Search Console
+    reports as "Referring page: None detected"
   * images referenced in the post that the CDN does not serve yet (jsDelivr caches a
     branch snapshot for about a week, so a freshly merged post shows broken images)
   * posts with no Blogger-generated thumbnail, which is why list/homepage cards are text-only
@@ -31,6 +37,7 @@ import sys
 import unicodedata
 import urllib.error
 import urllib.request
+from html import unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -107,6 +114,114 @@ def jsdelivr_index() -> set:
     return found
 
 
+_BLOG_HOST = re.escape(BLOG_URL.split("//", 1)[-1])
+
+
+def link_path(href: str) -> str:
+    """The on-blog path of an internal link, or "" if it points elsewhere.
+
+    Handles what the posts actually contain: absolute blog URLs (the build
+    writes them) and root-relative ones. Off-blog links, anchors and mailto
+    return "", because a broken external link is not this blog's indexing
+    problem.
+    """
+    h = (href or "").strip()
+    if not h or h.startswith(("#", "mailto:", "tel:", "javascript:", "data:")):
+        return ""
+    if re.match(r"^(https?:)?//", h, re.I):
+        m = re.match(rf"^(?:https?:)?//(?:www\.)?{_BLOG_HOST}(/.*)?$", h, re.I)
+        if not m:
+            return ""
+        h = m.group(1) or "/"
+    elif not h.startswith("/"):
+        return ""
+    return h.split("#")[0].split("?")[0]
+
+
+def internal_links(html: str) -> list:
+    """(href, path, anchor text) for every link in a post that points back here.
+
+    The anchor text is carried along so a broken link can be reported by what
+    the reader clicks ("our step-by-step guide to essential Termux commands...")
+    rather than only by its URL - that is what you search for in the editor.
+    """
+    out, seen = [], set()
+    for m in re.finditer(r"<a\b([^>]*)>(.*?)</a>", html, re.I | re.S):
+        attrs, inner = m.group(1), m.group(2)
+        href = re.search(r'\shref="([^"]*)"', attrs, re.I)
+        if not href:
+            continue
+        path = link_path(href.group(1))
+        if not path or path == "/" or path in seen:
+            continue
+        seen.add(path)
+        text = re.sub(r"<[^>]+>", "", inner)
+        text = " ".join(unescape(text).split())[:70]
+        out.append((href.group(1), path, text))
+    return out
+
+
+def http_status(url: str, cache: dict) -> int | None:
+    """HTTP status of one URL, once per run. None = could not reach it."""
+    if url in cache:
+        return cache[url]
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+            cache[url] = r.status
+    except urllib.error.HTTPError as exc:
+        cache[url] = exc.code
+    except Exception:  # noqa: BLE001 - unreachable is a finding, not a crash
+        cache[url] = None
+    return cache[url]
+
+
+def fetch_html(url: str, cache: dict) -> tuple:
+    """(status, html) for one URL, once per run. (None, "") when unreachable.
+
+    The Blogger feed carries the *body* of a post; it does not carry the <head>,
+    which is where rel=canonical and the robots meta live - the two tags that
+    decide whether Google can index the page at all. Only the live HTML has them.
+    """
+    if url in cache:
+        return cache[url]
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+            body = r.read().decode("utf-8", "replace")
+            cache[url] = (r.status, body)
+    except urllib.error.HTTPError as exc:
+        cache[url] = (exc.code, "")
+    except Exception:  # noqa: BLE001
+        cache[url] = (None, "")
+    return cache[url]
+
+
+def head_of(html: str) -> str:
+    """Just the <head>, or the whole document when it has no </head>."""
+    m = re.search(r"<head\b[^>]*>(.*?)</head>", html, re.S | re.I)
+    return m.group(1) if m else html
+
+
+def canonical_of(html: str) -> str:
+    """The href of the page's rel=canonical, "" when there is none."""
+    for m in re.finditer(r"<link\b[^>]*>", head_of(html), re.I):
+        tag = m.group(0)
+        rel = re.search(r"\brel=['\"]?([^'\">]+)", tag, re.I)
+        if rel and "canonical" in rel.group(1).lower():
+            href = re.search(r"\bhref=['\"]([^'\"]+)", tag, re.I)
+            if href:
+                return href.group(1)
+    return ""
+
+
+def meta_robots(html: str) -> str:
+    """The content of <meta name=robots>, "" when there is none."""
+    m = re.search(r"<meta\b[^>]*\bname=['\"]robots['\"][^>]*>", head_of(html), re.I)
+    if not m:
+        return ""
+    c = re.search(r"\bcontent=['\"]([^'\"]*)", m.group(0), re.I)
+    return c.group(1) if c else ""
+
+
 def match_local(post: dict, entries: list) -> tuple:
     """Find which live entry this folder became. Title first, then shared images."""
     for e in entries:
@@ -124,9 +239,15 @@ def match_local(post: dict, entries: list) -> tuple:
     return None, ""
 
 
-def report(post: dict, entries: list, cdn_files: set) -> int:
-    """Print how one post shows on the blog; return 0 (clean) or 1 (problem)."""
+def report(post: dict, entries: list, cdn_files: set, live_checks: bool = True, cache: dict | None = None) -> int:
+    """Print how one post shows on the blog; return 0 (clean) or 1 (problem).
+
+    live_checks fetches each live page: the internal links it makes, its
+    rel=canonical and its robots meta. Off (--no-links) leaves the feed and CDN
+    checks running.
+    """
     rc, name = 0, post["folder"].name
+    cache = {} if cache is None else cache
 
     def line(level, msg):
         nonlocal rc
@@ -169,10 +290,17 @@ def report(post: dict, entries: list, cdn_files: set) -> int:
         line(OK, f"labels present ({len(got)})")
 
     # 3. permalink
-    slug = post["slug"]
+    #    The URL the post has to live at. `PERMALINK:` in post.html wins when it
+    #    is set (a paste- or API-published post gets Blogger's title-derived
+    #    slug, not the folder's); otherwise the folder slug is the expectation.
+    slug = post["permalink"]
+    recorded = slug != post["slug"]
     path = re.sub(r"^https?://[^/]+", "", live["link"])
     if f"/{slug}.html" in path:
-        line(OK, f"permalink matches the folder slug: {path}")
+        if recorded:
+            line(OK, f"permalink is the recorded PERMALINK: {path}")
+        else:
+            line(OK, f"permalink matches the folder slug: {path}")
     else:
         suffix = re.search(r"_(\d+)\.html$", path)
         why = (
@@ -181,8 +309,20 @@ def report(post: dict, entries: list, cdn_files: set) -> int:
             if suffix
             else "the title was edited in Blogger after publishing"
         )
-        line(WARN, f'permalink is "{path}", not the folder slug "{slug}" - {why}')
-        line(NOTE, "fix in the Blogger editor: Post settings > Permalink > Custom permalink")
+        if recorded:
+            line(
+                WARN,
+                f'permalink is "{path}" but post.html records PERMALINK: {slug} - the post '
+                "moved, so every internal link pointing at the recorded URL now 404s",
+            )
+        else:
+            line(WARN, f'permalink is "{path}", not the folder slug "{slug}" - {why}')
+        line(
+            NOTE,
+            f'accept it: add "PERMALINK: {Path(path).stem}" to posts/{name}/post.html (then fix the '
+            "links that use the folder slug) - or set Post settings > Permalink > Custom permalink "
+            f'to "{slug}" in the Blogger editor',
+        )
 
     # 4. images
     shown = [i for i in post["images"] if i in live["html"]]
@@ -255,6 +395,90 @@ def report(post: dict, entries: list, cdn_files: set) -> int:
             line(OK, "the published hero image is still fetchpriority=high")
         if "loading" in imgs[0].lower() and 'loading="lazy"' in imgs[0].lower():
             line(ERR, "the published hero image is loading=lazy - that is the LCP element, it must be eager")
+
+    # 7. the links this post makes back to the rest of the blog
+    #    A dead internal link is invisible from the repo - the href looks right
+    #    in post.html - and the post it was meant to point at ends up with no
+    #    inbound link at all, which is the "Referring page: None detected" row
+    #    in Search Console's URL Inspection.
+    links = internal_links(live["html"])
+    broken, unverified = [], []
+    for _href, path, text in links:
+        code = http_status(BLOG_URL + path, cache) if live_checks else None
+        if code is None:
+            unverified.append(path)
+        elif code >= 400:
+            broken.append((path, code, text))
+    if not links:
+        line(NOTE, "this post links to no other page on the blog (POST_RULES section 12 asks for one)")
+    elif broken:
+        for path, code, text in broken:
+            where = f' on "{text}"' if text else ""
+            line(ERR, f"internal link 404s: {path} (HTTP {code}){where} - Google follows it and lands on nothing")
+        line(NOTE, "point the href at the target's real URL (its PERMALINK:) in post.html, then re-publish the body")
+    elif not live_checks:
+        line(NOTE, f"{len(links)} internal link(s) not checked (--no-links)")
+    elif unverified:
+        line(WARN, f"could not reach {len(unverified)} internal link(s): " + ", ".join(unverified[:3]))
+    else:
+        line(OK, f"all {len(links)} internal link(s) resolve")
+
+    # 8. does anything else on the blog link here?
+    mine = link_path(live["link"])
+    others = [e for e in entries if e is not live]
+    inbound = [e for e in others if mine and mine in e["html"]]
+    stale = [e for e in others if post["slug"] != post["permalink"] and f"/{post['slug']}.html" in e["html"]]
+    if inbound:
+        line(OK, f"{len(inbound)} other published post(s) link here")
+    elif stale:
+        line(
+            ERR,
+            f"{len(stale)} post(s) link to /{post['slug']}.html, which is not where this post lives "
+            f"({mine}) - those links 404",
+        )
+    else:
+        line(
+            WARN,
+            "no other published post links here - a page nothing links to is the easiest one for "
+            "Google to leave out of the index",
+        )
+        line(NOTE, "add a contextual link from a related post (POST_RULES section 12), then re-publish that body")
+
+    # 9. the live <head>: the two tags that decide whether Google may index the
+    #    page, and the one that ties Blogger's mobile ?m=1 URL to this one.
+    #    A Blogger blog fetches its posts fine for a normal client and still shows
+    #    "Page fetch: Failed: Redirect error / Indexing allowed? N/A" in Search
+    #    Console, because Googlebot smartphone gets the mobile redirect. Only the
+    #    live HTML says which side of that the page is on.
+    if live_checks:
+        status, html = fetch_html(live["link"], cache)
+        if status != 200 or not html:
+            line(ERR, f"the live URL does not return 200 (got {status}) - Google cannot read the page")
+        else:
+            canon = canonical_of(html)
+            want = live["link"]
+            if not canon:
+                line(
+                    ERR,
+                    "the live page has no rel=canonical - Blogger emits it inside "
+                    "<b:include name='all-head-content'/>, so the theme has lost it; the mobile "
+                    "?m=1 URL and this one are then undeclared duplicates",
+                )
+            elif canon.split("#")[0].split("?")[0].rstrip("/") != want.rstrip("/"):
+                line(
+                    ERR,
+                    f'the live rel=canonical is "{canon}", not this post\'s own URL - Google is '
+                    "being pointed at a different page",
+                )
+            else:
+                line(OK, "the live page declares itself canonical (the clean URL, no ?m=1)")
+            robots = meta_robots(html)
+            if "noindex" in robots.lower() or "none" in robots.lower():
+                line(ERR, f'the live page ships <meta name=robots content="{robots}"> - that blocks indexing')
+            elif robots:
+                line(OK, f'robots meta is "{robots}" (no noindex)')
+            else:
+                line(OK, "no noindex in the page's robots meta")
     return rc
 
 
@@ -262,6 +486,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("post", nargs="?", help="post folder name or path (default: all)")
     ap.add_argument("--no-cdn", action="store_true", help="skip the jsDelivr image check")
+    ap.add_argument(
+        "--no-links",
+        action="store_true",
+        help="do not fetch the live pages (internal links, rel=canonical, robots meta)",
+    )
     ap.add_argument("--json-file", type=Path, help="read the feed from a saved JSON file instead of the network")
     a = ap.parse_args()
 
@@ -288,7 +517,7 @@ def main() -> int:
     else:
         folders = sorted(d for d in POSTS_DIR.iterdir() if d.is_dir() and not d.name.startswith("_"))
 
-    rc = 0
+    rc, live_cache = 0, {}
     for folder in folders:
         p = load_post(folder)
         if p["problems"]:
@@ -298,7 +527,7 @@ def main() -> int:
             rc = 1
             continue
         print(f"posts/{folder.name}/")
-        rc |= report(p, entries, cdn_files)
+        rc |= report(p, entries, cdn_files, live_checks=not a.no_links, cache=live_cache)
         print()
     return rc
 

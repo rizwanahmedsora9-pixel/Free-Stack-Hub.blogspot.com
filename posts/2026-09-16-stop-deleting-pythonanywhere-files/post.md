@@ -161,4 +161,4 @@ Be aware that `git checkout --` discards that file's server-side changes permane
 
 The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your `.env` and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.
 
-If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. Next up: the `.gitignore` that keeps your `.env` and database off GitHub without breaking your app.
+If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. And if you want to try a change before it ever reaches the server, you can [run the same Python script from your phone in Termux](https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html). Next up: the `.gitignore` that keeps your `.env` and database off GitHub without breaking your app.
