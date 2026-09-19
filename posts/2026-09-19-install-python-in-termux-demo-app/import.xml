@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
+  <id>tag:blogger.com,1999:blog-7497660712599875944</id>
+  <updated>2026-09-19T17:22:46.768+00:00</updated>
+  <title type="text">Free Stack Hub</title>
+  <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
+  <author><name>Free Stack Hub</name></author>
+  <generator>Free-Stack-Hub build_import.py</generator>
+  <entry>
+    <id>tag:blogger.com,1999:blog-7497660712599875944.post-install-python-in-termux-demo-app</id>
+    <blogger:type>POST</blogger:type>
+    <blogger:status>LIVE</blogger:status>
+    <author>
+      <name>Free Stack Hub</name>
+      <blogger:type>BLOGGER</blogger:type>
+    </author>
+    <title type="text">Install Python in Termux: Build and Run Your First Python App with Nano on Android</title>
+    <content type="html">&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/01-install-python-termux-nano-hero.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/01-install-python-termux-nano-hero.webp" type="image/webp"/&gt;
+    &lt;img alt="An Android smartphone running the Termux terminal emulator with Python 3 and the nano editor open side by side" decoding="async" fetchpriority="high" height="675" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/01-install-python-termux-nano-hero.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Turn your Android phone into an autonomous Python workstation without root or paid tools.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;I tried running my first Python automation script inside Termux while waiting for a train and watched the screen freeze on a wall of compiler errors. Nothing was broken on my phone; I had simply missed the two build flags and Android-specific package requirements that mobile Linux demands behind the scenes. Once you understand how Python lives inside Termux's sandbox, writing, editing with nano, and executing production-ready scripts on your phone takes less than ten minutes.&lt;/p&gt;
+
+&lt;p&gt;Having a complete Python runtime in your pocket changes how you think about development. You do not need to boot a laptop or pay for cloud compute to test an algorithm, scrape an API endpoint, automate bulk text files, or prototype a microservice. Termux gives you a real Linux userspace directly on Android, complete with standard POSIX system calls, a package manager, and native access to your device's filesystem.&lt;/p&gt;
+
+&lt;p&gt;Yet for most developers, their first attempt ends in frustration. Python scripts fail because of invisible tab-versus-space indentation mismatches on touch keyboards, package installations fail during C-extension compilation, or scripts vanish when switching apps. This comprehensive guide walks you through every layer of the setup: installing the latest Python runtime, configuring nano for clean Python syntax and indentation, building a full-featured interactive demo application from scratch, running it from the command line, and linking your mobile workflow to professional developer tools.&lt;/p&gt;
+
+&lt;p&gt;If you are completely new to Termux or need to set up storage permissions and navigation keys first, start with &lt;a href="https://freestackhub.blogspot.com/2026/09/termux-commands-git-nano.html"&gt;our step-by-step guide to essential Termux commands, Git cloning, and nano on Android&lt;/a&gt;. Once your terminal fundamentals are in place, you are ready to install Python.&lt;/p&gt;
+
+&lt;h2&gt;Step 1: Installing Python and Core Dependencies in Termux&lt;/h2&gt;
+
+&lt;p&gt;Before installing any language runtime, always synchronise your package database with the official mirrors. Termux updates packages frequently, and attempting to install packages against a stale cache is the number one cause of broken package downloads:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pkg update &amp;amp;&amp;amp; pkg upgrade -y&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Once the system packages are up to date, install Python. In Termux, the package name is simply &lt;code&gt;python&lt;/code&gt;, which pulls in the current Python 3 release, along with &lt;code&gt;pip&lt;/code&gt; (the package installer) and essential shared libraries like SQLite3 and OpenSSL:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pkg install python -y&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The installation typically takes between thirty seconds and two minutes depending on your internet connection and phone storage speed. Once the prompt returns, verify that the binaries are correctly registered in your path:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;python --version
+pip --version
+which python&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see &lt;code&gt;Python 3.11.x&lt;/code&gt; or &lt;code&gt;Python 3.12.x&lt;/code&gt; (depending on the repository version) and a path pointing directly inside Termux's isolated prefix at &lt;code&gt;/data/data/com.termux/files/usr/bin/python&lt;/code&gt;. This path is crucial: unlike a standard desktop Linux distribution where binaries live in &lt;code&gt;/usr/bin&lt;/code&gt;, Termux places all binaries inside its app data prefix so it can run without root permissions.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/02-termux-pkg-install-python.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/02-termux-pkg-install-python.webp" type="image/webp"/&gt;
+    &lt;img alt="A mobile terminal screen executing pkg install python and displaying Python 3 version verification" decoding="async" height="545" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/02-termux-pkg-install-python.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;A single pkg command delivers a full native Python 3 runtime and pip package manager.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;Step 2: Exploring the Python Interactive Shell (REPL)&lt;/h2&gt;
+
+&lt;p&gt;The quickest way to confirm that your Python environment can execute code is by launching the interactive Read-Eval-Print Loop (REPL). Type &lt;code&gt;python&lt;/code&gt; into your terminal and hit Enter:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;python&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The terminal cursor will transform into the classic triple-arrow prompt (&lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;). Here you can run immediate Python expressions, inspect system properties, and test logic before putting it into a script file. Try running these lines one by one:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; print("Hello from Termux Python!")
+&amp;gt;&amp;gt;&amp;gt; import platform, sys
+&amp;gt;&amp;gt;&amp;gt; platform.system(), platform.machine()
+('Linux', 'aarch64')
+&amp;gt;&amp;gt;&amp;gt; 2 ** 32 - 1
+4294967295
+&amp;gt;&amp;gt;&amp;gt; exit()&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice that &lt;code&gt;platform.machine()&lt;/code&gt; prints &lt;code&gt;aarch64&lt;/code&gt; on modern 64-bit Android smartphones. This confirms that your Python binaries are compiled natively for your phone's ARM processor, giving you near-native performance for mathematical calculations, data processing, and file operations.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/03-python-interactive-repl-termux.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/03-python-interactive-repl-termux.webp" type="image/webp"/&gt;
+    &lt;img alt="An interactive Python REPL prompt inside Termux showing print statements and system architecture queries" decoding="async" height="545" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/03-python-interactive-repl-termux.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The interactive REPL lets you test logic, test regexes, and inspect mobile system stats instantly.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;To exit the REPL and return to the bash prompt, you can either call &lt;code&gt;exit()&lt;/code&gt; or press &lt;b&gt;Ctrl+D&lt;/b&gt; using the Termux extra-keys row above your software keyboard.&lt;/p&gt;
+
+&lt;h2&gt;Step 3: Configuring Nano for Painless Python Indentation&lt;/h2&gt;
+
+&lt;p&gt;Interactive shells are great for one-liners, but real applications need script files. On a desktop computer, developers use IDEs with automatic indentation and linting. On mobile in a terminal, your best companion is GNU Nano: it is fast, lightweight, and requires zero memorised modal commands.&lt;/p&gt;
+
+&lt;p&gt;However, Python has a strict syntax rule that makes mobile coding notoriously tricky: &lt;b&gt;whitespace indentation matters&lt;/b&gt;. If your mobile keyboard inserts a hard tab character on line 4 and four space characters on line 5, Python will immediately throw an &lt;code&gt;IndentationError: unindent does not match any outer indentation level&lt;/code&gt;. By default, nano inserts tabs when you press the Tab key. We can fix this permanently by configuring nano's settings file.&lt;/p&gt;
+
+&lt;p&gt;Create or edit the global nano configuration file &lt;code&gt;~/.nanorc&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;nano ~/.nanorc&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Type or paste the following configuration lines into the editor:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;set tabsize 4
+set tabstospaces
+set linenumbers
+set autoindent
+set mouse&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here is why these five directives are a game changer for Python developers on mobile:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;set tabsize 4:&lt;/b&gt; Sets the tab stop width to four columns, matching PEP 8 standard Python conventions.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;set tabstospaces:&lt;/b&gt; Automatically converts every press of the Tab key into four distinct space characters, eradicating mixed-indentation errors forever.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;set linenumbers:&lt;/b&gt; Displays line numbers on the left margin so you can instantly spot where a traceback error occurred.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;set autoindent:&lt;/b&gt; Automatically matches the indentation of the previous line when you press Enter, saving countless keystrokes on mobile touchscreens.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;set mouse:&lt;/b&gt; Lets you tap on screen with your finger to position the text cursor exactly where you want it.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Save the file with &lt;b&gt;Ctrl+O&lt;/b&gt;, press Enter to confirm, and exit nano with &lt;b&gt;Ctrl+X&lt;/b&gt;. Every Python script you edit in nano will now follow strict whitespace standards automatically.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/04-nano-python-script-editor.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/04-nano-python-script-editor.webp" type="image/webp"/&gt;
+    &lt;img alt="The GNU Nano text editor interface inside Termux displaying formatted Python code with line numbers" decoding="async" height="545" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/04-nano-python-script-editor.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;With tabstospaces and line numbers enabled, nano becomes a clean mobile Python code editor.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;Step 4: Building the Demo App: Pocket Task and System Monitor&lt;/h2&gt;
+
+&lt;p&gt;Now let's build a real, useful demo application rather than a trivial one-line hello world. We will create &lt;b&gt;Pocket Tracker&lt;/b&gt; (&lt;code&gt;pocket_tracker.py&lt;/code&gt;): an interactive command-line application that allows you to manage tasks with persistent JSON storage on your phone and inspect real-time system metrics (timestamp, battery-friendly memory usage, and free disk storage).&lt;/p&gt;
+
+&lt;p&gt;Create a dedicated project directory to keep your workspace organised, navigate into it, and open the new script in nano:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;mkdir -p ~/projects/pocket-app
+cd ~/projects/pocket-app
+nano pocket_tracker.py&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Inside nano, write or paste the following complete Python program:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;#!/usr/bin/env python3
+"""
+Pocket Tracker: A demo CLI application built and executed in Termux on Android.
+Features: Interactive menu, JSON task persistence, and system storage metrics.
+"""
+
+import json
+import os
+import shutil
+import sys
+from datetime import datetime
+
+DATA_FILE = "tasks.json"
+
+# ANSI color codes for clear mobile terminal visibility
+CYAN = "\033[96m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+RED = "\033[91m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+
+def load_tasks():
+    """Load existing tasks from JSON file or return an empty list."""
+    if not os.path.exists(DATA_FILE):
+        return []
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def save_tasks(tasks):
+    """Save tasks to local JSON file."""
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(tasks, f, indent=2)
+
+
+def add_task(tasks):
+    """Prompt user and record a new task with a timestamp."""
+    print(f"\n{BOLD}--- Add New Task ---{RESET}")
+    title = input("Enter task description: ").strip()
+    if not title:
+        print(f"{RED}Task cannot be empty!{RESET}")
+        return
+    task = {
+        "id": len(tasks) + 1,
+        "title": title,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "done": False,
+    }
+    tasks.append(task)
+    save_tasks(tasks)
+    print(f"{GREEN}Task #{task['id']} saved successfully!{RESET}")
+
+
+def list_tasks(tasks):
+    """Display all saved tasks in a formatted table."""
+    print(f"\n{BOLD}--- Current Pocket Tasks ({len(tasks)}) ---{RESET}")
+    if not tasks:
+        print(f"{YELLOW}No tasks found. Use option 1 to add one.{RESET}")
+        return
+    for t in tasks:
+        status = f"{GREEN}[DONE]{RESET}" if t["done"] else f"{YELLOW}[PENDING]{RESET}"
+        print(f" {t['id']}. {status} {t['title']} {CYAN}({t['created_at']}){RESET}")
+
+
+def complete_task(tasks):
+    """Mark a specific task as completed."""
+    list_tasks(tasks)
+    if not tasks:
+        return
+    choice = input(f"\nEnter task ID to mark done: ").strip()
+    for t in tasks:
+        if str(t["id"]) == choice:
+            t["done"] = True
+            save_tasks(tasks)
+            print(f"{GREEN}Task #{choice} marked as complete!{RESET}")
+            return
+    print(f"{RED}Task ID not found.{RESET}")
+
+
+def show_system_stats():
+    """Display real-time device storage and Python runtime statistics."""
+    total, used, free = shutil.disk_usage(".")
+    gb = 1024 ** 3
+    print(f"\n{BOLD}--- Mobile System &amp;amp; Python Info ---{RESET}")
+    print(f" Python Version : {sys.version.split()[0]}")
+    print(f" Platform       : {sys.platform} (Android Linux userspace)")
+    print(f" Working Folder : {os.getcwd()}")
+    print(f" Storage Total  : {total / gb:.2f} GB")
+    print(f" Storage Free   : {free / gb:.2f} GB ({free / total * 100:.1f}% free)")
+    print(f" Storage Used   : {used / gb:.2f} GB")
+
+
+def main():
+    tasks = load_tasks()
+    while True:
+        print(f"\n{CYAN}{BOLD}==============================")
+        print("  POCKET TRACKER - TERMUX CLI")
+        print(f"=============================={RESET}")
+        print(" [1] Add New Task")
+        print(" [2] List All Tasks")
+        print(" [3] Complete a Task")
+        print(" [4] View Device Storage &amp;amp; System Stats")
+        print(" [5] Exit")
+        choice = input(f"{BOLD}Select an option [1-5]: {RESET}").strip()
+
+        if choice == "1":
+            add_task(tasks)
+        elif choice == "2":
+            list_tasks(tasks)
+        elif choice == "3":
+            complete_task(tasks)
+        elif choice == "4":
+            show_system_stats()
+        elif choice == "5":
+            print(f"\n{GREEN}Goodbye! Keep building on mobile.{RESET}\n")
+            break
+        else:
+            print(f"{RED}Invalid option. Please enter 1 to 5.{RESET}")
+
+
+if __name__ == "__main__":
+    main()&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Review the code inside nano. To save your work, press &lt;b&gt;Ctrl+O&lt;/b&gt;, verify the filename &lt;code&gt;pocket_tracker.py&lt;/code&gt;, and hit Enter. Then exit back to the terminal prompt by pressing &lt;b&gt;Ctrl+X&lt;/b&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Step 5: Running and Testing Your Python App in Termux&lt;/h2&gt;
+
+&lt;p&gt;With your code saved to disk, you can execute it in two different ways. The direct approach is passing the filename as an argument to the Python interpreter:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;python pocket_tracker.py&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Alternatively, you can give your script direct executable permissions with &lt;code&gt;chmod&lt;/code&gt;, allowing you to run it like any native command via the shebang line (&lt;code&gt;#!/usr/bin/env python3&lt;/code&gt;) at the top of the file:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;chmod +x pocket_tracker.py
+./pocket_tracker.py&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/05-running-python-demo-app.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/05-running-python-demo-app.webp" type="image/webp"/&gt;
+    &lt;img alt="Termux terminal running the Pocket Tracker CLI application with colored menu options and system stats" decoding="async" height="545" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/05-running-python-demo-app.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The demo app in action: formatted menus, task persistence, and real-time device storage inspection.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Try interacting with your new application:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Press &lt;b&gt;1&lt;/b&gt; to add your first task: &lt;code&gt;Install Python in Termux&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Press &lt;b&gt;1&lt;/b&gt; again to add a second task: &lt;code&gt;Configure nano indentation rules&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Press &lt;b&gt;2&lt;/b&gt; to list your tasks and confirm they are listed as &lt;code&gt;[PENDING]&lt;/code&gt; with timestamps.&lt;/li&gt;
+&lt;li&gt;Press &lt;b&gt;3&lt;/b&gt; and select task ID &lt;code&gt;1&lt;/code&gt; to mark it &lt;code&gt;[DONE]&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Press &lt;b&gt;4&lt;/b&gt; to see your smartphone's actual disk metrics and Python interpreter version calculated live.&lt;/li&gt;
+&lt;li&gt;Press &lt;b&gt;5&lt;/b&gt; to exit the application.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now check your project folder with &lt;code&gt;ls -la&lt;/code&gt;. You will see a newly generated &lt;code&gt;tasks.json&lt;/code&gt; file. Inspect its contents using &lt;code&gt;cat tasks.json&lt;/code&gt;. Your data was safely serialized and saved to your device's persistent storage. Even if you reboot your phone or clear your terminal session, your Python application will load the saved state the moment you run it again.&lt;/p&gt;
+
+&lt;h2&gt;Step 6: Installing Third-Party Packages with Pip (and Avoiding the C-Extension Trap)&lt;/h2&gt;
+
+&lt;p&gt;Python's built-in standard library is powerful, but modern development relies heavily on third-party packages from PyPI (Python Package Index). When you run &lt;code&gt;pip install&lt;/code&gt; in Termux, packages fall into two distinct categories:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;b&gt;Pure Python packages:&lt;/b&gt; Libraries written entirely in Python (such as &lt;code&gt;requests&lt;/code&gt;, &lt;code&gt;rich&lt;/code&gt;, &lt;code&gt;click&lt;/code&gt;, or &lt;code&gt;beautifulsoup4&lt;/code&gt;) install effortlessly on Android without extra tools.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Native C/C++ extension packages:&lt;/b&gt; Libraries that compile native binaries (such as &lt;code&gt;numpy&lt;/code&gt;, &lt;code&gt;cryptography&lt;/code&gt;, &lt;code&gt;lxml&lt;/code&gt;, or &lt;code&gt;pillow&lt;/code&gt;) require an ARM C-compiler, Python header files, and build utilities.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;If you try to install a package requiring compilation on a bare Termux setup, pip will throw errors mentioning &lt;code&gt;clang: command not found&lt;/code&gt; or &lt;code&gt;error: command 'gcc' failed&lt;/code&gt;. To prevent these failures, install the mobile build essentials upfront:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pkg install clang make python-pip -y&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For packages like &lt;code&gt;cryptography&lt;/code&gt; that depend on Rust, Termux also provides a native Rust toolchain via &lt;code&gt;pkg install rust&lt;/code&gt;. In addition, Termux maintains pre-compiled binary packages for several heavy scientific libraries directly through &lt;code&gt;pkg&lt;/code&gt;. For instance, rather than compiling NumPy from source with pip, you can install the optimized native build in three seconds using &lt;code&gt;pkg install python-numpy&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/06-pip-packages-clang-wheel.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/06-pip-packages-clang-wheel.webp" type="image/webp"/&gt;
+    &lt;img alt="Infographic illustrating pip package installation in Termux alongside clang compiler and wheel build tools" decoding="async" height="545" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/06-pip-packages-clang-wheel.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Installing clang and make ensures pip can build native C extensions and wheels directly on ARM64.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Let's install the popular &lt;code&gt;requests&lt;/code&gt; library to demonstrate fetching web data directly from your Termux Python script:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;pip install requests&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Test it with a quick one-liner that fetches your public IP address from the command line:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;python -c "import requests; print('Public IP:', requests.get('https://api.ipify.org').text)"&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If that command returns your network IP, your mobile Python setup is fully equipped to interact with modern REST APIs, cloud databases, and web services.&lt;/p&gt;
+
+&lt;h2&gt;Step 7: Connecting Your Mobile Scripts to the Cloud (Interlinking)&lt;/h2&gt;
+
+&lt;p&gt;Building scripts in Termux is fast, but leaving code trapped on a single phone is risky. A lost device, broken screen, or accidental app uninstallation wipes your local files. The professional answer is connecting your Termux environment to a cloud workflow with Git.&lt;/p&gt;
+
+&lt;p&gt;Initialize a Git repository inside your &lt;code&gt;~/projects/pocket-app&lt;/code&gt; folder, stage your files, and commit them:&lt;/p&gt;
+
+&lt;pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"&gt;&lt;code&gt;git init
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+git add pocket_tracker.py
+git commit -m "initial commit: pocket tracker demo app"&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This Git connection unlocks three vital capabilities across your entire developer stack:&lt;/p&gt;
+
+&lt;p&gt;First, it eliminates the dangerous "delete-and-reupload" habit. If you later take a Python script or Flask backend built on mobile and host it on free cloud infrastructure, follow the lessons in &lt;a href="https://freestackhub.blogspot.com/2026/09/stop-deleting-pythonanywhere-files.html"&gt;our guide on stopping file deletion on PythonAnywhere and using Git instead&lt;/a&gt;. Using a single &lt;code&gt;git pull&lt;/code&gt; command updates your production server in seconds without ever risking your databases or upload directories.&lt;/p&gt;
+
+&lt;p&gt;Second, if you decide to expand your mobile Python script into a lightweight web dashboard using Python's built-in &lt;code&gt;http.server&lt;/code&gt; or a microframework, you need to monitor performance and asset weights. Review our detailed breakdown in &lt;a href="https://freestackhub.blogspot.com/2026/09/pagespeed-insights-scores-explained.html"&gt;Check Your Website's Vital Scores with PageSpeed Insights&lt;/a&gt; to see how server response time, render blocking, and image compression directly affect mobile user experience and Core Web Vitals.&lt;/p&gt;
+
+&lt;p&gt;Third, when your mobile tools, documentation, or technical projects are published online for public access, do not leave their visibility to chance. Learn how to verify site properties, submit sitemaps, and debug indexation by reading &lt;a href="https://freestackhub.blogspot.com/2026/09/google-search-console-step-by-step.html"&gt;Google Search Console from Zero: Add a Property, Inspect a URL, Request Indexing, Submit a Sitemap&lt;/a&gt;. A disciplined workflow connects pocket prototyping directly to discoverable web applications.&lt;/p&gt;
+
+&lt;div style="text-align:center; margin:18px 0;"&gt;
+  &lt;picture&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/07-termux-python-nano-workflow-recap.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/07-termux-python-nano-workflow-recap.webp" type="image/webp"/&gt;
+    &lt;img alt="A five-step mobile developer workflow diagram showing installation, editing in nano, running python, git sync, and cloud deployment" decoding="async" height="545" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-19-install-python-in-termux-demo-app/images/07-termux-python-nano-workflow-recap.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+  &lt;/picture&gt;
+  &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;From phone terminal to production: a five-step loop turns mobile experiments into robust software.&lt;/i&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;Troubleshooting Common Termux Python Errors&lt;/h2&gt;
+
+&lt;p&gt;When developing in a mobile environment, you will eventually encounter a few quirks unique to Android's security architecture. Keep these solutions handy:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;b&gt;Permission Denied when saving outside Termux:&lt;/b&gt; Android restricts background storage access by default. Run &lt;code&gt;termux-setup-storage&lt;/code&gt; and grant the prompt permission. Your phone's internal storage will then be safely accessible under &lt;code&gt;~/storage/shared&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;error: externally-managed-environment:&lt;/b&gt; In recent Python packaging updates, pip may block global installs to protect system packages. You can safely install packages for your user by adding the &lt;code&gt;--break-system-packages&lt;/code&gt; flag (e.g., &lt;code&gt;pip install requests --break-system-packages&lt;/code&gt;) or by creating an isolated virtual environment with &lt;code&gt;python -m venv myenv &amp;amp;&amp;amp; source myenv/bin/activate&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Script stops running when you lock the phone:&lt;/b&gt; Android's aggressive battery optimizer will pause Termux processes when the display sleeps. Prevent this by running &lt;code&gt;termux-wake-lock&lt;/code&gt; in your terminal or disabling battery optimization for Termux in Android Settings.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Accidental indentation errors:&lt;/b&gt; If you copy code from a browser that has mixed tabs and spaces, open the file in nano and review each indentation level. With &lt;code&gt;set tabstospaces&lt;/code&gt; in your &lt;code&gt;~/.nanorc&lt;/code&gt;, hitting Tab will always insert four clean space characters.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Quick recap&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Update your package index with &lt;code&gt;pkg update &amp;amp;&amp;amp; pkg upgrade&lt;/code&gt; and install the runtime with &lt;code&gt;pkg install python&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Configure &lt;code&gt;~/.nanorc&lt;/code&gt; with &lt;code&gt;set tabstospaces&lt;/code&gt; and &lt;code&gt;set tabsize 4&lt;/code&gt; to prevent mixed-indentation syntax crashes.&lt;/li&gt;
+&lt;li&gt;Create your script using &lt;code&gt;nano filename.py&lt;/code&gt;, write your logic, save with &lt;b&gt;Ctrl+O&lt;/b&gt;, and exit with &lt;b&gt;Ctrl+X&lt;/b&gt;.&lt;/li&gt;
+&lt;li&gt;Execute your app with &lt;code&gt;python filename.py&lt;/code&gt; or grant execute permissions with &lt;code&gt;chmod +x filename.py&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Install build tools (&lt;code&gt;clang&lt;/code&gt; and &lt;code&gt;make&lt;/code&gt;) before running pip, and push your code to Git so your mobile work seamlessly connects to production servers.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;You now possess a full, native Python development station that fits in the palm of your hand. Open Termux today, create a project directory, and build a script that automates something in your daily workflow. The entire software engineering stack is accessible from your pocket.&lt;/p&gt;</content>
+    <blogger:metaDescription>Install Python in Termux on Android, write a complete interactive CLI demo app using nano, and run your scripts with zero compilation headaches.</blogger:metaDescription>
+    <blogger:created>2026-09-19T00:00:00.000+00:00</blogger:created>
+    <published>2026-09-19T00:00:00.000+00:00</published>
+    <updated>2026-09-19T00:00:00.000+00:00</updated>
+    <blogger:location/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Termux"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Android"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Python"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Command Line"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Nano"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Mobile Development"/>
+    <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Free Stack"/>
+    <blogger:filename>/2026/09/install-python-in-termux-demo-app.html</blogger:filename>
+    <link/>
+    <enclosure/>
+  </entry>
+</feed>

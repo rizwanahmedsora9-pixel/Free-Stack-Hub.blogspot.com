@@ -248,14 +248,28 @@ imageio-ffmpeg pillow` gets both (that package ships a static ffmpeg with libx26
 **Blogger cannot host video.** Upload the two files to YouTube and link them from the post, or
 embed the wide one with a `<iframe>`; never expect the MP4 in the post folder to stream itself.
 
+## 12. Interlinking rule (mandatory across all posts)
+Every post published on Free Stack Hub must actively participate in an interconnected internal linking structure:
+
+- **Mandatory interlinking:** Every post **must** include natural, contextual links to other published posts on the blog.
+- **Related posts are mandatory links ("specially related must"):** Whenever a post touches on a related topic, tool, or stack layer, it is strictly required to link to the existing sister posts. For example:
+  - Any mobile/terminal post must link to [Termux Commands Worth Memorising: Basics, Git Cloning and Nano on Android](https://freestackhub.blogspot.com/2026/09/termux-commands-git-nano.html).
+  - Any Python or deployment post must link to [Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead](https://freestackhub.blogspot.com/2026/09/stop-deleting-pythonanywhere-files.html).
+  - Any performance or web speed post must link to [Check Your Website's Vital Scores with PageSpeed Insights](https://freestackhub.blogspot.com/2026/09/pagespeed-insights-scores-explained.html).
+  - Any SEO or site discovery post must link to [Google Search Console from Zero](https://freestackhub.blogspot.com/2026/09/google-search-console-step-by-step.html).
+- **Descriptive anchor text:** Always use descriptive, human-readable anchor text that clearly identifies the target topic (e.g., `<a href="/2026/09/termux-commands-git-nano.html">our step-by-step Termux terminal commands and nano guide</a>`). Never use generic text like "click here", "read more", or unformatted raw URLs.
+- **Future posts commitment:** In every future post, interlinking to existing posts (especially related ones) is a required quality gate before merging.
+
 ## Checklist for the agent when adding a post
 1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
 2. Write `post.html` (+ `post.md`), generate images into `images/` - bare `<img src alt>`, no sizes
 3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker
-4. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
-5. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
-6. `python3 tools/check_perf.py` → must print `clean`
-7. Commit the whole folder including the image variants, `import.xml`, `paste.html` and `title.txt`
-8. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels by hand)
-9. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL
-10. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos
+4. Apply the section 12 interlinking rule: contextually interlink to related and existing posts on the blog
+5. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
+6. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
+7. `python3 tools/check_perf.py` → must print `clean`
+8. Commit the whole folder including the image variants, `import.xml`, `paste.html` and `title.txt`
+9. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels by hand)
+10. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL
+11. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos
+

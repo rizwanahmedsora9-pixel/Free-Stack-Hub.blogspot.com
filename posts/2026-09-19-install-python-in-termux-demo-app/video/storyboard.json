@@ -1,0 +1,74 @@
+[
+  {
+    "kind": "hook",
+    "image": "01-install-python-termux-nano-hero.jpg",
+    "eyebrow": "Free Stack Hub · 19 Sep 2026",
+    "title": "Install Python in Termux: Build and Run Your First Python App with Nano on Android",
+    "voiceover": "I tried running my first Python automation script inside Termux while waiting for a train and watched the screen freeze on a wall of compiler errors. Nothing was broken on my phone; I had simply missed the two build flags and Android-specific package requirements that mobile Linux demands behind the scenes. Once you understand how Python lives inside Termux's sandbox, writing, editing with nano, and executing production-ready scripts on your phone takes less than ten minutes.",
+    "index": "01 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "02-termux-pkg-install-python.jpg",
+    "eyebrow": "The post",
+    "title": "Step 1: Installing Python and Core Dependencies in Termux",
+    "voiceover": "Before installing any language runtime, always synchronise your package database with the official mirrors. Termux updates packages frequently, and attempting to install packages against a stale cache is the number one cause of broken package downloads: Once the system packages are up to date, install Python.",
+    "index": "02 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "03-python-interactive-repl-termux.jpg",
+    "eyebrow": "The post",
+    "title": "Step 2: Exploring the Python Interactive Shell (REPL)",
+    "voiceover": "The quickest way to confirm that your Python environment can execute code is by launching the interactive Read-Eval-Print Loop (REPL). Type python into your terminal and hit Enter: The terminal cursor will transform into the classic triple-arrow prompt ( &gt;&gt;&gt; ).",
+    "index": "03 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "04-nano-python-script-editor.jpg",
+    "eyebrow": "The post",
+    "title": "Step 3: Configuring Nano for Painless Python Indentation",
+    "voiceover": "Interactive shells are great for one-liners, but real applications need script files. On a desktop computer, developers use IDEs with automatic indentation and linting.",
+    "index": "04 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "01-install-python-termux-nano-hero.jpg",
+    "eyebrow": "The post",
+    "title": "Step 4: Building the Demo App: Pocket Task and System Monitor",
+    "voiceover": "Now let's build a real, useful demo application rather than a trivial one-line hello world. We will create Pocket Tracker ( pocket_tracker.py ): an interactive command-line application that allows you to manage tasks with persistent JSON storage on your phone and inspect real-time system metrics (timestamp, battery-friendly memory usage, and free disk storage).",
+    "index": "05 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "05-running-python-demo-app.jpg",
+    "eyebrow": "The post",
+    "title": "Step 5: Running and Testing Your Python App in Termux",
+    "voiceover": "With your code saved to disk, you can execute it in two different ways. The direct approach is passing the filename as an argument to the Python interpreter: Alternatively, you can give your script direct executable permissions with chmod , allowing you to run it like any native command via the shebang line ( #!/usr/bin/env python3 ) at the top of the file: Try interacting with your new application: Now check your project folder with ls -la .",
+    "index": "06 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "06-pip-packages-clang-wheel.jpg",
+    "eyebrow": "The post",
+    "title": "Step 6: Installing Third-Party Packages with Pip (and Avoiding the C-Extension Trap) (+3 more)",
+    "voiceover": "Python's built-in standard library is powerful, but modern development relies heavily on third-party packages from PyPI (Python Package Index). When you run pip install in Termux, packages fall into two distinct categories: If you try to install a package requiring compilation on a bare Termux setup",
+    "index": "07 / 08"
+  },
+  {
+    "kind": "recap",
+    "image": "01-install-python-termux-nano-hero.jpg",
+    "eyebrow": "Quick recap",
+    "title": "What to do",
+    "voiceover": "Update your package index with pkg update &amp;&amp; pkg upgrade and install the runtime with pkg install python . Configure ~/.nanorc with set tabstospaces and set tabsize 4 to prevent mixed-indentation syntax crashes. Create your script using nano filename.py , write your logic, save with Ctrl+O ,",
+    "bullets": [
+      "Update your package index with pkg update &amp;&amp; pkg upgrade and install the runtime with pkg install python .",
+      "Configure ~/.nanorc with set tabstospaces and set tabsize 4 to prevent mixed-indentation syntax crashes.",
+      "Create your script using nano filename.py , write your logic, save with Ctrl+O , and exit with Ctrl+X .",
+      "Execute your app with python filename.py or grant execute permissions with chmod +x filename.py .",
+      "Install build tools ( clang and make ) before running pip, and push your code to Git so your mobile work seamlessly connects to production servers."
+    ],
+    "cta": "Full walkthrough: freestackhub.blogspot.com",
+    "index": "08 / 08"
+  }
+]
