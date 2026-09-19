@@ -163,6 +163,53 @@ def http_status(url: str, cache: dict) -> int | None:
     return cache[url]
 
 
+def fetch_html(url: str, cache: dict) -> tuple:
+    """(status, html) for one URL, once per run. (None, "") when unreachable.
+
+    The Blogger feed carries the *body* of a post; it does not carry the <head>,
+    which is where rel=canonical and the robots meta live - the two tags that
+    decide whether Google can index the page at all. Only the live HTML has them.
+    """
+    if url in cache:
+        return cache[url]
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+            body = r.read().decode("utf-8", "replace")
+            cache[url] = (r.status, body)
+    except urllib.error.HTTPError as exc:
+        cache[url] = (exc.code, "")
+    except Exception:  # noqa: BLE001
+        cache[url] = (None, "")
+    return cache[url]
+
+
+def head_of(html: str) -> str:
+    """Just the <head>, or the whole document when it has no </head>."""
+    m = re.search(r"<head\b[^>]*>(.*?)</head>", html, re.S | re.I)
+    return m.group(1) if m else html
+
+
+def canonical_of(html: str) -> str:
+    """The href of the page's rel=canonical, "" when there is none."""
+    for m in re.finditer(r"<link\b[^>]*>", head_of(html), re.I):
+        tag = m.group(0)
+        rel = re.search(r"\brel=['\"]?([^'\">]+)", tag, re.I)
+        if rel and "canonical" in rel.group(1).lower():
+            href = re.search(r"\bhref=['\"]([^'\"]+)", tag, re.I)
+            if href:
+                return href.group(1)
+    return ""
+
+
+def meta_robots(html: str) -> str:
+    """The content of <meta name=robots>, "" when there is none."""
+    m = re.search(r"<meta\b[^>]*\bname=['\"]robots['\"][^>]*>", head_of(html), re.I)
+    if not m:
+        return ""
+    c = re.search(r"\bcontent=['\"]([^'\"]*)", m.group(0), re.I)
+    return c.group(1) if c else ""
+
+
 def match_local(post: dict, entries: list) -> tuple:
     """Find which live entry this folder became. Title first, then shared images."""
     for e in entries:
@@ -180,8 +227,13 @@ def match_local(post: dict, entries: list) -> tuple:
     return None, ""
 
 
-def report(post: dict, entries: list, cdn_files: set, check_links: bool = True, cache: dict | None = None) -> int:
-    """Print how one post shows on the blog; return 0 (clean) or 1 (problem)."""
+def report(post: dict, entries: list, cdn_files: set, live_checks: bool = True, cache: dict | None = None) -> int:
+    """Print how one post shows on the blog; return 0 (clean) or 1 (problem).
+
+    live_checks fetches each live page: the internal links it makes, its
+    rel=canonical and its robots meta. Off (--no-links) leaves the feed and CDN
+    checks running.
+    """
     rc, name = 0, post["folder"].name
     cache = {} if cache is None else cache
 
@@ -340,7 +392,7 @@ def report(post: dict, entries: list, cdn_files: set, check_links: bool = True, 
     links = internal_links(live["html"])
     broken, unverified = [], []
     for _href, path in links:
-        code = http_status(BLOG_URL + path, cache) if check_links else None
+        code = http_status(BLOG_URL + path, cache) if live_checks else None
         if code is None:
             unverified.append(path)
         elif code >= 400:
@@ -351,7 +403,7 @@ def report(post: dict, entries: list, cdn_files: set, check_links: bool = True, 
         for path, code in broken:
             line(ERR, f"internal link 404s: {path} (HTTP {code}) - Google follows it and lands on nothing")
         line(NOTE, "point the href at the target's real URL (its PERMALINK:) in post.html, then re-publish the body")
-    elif not check_links:
+    elif not live_checks:
         line(NOTE, f"{len(links)} internal link(s) not checked (--no-links)")
     elif unverified:
         line(WARN, f"could not reach {len(unverified)} internal link(s): " + ", ".join(unverified[:3]))
@@ -378,6 +430,42 @@ def report(post: dict, entries: list, cdn_files: set, check_links: bool = True, 
             "Google to leave out of the index",
         )
         line(NOTE, "add a contextual link from a related post (POST_RULES section 12), then re-publish that body")
+
+    # 9. the live <head>: the two tags that decide whether Google may index the
+    #    page, and the one that ties Blogger's mobile ?m=1 URL to this one.
+    #    A Blogger blog fetches its posts fine for a normal client and still shows
+    #    "Page fetch: Failed: Redirect error / Indexing allowed? N/A" in Search
+    #    Console, because Googlebot smartphone gets the mobile redirect. Only the
+    #    live HTML says which side of that the page is on.
+    if live_checks:
+        status, html = fetch_html(live["link"], cache)
+        if status != 200 or not html:
+            line(ERR, f"the live URL does not return 200 (got {status}) - Google cannot read the page")
+        else:
+            canon = canonical_of(html)
+            want = live["link"]
+            if not canon:
+                line(
+                    ERR,
+                    "the live page has no rel=canonical - Blogger emits it inside "
+                    "<b:include name='all-head-content'/>, so the theme has lost it; the mobile "
+                    "?m=1 URL and this one are then undeclared duplicates",
+                )
+            elif canon.split("#")[0].split("?")[0].rstrip("/") != want.rstrip("/"):
+                line(
+                    ERR,
+                    f'the live rel=canonical is "{canon}", not this post\'s own URL - Google is '
+                    "being pointed at a different page",
+                )
+            else:
+                line(OK, "the live page declares itself canonical (the clean URL, no ?m=1)")
+            robots = meta_robots(html)
+            if "noindex" in robots.lower() or "none" in robots.lower():
+                line(ERR, f'the live page ships <meta name=robots content="{robots}"> - that blocks indexing')
+            elif robots:
+                line(OK, f'robots meta is "{robots}" (no noindex)')
+            else:
+                line(OK, "no noindex in the page's robots meta")
     return rc
 
 
@@ -385,7 +473,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("post", nargs="?", help="post folder name or path (default: all)")
     ap.add_argument("--no-cdn", action="store_true", help="skip the jsDelivr image check")
-    ap.add_argument("--no-links", action="store_true", help="skip the internal-link (404) check")
+    ap.add_argument(
+        "--no-links",
+        action="store_true",
+        help="do not fetch the live pages (internal links, rel=canonical, robots meta)",
+    )
     ap.add_argument("--json-file", type=Path, help="read the feed from a saved JSON file instead of the network")
     a = ap.parse_args()
 
@@ -412,7 +504,7 @@ def main() -> int:
     else:
         folders = sorted(d for d in POSTS_DIR.iterdir() if d.is_dir() and not d.name.startswith("_"))
 
-    rc, link_cache = 0, {}
+    rc, live_cache = 0, {}
     for folder in folders:
         p = load_post(folder)
         if p["problems"]:
@@ -422,7 +514,7 @@ def main() -> int:
             rc = 1
             continue
         print(f"posts/{folder.name}/")
-        rc |= report(p, entries, cdn_files, check_links=not a.no_links, cache=link_cache)
+        rc |= report(p, entries, cdn_files, live_checks=not a.no_links, cache=live_cache)
         print()
     return rc
 

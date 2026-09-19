@@ -212,6 +212,18 @@ each one silently drops something the build files carry:
 - **Settings → Posts, comments and media → Convert line breaks = On** (`blog_convert_line_breaks`
   is `true`). Right for typed text; for pasted `paste.html` it can add blank space between blocks
   that already have `<p>` tags.
+- **Theme → Mobile:** Blogger serves one responsive template to both desktop and mobile
+  (`show_mobile_view` is `false` in the blog's own export), which is what a `b:responsive='true'`
+  theme wants - keep it. The mobile variant of a URL is still reachable as `...html?m=1`, and because
+  Googlebot smartphone is now the primary crawler it is the bot that meets Blogger's redirect between
+  the two. Two rules follow:
+  - **Never remove `<b:include data='blog' name='all-head-content'/>` from the theme.** That one line
+    is what emits `<link rel='canonical'>`, which is the tag that declares the `?m=1` URL and the
+    clean URL to be the same page. `tools/check_perf.py` fails the theme if it is missing, if a
+    second canonical is hand-written, or if a `noindex` appears.
+  - **Never "fix" the `?m=1` reports** by disallowing `?m=1` in robots.txt, noindexing it, or
+    stripping it with JavaScript - all three break the mobile/desktop relationship. See
+    [INDEXING.md](INDEXING.md) section 2.
 - **Time zone is `America/Los_Angeles`** while `PUBLISHED:` is read as midnight UTC, so a post
   dated `2026-09-16` shows and links as **Sep 15** unless you write the date with that offset in
   mind. The blog also has no **description** set (`blog_description` is empty), so page titles end

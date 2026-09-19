@@ -48,9 +48,11 @@ images would show as broken. Only the generated files have full URLs.
 - **Theme preview:** `python3 tools/build_theme_preview.py` (regenerates `theme/preview.html`)
 - **Video tool:** `python3 tools/make_video.py` (needs `pillow` + ffmpeg; see POST_RULES §11)
 - **Published-vs-source check:** `python3 tools/check_published.py` - also fetches every internal
-  link a post makes (a 404 fails the post) and warns when nothing on the blog links to it
-- **Indexing playbook:** [INDEXING.md](INDEXING.md) - what "Crawled - currently not indexed" means,
-  the audit behind the `PERMALINK:` key, and the Blogger/Search Console steps that fix a post
+  link a post makes (a 404 fails the post), checks the live page's `rel=canonical` and robots meta,
+  and warns when nothing on the blog links to it
+- **Indexing playbook:** [INDEXING.md](INDEXING.md) - what "Crawled - currently not indexed",
+  "Redirect error" and "Indexing allowed? N/A" each mean, the audit behind the `PERMALINK:` key, and
+  the Blogger/Search Console steps that fix a post
 - **Cache headers for a static host:** `perf/netlify.toml`
 - **Template:** `posts/_template/`
 - **Performance / accessibility / SEO:** [PERFORMANCE.md](PERFORMANCE.md) - what was changed in the
