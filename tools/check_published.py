@@ -37,6 +37,7 @@ import sys
 import unicodedata
 import urllib.error
 import urllib.request
+from html import unescape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -138,14 +139,25 @@ def link_path(href: str) -> str:
 
 
 def internal_links(html: str) -> list:
-    """(href, path) for every link in a post that points back at this blog."""
+    """(href, path, anchor text) for every link in a post that points back here.
+
+    The anchor text is carried along so a broken link can be reported by what
+    the reader clicks ("our step-by-step guide to essential Termux commands...")
+    rather than only by its URL - that is what you search for in the editor.
+    """
     out, seen = [], set()
-    for href in re.findall(r'<a\b[^>]*?\shref="([^"]*)"', html, re.I):
-        path = link_path(href)
+    for m in re.finditer(r"<a\b([^>]*)>(.*?)</a>", html, re.I | re.S):
+        attrs, inner = m.group(1), m.group(2)
+        href = re.search(r'\shref="([^"]*)"', attrs, re.I)
+        if not href:
+            continue
+        path = link_path(href.group(1))
         if not path or path == "/" or path in seen:
             continue
         seen.add(path)
-        out.append((href, path))
+        text = re.sub(r"<[^>]+>", "", inner)
+        text = " ".join(unescape(text).split())[:70]
+        out.append((href.group(1), path, text))
     return out
 
 
@@ -391,17 +403,18 @@ def report(post: dict, entries: list, cdn_files: set, live_checks: bool = True, 
     #    in Search Console's URL Inspection.
     links = internal_links(live["html"])
     broken, unverified = [], []
-    for _href, path in links:
+    for _href, path, text in links:
         code = http_status(BLOG_URL + path, cache) if live_checks else None
         if code is None:
             unverified.append(path)
         elif code >= 400:
-            broken.append((path, code))
+            broken.append((path, code, text))
     if not links:
         line(NOTE, "this post links to no other page on the blog (POST_RULES section 12 asks for one)")
     elif broken:
-        for path, code in broken:
-            line(ERR, f"internal link 404s: {path} (HTTP {code}) - Google follows it and lands on nothing")
+        for path, code, text in broken:
+            where = f' on "{text}"' if text else ""
+            line(ERR, f"internal link 404s: {path} (HTTP {code}){where} - Google follows it and lands on nothing")
         line(NOTE, "point the href at the target's real URL (its PERMALINK:) in post.html, then re-publish the body")
     elif not live_checks:
         line(NOTE, f"{len(links)} internal link(s) not checked (--no-links)")

@@ -229,6 +229,19 @@ For each post: Blogger → **Edit** → **HTML view** → select all → paste t
 If you would rather change only the last paragraph of those two sister posts, replace it with the
 matching paragraph from their `paste.html` - that is the only line that changed.
 
+**Nothing in this repo can reach Blogger.** Editing `post.html`/`paste.html` changes the *source*
+only; the live post keeps whatever body was last pasted into the editor. That is why a fixed link can
+sit in the repo for days while the live post still 404s. `check_published.py` is the tool that tells
+the two apart - run against the live blog, it reports each broken link **by its anchor text**, so you
+can search for that exact sentence in the editor:
+
+```
+FAIL  internal link 404s: /2026/09/termux-commands-git-nano.html (HTTP 404)
+      on "our step-by-step guide to essential Termux commands, Git cloning, and ..."
+```
+
+After a re-paste the same run prints `ok   all 4 internal link(s) resolve`.
+
 While the editor is open, put the cursor right after the hook sentence and use
 **Insert → Jump break** where `build_import.py` printed the break belongs (it names the sentence).
 
