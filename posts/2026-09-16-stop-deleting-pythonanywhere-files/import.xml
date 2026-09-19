@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-16T09:50:35.909+00:00</updated>
+  <updated>2026-09-19T17:51:09.133+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -183,7 +183,7 @@ git pull origin main&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your &lt;code&gt;.env&lt;/code&gt; and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.&lt;/p&gt;
 
-&lt;p&gt;If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. Next up: the &lt;code&gt;.gitignore&lt;/code&gt; that keeps your &lt;code&gt;.env&lt;/code&gt; and database off GitHub without breaking your app.&lt;/p&gt;</content>
+&lt;p&gt;If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. And if you want to try a change before it ever reaches the server, you can &lt;a href="https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html"&gt;run the same Python script from your phone in Termux&lt;/a&gt;. Next up: the &lt;code&gt;.gitignore&lt;/code&gt; that keeps your &lt;code&gt;.env&lt;/code&gt; and database off GitHub without breaking your app.&lt;/p&gt;</content>
     <blogger:metaDescription>Still deleting and re-uploading your PythonAnywhere project on every update? Here's the Git workflow that replaces it with one command.</blogger:metaDescription>
     <blogger:created>2026-09-16T00:00:00.000+00:00</blogger:created>
     <published>2026-09-16T00:00:00.000+00:00</published>
@@ -195,7 +195,7 @@ git pull origin main&lt;/code&gt;&lt;/pre&gt;
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Flask"/>
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Deployment"/>
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Web Development"/>
-    <blogger:filename>/2026/09/stop-deleting-pythonanywhere-files.html</blogger:filename>
+    <blogger:filename>/2026/09/stop-deleting-your-pythonanywhere-files.html</blogger:filename>
     <link/>
     <enclosure/>
   </entry>

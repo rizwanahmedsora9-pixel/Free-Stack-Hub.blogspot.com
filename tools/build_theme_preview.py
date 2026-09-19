@@ -30,7 +30,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_import import (  # noqa: E402
     FOLDER_RE, GITHUB_REPO, GITHUB_USER, HEADER_RE as POST_HEADER_RE, IMAGE_REF,
-    POSTS_DIR, load_post, parse_header,
+    POSTS_DIR, load_post, parse_header, permalink_slug,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -153,7 +153,7 @@ def search_sample() -> list:
             continue
         sample.append({
             "t": title,
-            "u": f"/{when.strftime('%Y/%m')}/{fm.group(2)}.html",
+            "u": f"/{when.strftime('%Y/%m')}/{permalink_slug(meta.get('PERMALINK', ''), fm.group(2))}.html",
             "l": [l.strip() for l in meta.get("LABELS", "").split(",") if l.strip()],
             "d": when.strftime("%Y-%m-%d"),
         })
@@ -289,7 +289,7 @@ def build(post: dict) -> str:
     body = re.sub(r'(<img[^>]*\ssrc=")([^"]+)(")', fix_img, body, flags=re.I)
 
     labels_html = "".join(f'<a href="{slug_url}" rel="tag">{html.escape(l)}</a>' for l in labels)
-    post_url = f"/{post['published'].strftime('%Y/%m')}/{post['slug']}.html"
+    post_url = f"/{post['published'].strftime('%Y/%m')}/{post['permalink']}.html"
 
     demo_title = "Your next post shows up as the second card in this list"
     demo_label = labels[:1] or ["PythonAnywhere"]

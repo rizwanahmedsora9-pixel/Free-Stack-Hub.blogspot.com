@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-19T17:22:46.768+00:00</updated>
+  <updated>2026-09-19T17:51:09.143+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -30,7 +30,7 @@
 
 &lt;p&gt;Yet for most developers, their first attempt ends in frustration. Python scripts fail because of invisible tab-versus-space indentation mismatches on touch keyboards, package installations fail during C-extension compilation, or scripts vanish when switching apps. This comprehensive guide walks you through every layer of the setup: installing the latest Python runtime, configuring nano for clean Python syntax and indentation, building a full-featured interactive demo application from scratch, running it from the command line, and linking your mobile workflow to professional developer tools.&lt;/p&gt;
 
-&lt;p&gt;If you are completely new to Termux or need to set up storage permissions and navigation keys first, start with &lt;a href="https://freestackhub.blogspot.com/2026/09/termux-commands-git-nano.html"&gt;our step-by-step guide to essential Termux commands, Git cloning, and nano on Android&lt;/a&gt;. Once your terminal fundamentals are in place, you are ready to install Python.&lt;/p&gt;
+&lt;p&gt;If you are completely new to Termux or need to set up storage permissions and navigation keys first, start with &lt;a href="https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html"&gt;our step-by-step guide to essential Termux commands, Git cloning, and nano on Android&lt;/a&gt;. Once your terminal fundamentals are in place, you are ready to install Python.&lt;/p&gt;
 
 &lt;h2&gt;Step 1: Installing Python and Core Dependencies in Termux&lt;/h2&gt;
 
@@ -348,11 +348,11 @@ git commit -m "initial commit: pocket tracker demo app"&lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This Git connection unlocks three vital capabilities across your entire developer stack:&lt;/p&gt;
 
-&lt;p&gt;First, it eliminates the dangerous "delete-and-reupload" habit. If you later take a Python script or Flask backend built on mobile and host it on free cloud infrastructure, follow the lessons in &lt;a href="https://freestackhub.blogspot.com/2026/09/stop-deleting-pythonanywhere-files.html"&gt;our guide on stopping file deletion on PythonAnywhere and using Git instead&lt;/a&gt;. Using a single &lt;code&gt;git pull&lt;/code&gt; command updates your production server in seconds without ever risking your databases or upload directories.&lt;/p&gt;
+&lt;p&gt;First, it eliminates the dangerous "delete-and-reupload" habit. If you later take a Python script or Flask backend built on mobile and host it on free cloud infrastructure, follow the lessons in &lt;a href="https://freestackhub.blogspot.com/2026/09/stop-deleting-your-pythonanywhere-files.html"&gt;our guide on stopping file deletion on PythonAnywhere and using Git instead&lt;/a&gt;. Using a single &lt;code&gt;git pull&lt;/code&gt; command updates your production server in seconds without ever risking your databases or upload directories.&lt;/p&gt;
 
-&lt;p&gt;Second, if you decide to expand your mobile Python script into a lightweight web dashboard using Python's built-in &lt;code&gt;http.server&lt;/code&gt; or a microframework, you need to monitor performance and asset weights. Review our detailed breakdown in &lt;a href="https://freestackhub.blogspot.com/2026/09/pagespeed-insights-scores-explained.html"&gt;Check Your Website's Vital Scores with PageSpeed Insights&lt;/a&gt; to see how server response time, render blocking, and image compression directly affect mobile user experience and Core Web Vitals.&lt;/p&gt;
+&lt;p&gt;Second, if you decide to expand your mobile Python script into a lightweight web dashboard using Python's built-in &lt;code&gt;http.server&lt;/code&gt; or a microframework, you need to monitor performance and asset weights. Review our detailed breakdown in &lt;a href="https://freestackhub.blogspot.com/2026/09/check-your-websites-vital-scores-with.html"&gt;Check Your Website's Vital Scores with PageSpeed Insights&lt;/a&gt; to see how server response time, render blocking, and image compression directly affect mobile user experience and Core Web Vitals.&lt;/p&gt;
 
-&lt;p&gt;Third, when your mobile tools, documentation, or technical projects are published online for public access, do not leave their visibility to chance. Learn how to verify site properties, submit sitemaps, and debug indexation by reading &lt;a href="https://freestackhub.blogspot.com/2026/09/google-search-console-step-by-step.html"&gt;Google Search Console from Zero: Add a Property, Inspect a URL, Request Indexing, Submit a Sitemap&lt;/a&gt;. A disciplined workflow connects pocket prototyping directly to discoverable web applications.&lt;/p&gt;
+&lt;p&gt;Third, when your mobile tools, documentation, or technical projects are published online for public access, do not leave their visibility to chance. Learn how to verify site properties, submit sitemaps, and debug indexation by reading &lt;a href="https://freestackhub.blogspot.com/2026/09/google-search-console-from-zero-add.html"&gt;Google Search Console from Zero: Add a Property, Inspect a URL, Request Indexing, Submit a Sitemap&lt;/a&gt;. A disciplined workflow connects pocket prototyping directly to discoverable web applications.&lt;/p&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
@@ -397,7 +397,7 @@ git commit -m "initial commit: pocket tracker demo app"&lt;/code&gt;&lt;/pre&gt;
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Nano"/>
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Mobile Development"/>
     <category scheme="tag:blogger.com,1999:blog-7497660712599875944" term="Free Stack"/>
-    <blogger:filename>/2026/09/install-python-in-termux-demo-app.html</blogger:filename>
+    <blogger:filename>/2026/09/install-python-in-termux-build-and-run.html</blogger:filename>
     <link/>
     <enclosure/>
   </entry>

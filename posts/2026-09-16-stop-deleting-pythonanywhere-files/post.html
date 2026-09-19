@@ -4,6 +4,7 @@ BLOGGER POST - source for import.xml (built by tools/build_import.py)
 TITLE:  Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead.
 LABELS: PythonAnywhere, Git, GitHub, Flask, Deployment, Web Development
 PUBLISHED: 2026-09-16
+PERMALINK: stop-deleting-your-pythonanywhere-files
 SEARCH DESCRIPTION (Post settings > Search description):
 Still deleting and re-uploading your PythonAnywhere project on every update?
 Here's the Git workflow that replaces it with one command.
@@ -175,4 +176,4 @@ git pull origin main</code></pre>
 
 <p>The delete-and-reupload habit feels safe because it's familiar, but it's quietly the riskiest thing in your workflow. The git route flips that: your history is preserved, your <code>.env</code> and database stay put, and deploying becomes a boring, repeatable, ten-second command. On a free tier with limited resources, boring is exactly what you want your deploys to be.</p>
 
-<p>If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. Next up: the <code>.gitignore</code> that keeps your <code>.env</code> and database off GitHub without breaking your app.</p>
+<p>If you run anything on a free PythonAnywhere plan, do this before your next update. Ten minutes once, and the upload marathon is over for good. And if you want to try a change before it ever reaches the server, you can <a href="https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html">run the same Python script from your phone in Termux</a>. Next up: the <code>.gitignore</code> that keeps your <code>.env</code> and database off GitHub without breaking your app.</p>

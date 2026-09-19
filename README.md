@@ -30,7 +30,8 @@ that: each home-page card is the feature image, the hook, and a **Read more** bu
 that post's own URL. After publishing, check what actually landed:
 
 ```bash
-python3 tools/check_published.py      # live title / labels / permalink / images vs posts/
+python3 tools/check_published.py      # live title / labels / permalink / images / links vs posts/
+python3 tools/check_published.py --no-links   # same, without fetching every internal link
 python3 tools/check_perf.py           # Core Web Vitals / a11y / SEO, offline, no browser
 python3 tools/make_video.py 2026-09-16-stop-deleting-pythonanywhere-files   # social videos
 ```
@@ -46,7 +47,10 @@ images would show as broken. Only the generated files have full URLs.
 - **Performance audit:** `python3 tools/check_perf.py` - see [PERFORMANCE.md](PERFORMANCE.md)
 - **Theme preview:** `python3 tools/build_theme_preview.py` (regenerates `theme/preview.html`)
 - **Video tool:** `python3 tools/make_video.py` (needs `pillow` + ffmpeg; see POST_RULES §11)
-- **Published-vs-source check:** `python3 tools/check_published.py`
+- **Published-vs-source check:** `python3 tools/check_published.py` - also fetches every internal
+  link a post makes (a 404 fails the post) and warns when nothing on the blog links to it
+- **Indexing playbook:** [INDEXING.md](INDEXING.md) - what "Crawled - currently not indexed" means,
+  the audit behind the `PERMALINK:` key, and the Blogger/Search Console steps that fix a post
 - **Cache headers for a static host:** `perf/netlify.toml`
 - **Template:** `posts/_template/`
 - **Performance / accessibility / SEO:** [PERFORMANCE.md](PERFORMANCE.md) - what was changed in the
