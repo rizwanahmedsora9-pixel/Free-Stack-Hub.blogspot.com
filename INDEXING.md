@@ -1,16 +1,17 @@
 # Why the posts are not in Google yet, and what fixes each one
 
-This is the write-up of two Search Console **URL Inspection** reports from
-freestackhub.blogspot.com:
+This is the write-up of three Search Console **URL Inspection** reports from
+freestackhub.blogspot.com - reports B and C are the same failure on two URLs:
 
 | Report | Post | Verdict | Page fetch | Indexing allowed |
 |---|---|---|---|---|
 | **A** | `install-python-in-termux-build-and-run.html` | Crawled - currently not indexed | Successful | Yes |
 | **B** | `google-search-console-from-zero-add.html` | Redirect error | **Failed: Redirect error** | **N/A** |
+| **C** | `check-your-websites-vital-scores-with.html` | Redirect error | **Failed: Redirect error** | **N/A** |
 
-They are two *different* failures - A is a quality/discovery judgement, B is a technical
-fetch failure - and below each one is explained, then the audit that found the underlying
-problem they share, and the steps that are left.
+A and B/C are two *different* failures - A is a quality/discovery judgement, B and C are a
+technical fetch failure (one crawl burst, two URLs) - and below each one is explained, then the
+audit that found the underlying problem they share, and the steps that are left.
 
 ---
 
@@ -94,7 +95,7 @@ That includes report B's post, whose inspection says **`User-declared canonical:
 is not "this post has no canonical" - it is the *same failed fetch* as `Page fetch: Failed` and
 `Indexing allowed? N/A`. Google read nothing, so it could report nothing. On the newest post the
 crawl succeeded and the same field was filled in. Same theme, same tag, different crawl outcome:
-**the difference between the two reports is the crawl, not the page.**
+**the difference between reports A and B is the crawl, not the page.**
 
 Also worth knowing, because it is the mechanism behind report B: a request that looks like a mobile
 client to Blogger is served a **302 from the clean URL to `...html?m=1`** - reproduced while
@@ -147,9 +148,45 @@ a cosmetic report into a real problem:
 - **JavaScript that strips `?m=1`.** It forces a desktop render on phones and creates the very
   redirect loop Search Console is complaining about.
 
+### 2.6 Report C: the same redirect error, one post over (the Sep 20 email)
+
+On Sep 20 Search Console also emailed *"New reasons prevent pages in a sitemap from being
+indexed"* - the mail version of a third URL Inspection, this time on the PageSpeed post:
+
+```
+Last crawl     Sep 19, 2026, 10:10:31 PM   (Googlebot smartphone)
+Page fetch     Failed: Redirect error
+Indexing allowed?       N/A
+User-declared canonical N/A
+```
+
+10:10:31 PM is the same minute as report B's 22:10 crawl, so **this is report B's crawl burst,
+one URL over**: Googlebot smartphone met Blogger's mobile redirect on more than one URL and
+dropped both. Two inspections, one event - everything in 2.1-2.5 applies unchanged, including
+that "Indexing allowed? N/A" is the failed fetch talking, not a missing tag.
+
+The live audit on **Sep 21** found the page itself healthy:
+
+| Check | Result |
+|---|---|
+| The clean URL serves | yes - the post, its title, hook and images |
+| The `?m=1` variant serves | yes - the same post |
+| Listed in `sitemap.xml` | yes, lastmod 2026-09-16 |
+| `rel=canonical` | itself (verified in the Sep 19 audit, 2.3) |
+| Live labels | `Beginner Mistakes, Blog, Google` - **not** the repo's set (5.3) |
+| Live internal links out | none (the repo's own copy had none either, until this fix - see 4) |
+| Live posts linking to it | none - the Install Python post still points at its dead folder slug |
+
+That last row is why "Referring page: None detected" is still true on the live blog: the manual
+steps in section 5 have not been applied yet. The feed proves it - no post body has been edited
+since Sep 16-17 (the interlinking fix landed Sep 19, 18:17 UTC, and the newest post was
+published at 17:33 UTC that day, 44 minutes *before* the fix), and the live Install Python post
+still contains the dead `/2026/09/termux-commands-git-nano.html` link. The repo cannot close
+that gap from here; section 5 can.
+
 ---
 
-## 3. What the audit found behind both reports
+## 3. What the audit found behind all three reports
 
 The five published posts were not published through `import.xml`. Blogger therefore built every URL
 from the post's **title**, so **not one live URL matches its folder slug** in `posts/`:
@@ -191,6 +228,7 @@ correct (2.3), and the pages render on desktop and mobile alike.
 | All five posts record their live URL, so the repo stops claiming URLs that 404 | `posts/*/post.html` |
 | The four dead links now point at the real URLs (post.html + post.md) | `posts/2026-09-19-install-python-in-termux-demo-app/` |
 | Inbound links added from the two posts that continue this one (Termux commands → install Python; PythonAnywhere → run the script from your phone) | `posts/2026-09-17-termux-commands-git-nano/`, `posts/2026-09-16-stop-deleting-pythonanywhere-files/` |
+| **Report C's post linked to nothing** - and neither did the Search Console post; §12's "every post must link out" held for only three of five posts. The PageSpeed post now links to the Search Console walkthrough (one sentence in the routine paragraph), and the Search Console post links back to the PageSpeed post (one sentence in the "what this tool actually is" paragraph) | `posts/2026-09-16-pagespeed-insights-scores-explained/`, `posts/2026-09-16-google-search-console-step-by-step/` |
 | New check: every internal link a post makes is fetched, and one that 404s **fails** the post | `tools/check_published.py` |
 | New check: a post that no other published post links to is **warned** about - the "Referring page: None detected" state | `tools/check_published.py` |
 | New check: the live page's `<head>` is fetched and its **`rel=canonical`** must be the post's own clean URL, with no `noindex` in its robots meta - i.e. section 2.3, automated for every post | `tools/check_published.py` |
@@ -215,7 +253,7 @@ The repo cannot reach Blogger. These are the steps on the blog itself.
 2. **Settings → Privacy → Visible to search engines = Yes.** (Already `true` in the export - check
    it once and forget it.)
 
-### 5.2 Re-paste three bodies (the fixed links live in the body)
+### 5.2 Re-paste five bodies (the fixed links live in the body)
 
 For each post: Blogger → **Edit** → **HTML view** → select all → paste the content of that post's
 `paste.html` → **Update**.
@@ -225,9 +263,13 @@ For each post: Blogger → **Edit** → **HTML view** → select all → paste t
 | `posts/2026-09-19-install-python-in-termux-demo-app/paste.html` | the 4 dead links now point at the 4 live URLs |
 | `posts/2026-09-17-termux-commands-git-nano/paste.html` | adds the inbound link to the Python post |
 | `posts/2026-09-16-stop-deleting-pythonanywhere-files/paste.html` | adds the inbound link to the Python post |
+| `posts/2026-09-16-pagespeed-insights-scores-explained/paste.html` | adds the link to the Search Console walkthrough - one sentence at the end of the "routine you can keep" paragraph (report C's post) |
+| `posts/2026-09-16-google-search-console-step-by-step/paste.html` | adds the link to the PageSpeed post - one sentence at the end of the "what this tool actually is" paragraph |
 
 If you would rather change only the last paragraph of those two sister posts, replace it with the
-matching paragraph from their `paste.html` - that is the only line that changed.
+matching paragraph from their `paste.html` - that is the only line that changed. The same goes
+for the two Sep 16 posts at the bottom of the table: one sentence each, so search for the
+sentence in the editor's HTML view rather than re-pasting the whole body.
 
 **Nothing in this repo can reach Blogger.** Editing `post.html`/`paste.html` changes the *source*
 only; the live post keeps whatever body was last pasted into the editor. That is why a fixed link can
@@ -245,16 +287,24 @@ After a re-paste the same run prints `ok   all 4 internal link(s) resolve`.
 While the editor is open, put the cursor right after the hook sentence and use
 **Insert → Jump break** where `build_import.py` printed the break belongs (it names the sentence).
 
-### 5.3 Add the labels to report A's post (no re-paste needed)
+### 5.3 Set the labels to what the repo declares (all five posts)
 
-Open the post → **Labels** in the right sidebar → paste exactly:
+Labels live in the editor's right sidebar, **not** in the pasted body, so no re-paste fixes
+them. On Sep 21 every live post had hand-typed labels that differ from its `LABELS:` header
+(report A's post had none at all), and `check_published.py` fails a post for each missing one.
 
-```
-Termux, Android, Python, Command Line, Nano, Mobile Development, Free Stack
-```
+Open each post → **Labels** in the right sidebar → replace with exactly:
 
-This is the one item that is a hard FAIL in `check_published.py`, and it is what puts the post into
-the Termux / Android / Python label hubs that the sidebar's Categories list links to.
+| Post | Labels to paste |
+|---|---|
+| Install Python in Termux | `Termux, Android, Python, Command Line, Nano, Mobile Development, Free Stack` |
+| Termux Commands Worth Memorising | `Termux, Android, Command Line, Git, GitHub, Nano` |
+| Google Search Console from Zero | `Google Search Console, SEO, Indexing, Sitemap, Blogger` |
+| Check Your Website's Vital Scores (report C's post) | `PageSpeed Insights, Core Web Vitals, Web Performance, SEO, Lighthouse` |
+| Stop Deleting Your PythonAnywhere Files | `PythonAnywhere, Git, GitHub, Flask, Deployment, Web Development` |
+
+Labels are what put each post into the `/search/label/...` hubs the sidebar's Categories list
+links to - the blog's own topic navigation, and the main way its pages reference each other.
 
 ### 5.4 Restore the search description
 
@@ -270,12 +320,13 @@ and wraps every image in a link with no accessible name). Both are described in 
 
 1. Search Console → **Sitemaps** → resubmit `sitemap.xml` (clears the "Temporary processing error").
 2. Search Console → **URL Inspection** → **Test Live URL** on each affected post.
-   - **Report B's post** (redirect error): if the live test passes, **Request Indexing**. If it
-     fails again with the redirect error, inspect and request the **`?m=1`** version instead (2.4).
+   - **Reports B and C's posts** (redirect error): if the live test passes, **Request Indexing**.
+     If either fails again with the redirect error, inspect and request the **`?m=1`** version of
+     that post instead (2.4).
    - **Report A's post**: inspect the canonical URL
      `https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html`
      (not the `?m=1` variant) → **Request Indexing**.
-3. Request indexing for the two sister posts you re-pasted as well - their bodies changed.
+3. Request indexing for the sister posts you re-pasted as well - their bodies changed.
 4. Do the fixes **before** the re-crawl requests. A re-crawl of the broken state just re-confirms it.
 5. Wait a few days, then inspect again. Expect "URL is on Google", or at worst a crawl date that
    moved.
@@ -300,7 +351,7 @@ python3 tools/check_published.py --no-links # feed + CDN only; no live page fetc
 python3 tools/check_perf.py                 # offline; must print "clean"
 ```
 
-`check_published.py` exits 1 on any FAIL, so none of the states that caused these two reports can
+`check_published.py` exits 1 on any FAIL, so none of the states that caused these reports can
 pass unnoticed again: a link built from a folder slug is fetched and reported as a 404, a post that
 nothing links to is reported as an orphan, and a live page whose `rel=canonical` is missing or points
 somewhere else - or that ships a `noindex` - fails the post outright.
