@@ -25,7 +25,7 @@ python3 tools/check_published.py <folder>. Videos: python3 tools/make_video.py <
 
 ## First, what this tool actually is
 
-Google Search Console is a free dashboard that shows you your website through Google's eyes. That is the whole pitch, and it is easier to show than to say: which of your pages Google has crawled, which ones it decided to put in search results, which ones it excluded and why, when the crawler last visited, and how your submitted sitemap is doing. Clicks and impressions from search come with it too, but that is a later post.
+Google Search Console is a free dashboard that shows you your website through Google's eyes. That is the whole pitch, and it is easier to show than to say: which of your pages Google has crawled, which ones it decided to put in search results, which ones it excluded and why, when the crawler last visited, and how your submitted sitemap is doing. Clicks and impressions from search come with it too, but that is a later post. The **Core Web Vitals** report lives in there as well, grading your pages on the speed metrics your visitors actually feel, and naming the same LCP, CLS and INP numbers you meet in [Check Your Website's Vital Scores with PageSpeed Insights](https://freestackhub.blogspot.com/2026/09/check-your-websites-vital-scores-with.html).
 
 What it is not: it is not a ranking machine, and nothing you click in there is a command. It is a window. And it is blind to your site until you register the site in it, which is where the whole process starts.
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-19T17:51:09.128+00:00</updated>
+  <updated>2026-09-21T17:56:30.544+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -137,7 +137,7 @@
 
 &lt;h2&gt;A routine you can keep: one check, two fixes&lt;/h2&gt;
 
-&lt;p&gt;Here&amp;rsquo;s how I actually use the tool now, and it takes five minutes a week. I run the mobile test on my most important page every Monday. I ignore the performance &lt;i&gt;score&lt;/i&gt; and read the three Core Web Vitals first &amp;mdash; LCP under 2.5 seconds, CLS under 0.1, INP under 200 milliseconds &amp;mdash; because those are the numbers that get ranked. Then I look at the opportunities list, pick the &lt;b&gt;two&lt;/b&gt; rows with the biggest estimated savings, and fix only those. I re-run the lab test the same evening to confirm the numbers moved, and I check the field data in four weeks to confirm my visitors felt it.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s how I actually use the tool now, and it takes five minutes a week. I run the mobile test on my most important page every Monday. I ignore the performance &lt;i&gt;score&lt;/i&gt; and read the three Core Web Vitals first &amp;mdash; LCP under 2.5 seconds, CLS under 0.1, INP under 200 milliseconds &amp;mdash; because those are the numbers that get ranked. Then I look at the opportunities list, pick the &lt;b&gt;two&lt;/b&gt; rows with the biggest estimated savings, and fix only those. I re-run the lab test the same evening to confirm the numbers moved, and I check the field data in four weeks to confirm my visitors felt it. That field data has a second home, too: Search Console&amp;rsquo;s &lt;b&gt;Core Web Vitals&lt;/b&gt; report grades every page on the site at once instead of one at a time, so if you have not set that dashboard up yet, &lt;a href="https://freestackhub.blogspot.com/2026/09/google-search-console-from-zero-add.html"&gt;our Google Search Console from Zero walkthrough&lt;/a&gt; takes about ten minutes.&lt;/p&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
