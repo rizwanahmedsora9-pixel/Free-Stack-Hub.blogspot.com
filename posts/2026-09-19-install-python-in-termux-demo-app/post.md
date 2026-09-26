@@ -353,4 +353,4 @@ When developing in a mobile environment, you will eventually encounter a few qui
 4. Execute your app with `python filename.py` or grant execute permissions with `chmod +x filename.py`.
 5. Install build tools (`clang` and `make`) before running pip, and push your code to Git so your mobile work seamlessly connects to production servers.
 
-You now possess a full, native Python development station that fits in the palm of your hand. Open Termux today, create a project directory, and build a script that automates something in your daily workflow. The entire software engineering stack is accessible from your pocket.
+You now possess a full, native Python development station that fits in the palm of your hand. Open Termux today, create a project directory, and build a script that automates something in your daily workflow. The entire software engineering stack is accessible from your pocket. If the thing you want is a web server rather than a script, the failures are different: [how to run a Node app in Termux without the symlink error or a server that dies when the screen locks](https://freestackhub.blogspot.com/2026/09/how-to-run-a-node-app-in-termux.html).

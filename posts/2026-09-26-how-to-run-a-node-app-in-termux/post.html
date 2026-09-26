@@ -1,0 +1,233 @@
+<!-- ============================================================
+BLOGGER POST - source for import.xml (built by tools/build_import.py)
+
+TITLE:  How to run a Node app in Termux
+LABELS: Termux, Android, Node.js, JavaScript, Command Line, Nano
+PUBLISHED: 2026-09-26T01:30:00-07:00
+PERMALINK: how-to-run-a-node-app-in-termux
+TARGET KEYWORD: run a Node app in Termux
+SEARCH DESCRIPTION:
+Learn to run a Node app in Termux on Android: fix the wrong package name, the shared-storage symlink error, and the server that dies when the screen locks.
+
+IMAGES: <img> tags use bare file names from ./images/. Running
+python3 tools/build_import.py rewrites them to public URLs in import.xml
+and paste.html.
+
+DO NOT paste this file into Blogger. The bare image names only work after
+the build. Publish with import.xml (Import content) so the URL matches
+PERMALINK. Do not change the title in the editor: Blogger would invent a
+different slug, and the links from the sister posts would 404.
+
+STRUCTURE: feature image first, then the 2-4 sentence hook, then the jump
+break marker (the "more" comment) on its own line. Everything after it is
+hidden behind "Read More". A post has exactly one such marker.
+============================================================= -->
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="01-run-node-termux-hero.jpg" alt="An Android phone in a dark room running Termux, with node server.js printed and a line saying the app is listening on 127.0.0.1 port 3000" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>The server is up when that line is on screen, and not a moment before.</i></div>
+</div>
+
+<p>I tried to run a Node app in Termux on the bus, typed npm install, and watched it die on a symlink error I had never seen on a laptop. The server that did start vanished the moment the screen locked, which looked like a crash and was not one. The package name in half the tutorials is wrong for this phone, and that is the smallest of the three traps.</p>
+
+<!--more-->
+
+<p>If Termux itself is still new, do not start here. Storage permission, the extra-keys row, and nano are already covered in <a href="https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html">the Termux commands worth memorising, including Git and nano</a>. This post assumes those three work. Without them you will fight the keyboard instead of Node.</p>
+
+<p>If you already followed <a href="https://freestackhub.blogspot.com/2026/09/install-python-in-termux-build-and-run.html">installing Python in Termux and building a first app with nano</a>, the phone setup is the same and the failures are not. Python's first wall was a compiler. Node's walls are a package that is not called what the tutorial says, a folder that cannot hold symlinks, and Android freezing the process when the screen goes dark.</p>
+
+<h2>The three failures that look like Node is broken</h2>
+
+<p>Three errors account for almost every "Node does not work on my phone" thread. None of them is in the Node documentation, because none of them is Node's fault. Learn the shape of each one and the rest of the evening gets boring, which is what you want.</p>
+
+<ol>
+<li><b>Wrong package name.</b> <code>pkg install node</code> fails immediately. The Termux package is <code>nodejs-lts</code>. There is no package called <code>node</code>.</li>
+<li><b>Wrong folder.</b> A project under shared storage, Downloads, or the SD card cannot hold the symlinks npm creates. The install dies with <code>ENOTSUP</code> or <code>EPERM</code>.</li>
+<li><b>Wrong diagnosis of a frozen process.</b> Lock the screen and the server stops answering. It did not crash. Android stopped scheduling it.</li>
+</ol>
+
+<p>Desktop tutorials skip all three, because a laptop has a package named whatever the author typed, a filesystem that allows symlinks, and no one yanking the CPU when the lid looks closed. Copying those tutorials onto Android is how the bus ride ends.</p>
+
+<h2>Install nodejs-lts, and do not install both</h2>
+
+<p>Update first. A stale package list is how Termux offers you a Node build that does not match the libraries already on the phone. Then install one Node, the long-term support build. npm comes with it. You do not install npm as its own package.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg update &amp;&amp; pkg upgrade -y
+pkg install nodejs-lts -y
+node -v
+npm -v
+which node</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="02-pkg-install-nodejs-lts.jpg" alt="Termux screen showing pkg install nodejs-lts finished, then node -v and npm -v each printing a version, and which node pointing inside the Termux app prefix" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>One package. Two binaries. The path must sit inside Termux, not in /usr/bin.</i></div>
+</div>
+
+<p><code>which node</code> should print a path under <code>/data/data/com.termux/files/usr/bin</code>. That prefix is the whole story of why laptop instructions fail here. Termux is not a rooted Linux. It cannot write to <code>/usr</code>, and it does not use glibc. A Node binary you download from nodejs.org is built for glibc. It will not link. Do not "fix" a missing package by curling a tarball.</p>
+
+<p>The error from the tutorial that says <code>pkg install node</code> is blunt, and it is the one to trust:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg install node
+E: Unable to locate package node</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="03-unable-to-locate-package-node.jpg" alt="Termux error E: Unable to locate package node after pkg install node, with the working command pkg install nodejs-lts written underneath" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>That error is the tutorial's fault. The package was never called node.</i></div>
+</div>
+
+<p>There is a second package, <code>nodejs</code>, which tracks current rather than LTS. My opinion: install <code>nodejs-lts</code> and stop. A phone server you still want next month does not need this week's language feature. The two packages provide the same command names, so installing the second one replaces the first and leaves you unsure which <code>node</code> just answered. If both are already installed, remove them and install only the LTS package:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg uninstall nodejs nodejs-lts -y
+pkg install nodejs-lts -y</code></pre>
+
+<p>The uglier failure shows up after a half-finished upgrade. Node starts, then refuses:</p>
+
+<blockquote>CANNOT LINK EXECUTABLE "node": library "libicui18n.so.77" not found</blockquote>
+
+<p>The number on the end moves. The meaning does not. The Node package and the ICU library were updated at different moments, and your mirror handed you one without the other. Run <code>pkg update &amp;&amp; pkg upgrade -y</code>, then <code>pkg reinstall nodejs-lts -y</code>. If the upgrade itself cannot download, <code>termux-change-repo</code> and pick a single official mirror, then upgrade again. This is a packaging race, not a reason to install nvm.</p>
+
+<p>Skip nvm. On a laptop it is a reasonable way to pin a version. On Termux it either compiles Node for a long, hot stretch or fetches a build that expects glibc, and you are back at the link error. The Termux package is already the build that matches the phone. A version manager here is how you lose the evening you meant to spend on the app.</p>
+
+<h2>Put the project in home, not in shared storage</h2>
+
+<p>This is the symlink error from the bus. I had created the folder in <code>~/storage/shared/Download</code> because that is where the phone's file app can see it. npm then tried to create a symlink inside <code>node_modules</code> and Android's emulated storage refused. The message is some mix of <code>ENOTSUP</code>, <code>EPERM</code>, and <code>operation not permitted, symlink</code>. Nothing is wrong with the package. The folder cannot do what npm assumes every disk can do.</p>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="04-enotsup-symlink-shared-storage.jpg" alt="A split diagram: npm install failing with ENOTSUP symlink inside the shared Download folder, and the same install succeeding inside the Termux home folder node-demo" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Same command, two folders. Only the one inside home can hold node_modules.</i></div>
+</div>
+
+<p>Move the project and install there. Shared storage is for files you hand to other apps, not for the project itself.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>mkdir -p ~/node-demo
+cd ~/node-demo
+npm init -y
+npm install express</code></pre>
+
+<p><code>termux-setup-storage</code> is still worth running, once, so you can copy a finished file out to the rest of the phone. It is the wrong place to keep <code>node_modules</code>, a git repo, or the notes file this app is about to write. Edit in <code>~/node-demo</code>. Copy out with <code>cp</code> when you actually need to share something.</p>
+
+<p>express is pure JavaScript, which is why it is the right first dependency. <code>bcrypt</code>, <code>sharp</code>, and <code>canvas</code> are not. They compile C++ through node-gyp against a libc Termux does not use. The compile sits there long enough that the phone looks frozen, then fails. If a tutorial's first install is <code>bcrypt</code>, swap in <code>bcryptjs</code> until the server has answered one request. You can chase native addons after the page loads. Not before. Installing <code>build-essential</code> and <code>python</code> sometimes gets a native module through, and sometimes it does not. I would not spend that hour on a first app.</p>
+
+<h2>The clean way to run a Node app in Termux</h2>
+
+<p>The app is a notes page you can open in the phone's own browser. One field, one list, a JSON file next to the script. It is small on purpose. A framework tutorial that starts with a database is how people end up debugging Postgres instead of the three traps above.</p>
+
+<p>Create the file with nano. If the extra-keys row is missing, the commands guide shows how to turn Ctrl on. You will need Ctrl+O to save and Ctrl+X to leave.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>nano ~/node-demo/server.js</code></pre>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>const express = require("express");
+const fs = require("fs");
+const path = require("path");
+
+const app = express();
+const file = path.join(__dirname, "notes.json");
+app.use(express.urlencoded({ extended: false }));
+
+function readNotes() {
+  try { return JSON.parse(fs.readFileSync(file, "utf8")); }
+  catch (err) { return []; }
+}
+function esc(s) {
+  return String(s).replace(/[&amp;&lt;&gt;"]/g, (c) =&gt; ({
+    "&amp;": "&amp;amp;", "&lt;": "&amp;lt;", "&gt;": "&amp;gt;", '"': "&amp;quot;"
+  }[c]));
+}
+
+app.get("/", (req, res) =&gt; {
+  const items = readNotes().map((n) =&gt; "&lt;li&gt;" + esc(n) + "&lt;/li&gt;").join("");
+  res.type("html").send(
+    "&lt;!doctype html&gt;&lt;meta name=viewport content=width=device-width,initial-scale=1&gt;" +
+    "&lt;h1&gt;Pocket notes&lt;/h1&gt;&lt;ul&gt;" + items + "&lt;/ul&gt;" +
+    "&lt;form method=post action=/add&gt;&lt;input name=text autofocus&gt;" +
+    "&lt;button&gt;Save&lt;/button&gt;&lt;/form&gt;");
+});
+
+app.post("/add", (req, res) =&gt; {
+  const text = String(req.body.text || "").trim().slice(0, 200);
+  const notes = readNotes();
+  if (text) notes.push(text);
+  fs.writeFileSync(file, JSON.stringify(notes));
+  res.redirect("/");
+});
+
+app.listen(3000, "127.0.0.1", () =&gt; {
+  console.log("Open http://127.0.0.1:3000 on this phone");
+});</code></pre>
+
+<p>The <code>esc</code> function is not decoration. A notes box that prints raw input is stored XSS the moment anything untrusted lands in it. On localhost, today, the only writer is you. The day you bind a wider address, that page is a public form. Escape on the way out, now, while the app is ten lines and you can still see the bug.</p>
+
+<p>Listen on <code>127.0.0.1</code>, not <code>0.0.0.0</code>. Chrome on the same phone shares localhost with Termux, so <code>http://127.0.0.1:3000</code> opens the page. Binding every interface puts an app with no password on the café Wi-Fi. That is a later experiment, after the page loads, and only if another device actually needs to connect. A laptop browser pointed at <code>127.0.0.1</code> is talking to the laptop, not the phone. If the page fails from the laptop, that is the bind address doing its job.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>cd ~/node-demo
+node server.js</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="05-express-listening-on-phone.jpg" alt="A phone split between Termux printing Open http://127.0.0.1:3000 on this phone and Chrome on the same phone showing a Pocket notes page with one saved line" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Same phone, two apps. Chrome is the client. Termux is the server. Leave the terminal running.</i></div>
+</div>
+
+<p>Leave that session open. Closing Termux, or swiping it away, stops the server. If you want the process to restart when you save the file, try <code>node --watch server.js</code>. If Node answers <code>bad option: --watch</code>, the build is older than the flag and plain <code>node server.js</code> is the command. Do not reinstall a second Node to chase the flag.</p>
+
+<p>A shebang of <code>#!/usr/bin/node</code> will not run here. The binary is not in <code>/usr/bin</code>. <code>#!/usr/bin/env node</code> works, because <code>env</code> searches <code>PATH</code>. For a first app, skip the shebang and type <code>node server.js</code>. Fewer moving parts.</p>
+
+<h2>The screen lock is not a crash</h2>
+
+<p>You lock the phone, unlock it, and the page no longer loads. The terminal is still sitting on the listen line. Nothing printed an error. Android froze background CPU. Node did not exit. People then reinstall Node, which cannot help, because the process was never the thing that stopped.</p>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="06-screen-lock-wake-lock.jpg" alt="A locked Android phone beside a Termux session that has stopped answering, and the command termux-wake-lock typed before node server.js" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>The listen line is still there. Android stopped scheduling the process. That is not an npm error.</i></div>
+</div>
+
+<p>Two different switches, and mixing them up wastes an hour. Turning off battery optimization for Termux, in Android settings, stops the system from killing the app outright. It does not, by itself, keep the CPU awake after the screen locks. That second job is a wake lock, and the command is not in the base Termux app.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg install termux-api -y
+termux-wake-lock
+node server.js</code></pre>
+
+<p><code>termux-wake-lock</code> also needs the Termux:API add-on app, from the same place you installed Termux. If Termux came from F-Droid, the add-on has to come from F-Droid too. Mixing F-Droid and Play Store builds is a known way to get an add-on that cannot see the terminal. If the command is simply <code>not found</code>, the package or the add-on app is missing. That is not a PATH mystery inside your project.</p>
+
+<p>Run <code>termux-wake-unlock</code> when you stop the server. A wake lock left on is how the battery is gone by morning. It is a decision for the hour you need the page, not a setting you leave armed. If you only needed the server while you were looking at it, you do not need the wake lock at all.</p>
+
+<h2>Keep a second copy before you experiment</h2>
+
+<p>Termux lives in its own app data. Clear storage, or uninstall, and <code>~/node-demo</code> is gone. There is no trash bin. The phone is a copy, not the original. Commit before you try <code>0.0.0.0</code>, a native module, or a second Node package. Those are the three changes most likely to make you want yesterday's files.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>cd ~/node-demo
+git init
+git add server.js package.json package-lock.json
+git commit -m "pocket notes, localhost only"</code></pre>
+
+<p>Do not add <code>node_modules</code> or <code>notes.json</code> if the notes are only yours. A <code>.gitignore</code> with those two lines is enough. Push to a private repo when you have a network you trust. The reason this habit matters, written for a server but identical on a phone, is <a href="https://freestackhub.blogspot.com/2026/09/stop-deleting-your-pythonanywhere-files.html">stop deleting the only copy and use Git instead</a>. Uninstalling Termux is the same class of mistake as wiping a project folder to "redeploy".</p>
+
+<h2>Errors worth recognising on sight</h2>
+
+<p>Match the words, then do the one fix. Reinstalling everything is how the actual message scrolls away.</p>
+
+<ul>
+<li><b>Unable to locate package node.</b> <code>pkg install nodejs-lts</code>. There is nothing to locate under the other name.</li>
+<li><b>CANNOT LINK EXECUTABLE, libicui18n.so.</b> <code>pkg update &amp;&amp; pkg upgrade -y</code>, then reinstall <code>nodejs-lts</code>. Do not keep both Node packages.</li>
+<li><b>ENOTSUP or EPERM, symlink.</b> The project is on shared storage. Move it under <code>~/</code> and run npm install again.</li>
+<li><b>termux-wake-lock: not found.</b> Install the Termux:API app from the same store as Termux, then <code>pkg install termux-api</code>.</li>
+<li><b>The page loads in the phone browser and not on a laptop.</b> You bound <code>127.0.0.1</code>. Leave it that way until you mean to share it.</li>
+<li><b>gyp, node-gyp, or a compile that never ends.</b> A native addon. Switch to a pure-JavaScript package. express does not need a compiler.</li>
+<li><b>EACCES on a global npm install.</b> Termux has no useful sudo. Install in the project, which is what <code>npm install express</code> already did. A global prefix is a later convenience, not a requirement for this app.</li>
+</ul>
+
+<div style="text-align:center; margin:18px 0;">
+  <img src="07-node-termux-error-recap.jpg" alt="A five-row checklist on a phone: nodejs-lts not node, project in home not Downloads, express not a native addon, listen on 127.0.0.1, wake lock only while you need it" />
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Five checks. If the server is down, one of these is the reason, not Node itself.</i></div>
+</div>
+
+<h2>Quick recap</h2>
+
+<ol>
+<li>Install <code>nodejs-lts</code> only. <code>pkg install node</code> was never going to work, and installing both Node packages replaces one with the other.</li>
+<li>Keep the project in <code>~/node-demo</code>. Shared storage cannot hold the symlinks npm writes.</li>
+<li>Use express, or any pure-JavaScript package. Leave bcrypt, sharp, and canvas until a page has loaded.</li>
+<li>Listen on <code>127.0.0.1:3000</code> and open that address in the phone's own browser. A laptop's localhost is a different machine.</li>
+<li>A silent server after lock is Android, not a crash. Wake lock only for the hour you need, and only after the Termux:API add-on is installed.</li>
+</ol>
+
+<p>Tonight, run the five commands in home, save one note, and stop. Do not start with a native module, do not put the folder in Downloads, and do not point a tunnel at the phone until the page has loaded on localhost. The follow-up mistake is treating a frozen process as a broken install and reinstalling Node over a server that only needed the screen to stay awake.</p>
