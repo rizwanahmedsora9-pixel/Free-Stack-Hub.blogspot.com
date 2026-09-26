@@ -161,6 +161,23 @@ def internal_links(html: str) -> list:
     return out
 
 
+def outbound_links(html: str) -> list:
+    """Off-blog http(s) links in a post (section 14 rule 4: at least one)."""
+    out = []
+    for m in re.finditer(r"<a\b([^>]*)>(.*?)</a>", html, re.I | re.S):
+        href = re.search(r'\shref="([^"]*)"', m.group(1), re.I)
+        if not href:
+            continue
+        h = href.group(1).strip()
+        if not h or h.startswith(("#", "mailto:", "tel:", "javascript:", "data:")):
+            continue
+        if re.match(r"^(https?:)?//", h, re.I):
+            m_blog = re.match(rf"^(?:https?:)?//(?:www\.)?{_BLOG_HOST}(/.*)?$", h, re.I)
+            if not m_blog:
+                out.append(h)
+    return out
+
+
 def http_status(url: str, cache: dict) -> int | None:
     """HTTP status of one URL, once per run. None = could not reach it."""
     if url in cache:
@@ -409,8 +426,13 @@ def report(post: dict, entries: list, cdn_files: set, live_checks: bool = True, 
             unverified.append(path)
         elif code >= 400:
             broken.append((path, code, text))
+    is_new = bool(post.get("target_keyword"))
     if not links:
-        line(NOTE, "this post links to no other page on the blog (POST_RULES section 12 asks for one)")
+        if is_new:
+            line(ERR, "this post links to no other page on the blog - section 14 rule 3 "
+                      "requires at least 2 internal links with descriptive anchors")
+        else:
+            line(NOTE, "this post links to no other page on the blog (POST_RULES section 12 asks for one)")
     elif broken:
         for path, code, text in broken:
             where = f' on "{text}"' if text else ""
@@ -420,8 +442,13 @@ def report(post: dict, entries: list, cdn_files: set, live_checks: bool = True, 
         line(NOTE, f"{len(links)} internal link(s) not checked (--no-links)")
     elif unverified:
         line(WARN, f"could not reach {len(unverified)} internal link(s): " + ", ".join(unverified[:3]))
+    elif is_new and len(links) < 2:
+        line(ERR, f"only {len(links)} internal link(s) resolve - section 14 rule 3 requires at least 2")
     else:
         line(OK, f"all {len(links)} internal link(s) resolve")
+    if is_new and not outbound_links(live["html"]):
+        line(WARN, "no outbound link on the live post - section 14 rule 4 asks for at least "
+                   "one to an official source (docs, GitHub repo, wiki)")
 
     # 8. does anything else on the blog link here?
     mine = link_path(live["link"])

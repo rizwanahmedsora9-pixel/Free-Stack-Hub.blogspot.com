@@ -29,6 +29,7 @@ Exit status: 0 = clean, 1 = something would fail an audit.
 """
 
 import argparse
+import difflib
 import re
 import sys
 import unicodedata
@@ -717,6 +718,8 @@ def check_post(rep: Report, folder: Path):
     p = load_post(folder)
     for problem in p["problems"]:
         rep.fail(problem)
+    for warning in p.get("warnings", []):
+        rep.warn(f"[{folder.name}] {warning}")
     if not p["problems"]:
         rep.ok("build_import.py reports no structural problems")
     body = p.get("html", "")
@@ -787,6 +790,69 @@ def check_post(rep: Report, folder: Path):
                 rep.fail(f"the LCP hero AVIF is {avif.stat().st_size / 1024:.1f} KB - exceeds {HERO_AVIF_MAX_BYTES / 1024:.0f} KB limit")
 
 
+def check_cross_post(rep: Report, folders: list):
+    """Section 14 rules that only make sense across posts, not inside one."""
+    rep.head("[posts] section 14 - unique descriptions, unique titles, one topic lane")
+    metas = []
+    for folder in folders:
+        p = load_post(folder)
+        if not p.get("title"):
+            continue
+        metas.append({
+            "name": folder.name,
+            "title": p["title"],
+            "description": p.get("description", ""),
+            "labels": [str(label).lower() for label in p.get("labels", [])],
+        })
+    seen: dict[str, str] = {}
+    dups = 0
+    for m in metas:
+        key = " ".join(m["description"].lower().split())
+        if not key:
+            continue
+        if key in seen:
+            rep.fail(f"{m['name']} reuses the search description of {seen[key]} - "
+                     f"every post needs its own (section 14 rule 2)")
+            dups += 1
+        else:
+            seen[key] = m["name"]
+    if not dups:
+        rep.ok("every post has its own search description")
+    pairs = 0
+    for i in range(len(metas)):
+        for j in range(i + 1, len(metas)):
+            a, b = metas[i], metas[j]
+            na, nb = " ".join(a["title"].lower().split()), " ".join(b["title"].lower().split())
+            if not na or not nb:
+                continue
+            if na == nb:
+                rep.fail(f"{a['name']} and {b['name']} have the same title - "
+                         f"near-duplicate titles never go live (section 14 rule 8)")
+                pairs += 1
+                continue
+            ratio = difflib.SequenceMatcher(None, na, nb).ratio()
+            if ratio >= 0.9:
+                rep.fail(f"titles of {a['name']} and {b['name']} are near-duplicates "
+                         f"({ratio:.0%} similar) (section 14 rule 8)")
+                pairs += 1
+            elif ratio >= 0.8:
+                rep.warn(f"titles of {a['name']} and {b['name']} look similar "
+                         f"({ratio:.0%}) - keep every title unmistakable (section 14 rule 8)")
+    if not pairs:
+        rep.ok("no duplicate or near-duplicate titles")
+    if len(metas) >= 2:
+        newest = metas[-1]  # folder names sort chronologically (YYYY-MM-DD first)
+        prev_labels = {label for m in metas[-4:-1] for label in m["labels"]}
+        mine = set(newest["labels"])
+        shared = sorted(mine & prev_labels)
+        if mine and prev_labels and not shared:
+            rep.warn(f"{newest['name']} shares no label with the previous three posts - "
+                     f"section 14 rule 10 says cluster one topic lane at a time "
+                     f"before jumping elsewhere")
+        elif shared:
+            rep.ok(f"{newest['name']} continues the current topic lane ({', '.join(shared[:4])})")
+
+
 def check_drift(rep: Report, theme_doc: str):
     rep.head("[drift] the mock and the theme must not disagree")
     if not PREVIEW.exists() or not theme_doc:
@@ -839,8 +905,10 @@ def main() -> int:
         if extra.suffix == ".xml":
             text = (SKIN_RE.search(text).group(1) if SKIN_RE.search(text) else "") + text
         check_html(rep, extra, text)
-    for folder in sorted(d for d in POSTS_DIR.iterdir() if d.is_dir() and not d.name.startswith("_")):
+    folders = sorted(d for d in POSTS_DIR.iterdir() if d.is_dir() and not d.name.startswith("_"))
+    for folder in folders:
         check_post(rep, folder)
+    check_cross_post(rep, folders)
     check_drift(rep, theme_doc)
 
     print()

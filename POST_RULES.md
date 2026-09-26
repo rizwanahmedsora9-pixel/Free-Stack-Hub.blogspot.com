@@ -58,14 +58,15 @@ PUBLISHED: 2026-09-16                 (optional)
 PERMALINK: the-live-slug              (optional, section 1 - only when Blogger's URL is not the folder slug)
 SEARCH DESCRIPTION:
 One or two sentences for search engines. New posts: 150-160 characters,
-and the target keyword in it (section 13).
+unique to this post, and the target keyword in it (section 14, rule 2).
 TARGET KEYWORD: the exact phrase people would search   (required on new posts, section 13)
 -->
 ```
 Then the HTML body. Use `<h2>` for sections, `<p>`, `<ul>/<ol>`, `<code>`, and the
 `<pre>` style block from the template for code. `TARGET KEYWORD:` stays in the header so the
 next edit still knows the phrase. The build reads it (so it is not swallowed into the search
-description) and does not print it on the page.
+description) and does not print it on the page. `TITLE:` stays 50-60 characters with the
+keyword in the first half (section 14, rule 1).
 
 ## 3. Story structure (the homepage teaser is cut from exactly this)
 1. **Feature image first** - one `<img>` in the very first block, before any text.
@@ -299,7 +300,7 @@ embed the wide one with a `<iframe>`; never expect the MP4 in the post folder to
 ## 12. Interlinking rule (mandatory across all posts)
 Every post published on Free Stack Hub must actively participate in an interconnected internal linking structure:
 
-- **Mandatory interlinking:** Every post **must** include natural, contextual links to other published posts on the blog.
+- **Mandatory interlinking:** Every post **must** include natural, contextual links to other published posts on the blog. The minimum is two links per post, placed where the topic comes up - never dumped after the recap (section 14 rule 3).
 - **Related posts are mandatory links ("specially related must"):** Whenever a post touches on a related topic, tool, or stack layer, it is strictly required to link to the existing sister posts. For example:
   - Any mobile/terminal post must link to [Termux Commands Worth Memorising: Basics, Git Cloning and Nano on Android](https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html).
   - Any Python or deployment post must link to [Stop Deleting Your PythonAnywhere Files on Every Update. Use Git Instead](https://freestackhub.blogspot.com/2026/09/stop-deleting-your-pythonanywhere-files.html).
@@ -325,7 +326,7 @@ from the request. If either is missing, ask before writing. Record the phrase as
 
 Audience: beginners who want clear, honest, no-fluff guidance on free and open-source ways to
 build and host things (Python, Git, Termux, free hosting, dev tools). Write at least **1200
-words** of original prose (paragraphs, lists, headings, quotes). Do not pad with repetition,
+words** of original prose (paragraphs, lists, headings, quotes) (section 14 rule 7). Do not pad with repetition,
 generic disclaimers, or the same point said twice. Code blocks, alt text and captions do not
 count toward the 1200. Every paragraph has to earn its place.
 
@@ -336,101 +337,128 @@ count toward the 1200. Every paragraph has to earn its place.
    doing it, a real error message and the fix that actually works, a comparison of two approaches
    with an opinion on which is better and why, or a timing or size you measured. "It depends" is
    not one of the three.
-3. **Shape.** Clear `<h2>` / `<h3>`, paragraphs of 2-4 sentences, and at least one `<ul>` or
-   `<ol>` where a list is the honest shape (the closing recap counts, a list in the body is
-   better when the steps are the point).
+3. **Shape.** Clear `<h2>` / `<h3>` (section 14 rule 5: no `<h1>` in the body, no `<h3>` without
+   a parent `<h2>`), paragraphs of 2-4 sentences, and at least one `<ul>` or `<ol>` where a list
+   is the honest shape (the closing recap counts, a list in the body is better when the steps
+   are the point).
 4. **Voice.** Direct, human, slightly conversational. Not robotic, not keyword-stuffed, no filler.
 5. **Close on a next action.** After the section 3 recap `<ol>`, one short closing paragraph:
    what to do next, or the follow-up mistake to avoid. Not "Hope this helped!"
-6. **Keyword, once each, never forced.** The target keyword appears in `TITLE:`, in exactly one
-   `<h2>`, and in the opening paragraph (the hook). Nowhere else unless the sentence needs it.
-   `TITLE:` stays **under 60 characters**. `SEARCH DESCRIPTION:` is **150-160 characters** and
-   includes the keyword once, naturally. It still only reaches Google after the section 9
+6. **Keyword, once each, never forced.** The target keyword appears in `TITLE:` (in the first
+   half), in exactly one `<h2>`, and in the opening paragraph (the hook). Nowhere else unless
+   the sentence needs it. `TITLE:` stays **50-60 characters** (section 14 rule 1).
+   `SEARCH DESCRIPTION:` is **150-160 characters**, unique to this post, and includes the keyword
+   once, naturally (section 14 rule 2). It still only reaches Google after the section 9
    setting is on; write it anyway.
 7. **Exactly 7 images, each one a screenshot the reader needs.** After a command, an error, or
    the final output — not decoration, not a stock hero with nothing to look at. Count the feature
    image: `01-….jpg` through `07-….jpg`, in the order they appear. Section 4's hero budget still
-   applies to `01`.
-8. **Two or three internal links, already real.** A related post on this blog gets a normal
+   applies to `01`. Every image gets a descriptive alt and a one-line caption (section 14 rule 6).
+8. **Two or three internal links, already real, plus one outbound.** A related post on this blog gets a normal
    sentence and a descriptive `<a>`. Section 12 decides the URL: the target's live permalink,
    never `href="#"`, never a folder slug, never "click here". If the sister post does not exist
-   yet, leave the sentence out and name the missing topic in `post.md`. A guessed URL is how the
-   live posts shipped four 404s. When this post continues an older one, add the return link in
-   that older post too.
+   yet, leave the sentence out and name the missing topic in `post.md`. Add one outbound link
+   to an official source for the post's main tool - docs, GitHub repo, or wiki (section 14
+   rule 4). A guessed URL is how the live posts shipped four 404s. When this post continues an
+   older one, add the return link in that older post too.
 
 **What the brief's output format means in this repo.** Do not hand Blogger a loose HTML blob,
 and do not leave image placeholders in the file that gets built.
 
 | The brief says | Write this instead |
 |---|---|
-| SEO title on its own line, under 60 characters | `TITLE:` in the header |
-| Meta description, 150-160 characters | `SEARCH DESCRIPTION:` in the header |
+| SEO title on its own line, 50-60 characters, keyword first | `TITLE:` in the header (section 14 rule 1) |
+| Meta description, 150-160 characters | `SEARCH DESCRIPTION:` in the header (section 14 rule 2) |
 | `<img src="REPLACE_ME_1.png">` … `REPLACE_ME_7.png` | bare `<img src="01-short-name.jpg" alt="…">` through `07-…`. The build rejects a src that is not a file in `images/` |
 | `<figcaption>` | the template's caption line: `<div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>One line: what the reader is looking at.</i></div>`. `#777` fails the contrast check |
-| alt text | specific enough that someone could take the screenshot from the alt alone |
+| alt text | specific enough that someone could take the screenshot from the alt alone (section 14 rule 6) |
 | paste into Blogger's HTML view | `post.html` is the source. `paste.html` is generated. Never paste `post.html` |
 | tags limited to `h2 h3 p ul li strong em blockquote img figcaption a` | those, plus the house tags the build and the template already use: `<ol>`, `<code>`, `<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;">`, the caption `<div>`, and one `<!--more-->`. No `<html>`, `<head>`, `<body>`, `<picture>`, or a hand-written canonical |
 
 Generate the seven images into `images/` before the build (section 4). A post that still says
 `REPLACE_ME` is not finished.
 
-## 14. SEO rules — every post, no exceptions
+## 14. SEO rules - every post, no exceptions (the 10 rules)
 
-These are the non-negotiables. Sections 3, 4, 12 and 13 already enforce most of them in the
-build; this section is the single list to check against before a post goes live, whether or not
-a tool caught it.
+Sections 12 and 13 say what to write. This section says what every post must *pass* before it
+goes live - the same ten rules, checked the same way, on every post. The build enforces the
+automatable half: a post with `TARGET KEYWORD:` set (every new post) **fails** on any of them.
+The five Sep 16-19 posts predate this section, so the judgement rules (1, 2, 3, 4, 7) print as
+**warnings** on them - visible in `build_import.py` and `check_perf.py`, but they do not fail
+the build. Clear a warning the next time that post is edited: change the repo, mirror the same
+edit on the live post (title, search description, or body - a title edit on an already-published
+post keeps its URL), and re-run `check_published.py`. The never-rules (5, 6, 8) are errors for
+every post: no live post trips them. Rules 9 and 10 are process, not markup - the checklist
+enforces them, not code.
 
-1. **Title length: 50–60 characters max.** Put the main keyword in the first half. Never write a
-   title you have to trim in your head — if it needs "and," "with," or a colon-subtitle to explain
-   everything, cut it down before publishing. (`TITLE:` in the header; the build rejects over 60.)
-2. **Meta description required — never leave blank.** Every post has its own unique
-   `SEARCH DESCRIPTION:` of 150–160 characters. It goes in the header so `import.xml` carries it,
-   and it must also be what shows in Blogger's post editor sidebar after publishing — never let it
-   fall back to the sitewide default. It must:
-   - include the post's main keyword naturally
-   - describe what THIS post specifically covers (not a generic blog blurb)
-3. **Internal links: minimum 2 per post.** Every post links to at least 2 other existing posts on
-   this blog, using descriptive anchor text (not "click here" or "this post"). Put them inside the
-   body where they're contextually relevant, not dumped at the end. Section 12 decides the URL
-   (the target's live `PERMALINK:`), and `check_published.py` fails any that 404.
-4. **Outbound links: minimum 1 per post, where relevant.** When the post references a tool,
-   language, or platform, link out to at least one official/primary source (official docs, GitHub
-   repo, official wiki). This is a trust signal — don't skip it just because it sends traffic away.
-5. **Headings.** H2 for main sections, H3 for sub-points within a section. Never skip a level (no
-   `<h3>` without a parent `<h2>`). The post title is the only H1 (handled by the theme — never
-   add a second `<h1>` inside the body).
-6. **Images.** Every image has a specific, descriptive `alt` — describe what's actually in the
-   screenshot, not "image1" or the filename. Add a one-line caption under each screenshot (the
-   section 13 caption `<div>`) explaining what the reader is seeing.
-7. **Word count floor: 1,200 words** for a tutorial/guide post. Never pad to hit this — if the
-   topic is naturally shorter, it's the wrong topic for a full post; make it a short update or roll
-   it into a bigger post instead.
+| # | Rule | Checked by |
+|---|---|---|
+| 1 | Title 50-60 characters, keyword in the first half | `build_import.py` (error on new posts, warning on the five legacy ones) |
+| 2 | Unique 150-160 character search description with the keyword | `build_import.py` (length, keyword); `check_perf.py` (uniqueness across posts) |
+| 3 | At least 2 internal links, descriptive anchors, placed in context | `build_import.py` (count, anchors, placement); `check_published.py` (live count, 404s) |
+| 4 | At least 1 outbound link to an official source | `build_import.py`; `check_published.py` (live presence) |
+| 5 | H2 sections, H3 only under H2, no H1 in the body | `build_import.py` (error on every post) |
+| 6 | Descriptive alt plus a one-line caption per screenshot | `build_import.py` (error on every post) |
+| 7 | 1,200+ words of prose, no padding | `build_import.py` (error on new, warning on legacy) |
+| 8 | No test/placeholder/duplicate titles | `build_import.py` (test/draft/REPLACE_ME/lorem); `check_perf.py` (duplicate + near-duplicate titles) |
+| 9 | Uniqueness search before publishing | manual - checklist step 1 |
+| 10 | One topic lane at a time | manual - checklist step 1; `check_perf.py` warns when the newest post shares no label with the previous three |
+
+1. **Title length: 50-60 characters max. Put the main keyword in the first half.** `TITLE:` is
+   50-60 characters and the `TARGET KEYWORD:` starts in its first half. Never write a title you
+   have to trim in your head - if it needs "and," "with," or a colon-subtitle to explain
+   everything, cut it down before publishing. The keyword also appears in exactly one `<h2>` and
+   in the hook (section 13.6); the build checks all three placements.
+2. **Meta description required - never leave blank.** Every post has its own unique
+   `SEARCH DESCRIPTION:` (150-160 characters), carrying the keyword once, naturally, and
+   describing what THIS post specifically covers - not a generic blog blurb. On the import route
+   `import.xml`'s `<blogger:metaDescription>` carries it (once the section 9 setting is on); on
+   the paste route, paste it into the editor's Search Description field by hand. Never let a post
+   fall back to the sitewide default.
+3. **Internal links: minimum 2 per post.** At least two links to two other existing posts, with
+   descriptive anchor text - never "click here," "this post," or a raw URL. Place them where the
+   topic comes up in the body; at least one must sit before the final `<h2>`, never dumped after
+   the recap. Use each target's live permalink (sections 1, 12), and add the return link from the
+   sister post this one continues.
+4. **Outbound links: minimum 1 per post, where relevant.** Every tutorial names a tool, a
+   language, or a platform - so every tutorial links out to at least one official/primary source
+   for it: official docs, the GitHub repo, the official wiki. This is a trust signal; do not skip
+   it just because it sends traffic away.
+5. **Headings: H2 for main sections, H3 for sub-points within a section.** Never skip a level -
+   no `<h3>` without a parent `<h2>`, no `h2`->`h4` jumps. The post title is the page's H1
+   (handled by the theme); never add a second H1 inside the body.
+6. **Images: descriptive alt, one-line caption, every screenshot.** Each alt describes what is
+   actually in the screenshot (at least 15 characters - never "image1" or the filename) so
+   specifically that someone could take the screenshot from the alt alone. Each screenshot gets
+   the template's one-line caption underneath saying what the reader is seeing.
+7. **Word count floor: 1,200 words minimum for a tutorial/guide post.** Prose only - code
+   blocks, alt text, and captions do not count. Never pad to hit this: if the topic is naturally
+   shorter, it is the wrong topic for a full post; make it a short update or roll it into a
+   bigger post instead.
 8. **No test/placeholder posts published, ever.** Draft and delete test content before it ever
-   hits "Publish." If a post title contains "test," "draft," or is a near-duplicate of another post
-   title, it does not go live — full stop.
-9. **Uniqueness check before publishing.** Search the exact `TARGET KEYWORD:` first. If the top 3
-   results already cover this angle thoroughly, the post must add something they don't — a real
-   error/fix, a comparison, a personal benchmark, an opinion — before it's allowed to publish.
-   Re-explaining existing docs in your own words is not enough on its own (see section 13, "three
-   things the official docs do not say").
-10. **One topic lane at a time.** Don't scatter across unrelated tool categories in the same week.
-    Cluster related posts (e.g. all Termux, then all Git) so the blog builds topical authority
-    before jumping elsewhere. Check the most recent folders under `posts/` before picking a topic.
+   hits "Publish." A title containing "test" or "draft," a body containing `REPLACE_ME` or lorem
+   ipsum, and a title identical or near-identical (at least 90% similar) to another post's title
+   does not go live - full stop. (Titles at least 80% similar warn.)
+9. **Uniqueness check before publishing.** Search the exact target keyword first. If the top 3
+   results already cover this angle thoroughly, the post must add something they do not - a real
+   error/fix, a comparison, a personal benchmark, an opinion - before it is allowed to publish.
+   That is section 13's "three things the official docs do not say," aimed at the live results,
+   not the docs. Re-explaining existing docs in your own words is not enough on its own.
+10. **One topic lane at a time.** Do not scatter across unrelated tool categories in the same
+    week. Cluster related posts (e.g. all Termux, then all Git) so the blog builds topical
+    authority before jumping elsewhere. In this repo the lane shows in the labels: the newest
+    post should share at least one label with the previous three.
 
 ## Checklist for the agent when adding a post
-1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
-2. Write `post.html` (+ `post.md`) to section 13: 1200+ words of prose, a real opening mistake, three details the docs skip, keyword in `TITLE:` (under 60 characters), in one `<h2>`, and in the hook, `SEARCH DESCRIPTION:` at 150-160 characters with that keyword, `TARGET KEYWORD:` set. Generate exactly 7 images into `images/` (`01`–`07`), bare `<img src alt>`, no sizes, no `REPLACE_ME`
-3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker, then a recap `<ol>` and a closing that says what to do next
-4. Apply sections 12 and 13 together: 2-3 contextual links to related posts, each target's live URL (its `PERMALINK:`), never `href="#"` or a folder slug, and a return link from the sister post this one continues
-4b. Run the section 14 SEO list: title 50-60 chars with the keyword in the first half, unique 150-160 char description, 2+ internal links with descriptive anchors, 1+ outbound link to an official source, H2/H3 only (no H1, no skipped level), descriptive alt + caption on every image, 1200+ real words, no "test"/"draft" title, the keyword searched and the post adds something the top 3 don't, and the topic stays in the current lane
-5. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
-6. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
-7. `python3 tools/check_perf.py` → must print `clean`
-8. Commit the whole folder including the image variants, `import.xml`, `paste.html` and `title.txt`
-9. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels by hand)
-10. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL. It follows every
-    internal link the post makes and fails the ones that 404, and it warns when no other post links
-    here. If Blogger gave the post a different URL than the folder slug, check what it actually got
-    and put it in the header as `PERMALINK:` (see section 1), then fix the links that used the slug.
-11. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos
-
+1. Lane first, then uniqueness (section 14 rules 9-10): confirm the post continues the current topic lane (it should share a label with recent posts), and search the exact target keyword. If the top 3 already cover the angle, the draft must add an error/fix, a comparison, a benchmark, or an opinion - re-explaining docs is not enough. Record the phrase as `TARGET KEYWORD:`.
+2. `cp -r posts/_template posts/YYYY-MM-DD-slug`
+3. Write `post.html` (+ `post.md`) to sections 13-14: 1200+ words of prose, a real opening mistake, three details the docs skip, `TITLE:` at 50-60 characters with the keyword in the first half, `SEARCH DESCRIPTION:` at 150-160 characters unique to this post with the keyword once, no `<h1>` in the body, no `<h3>` without a parent `<h2>`, no test/draft title. Generate exactly 7 images into `images/` (`01`-`07`), each with a descriptive alt and a one-line caption, bare `<img src alt>`, no sizes, no `REPLACE_ME`
+4. Write to section 3: feature image, then a 2-4 sentence hook containing the keyword, then the break marker, then a recap `<ol>` and a closing that says what to do next
+5. Apply sections 12 and 14 together: 2-3 contextual internal links to related posts (each target's live URL, never `href="#"`, a folder slug, or "click here"), at least one outbound link to an official source, links placed where the topic comes up - and a return link from the sister post this one continues
+6. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
+7. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
+8. `python3 tools/check_perf.py` → must print `clean`
+9. Commit the whole folder including the image variants, `import.xml`, `paste.html` and `title.txt`
+10. Publish with **`import.xml`** (not `paste.html`, unless you retype title + labels + search description by hand)
+11. `python3 tools/check_published.py YYYY-MM-DD-slug` → must print no FAIL. It follows every internal link the post makes and fails the ones that 404, checks the live link counts against section 14, and warns when no other post links here. If Blogger gave the post a different URL than the folder slug, check what it actually got and put it in the header as `PERMALINK:` (see section 1), then fix the links that used the slug.
+12. `python3 tools/make_video.py YYYY-MM-DD-slug` for the two social videos

@@ -106,6 +106,31 @@ FOLDER_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-([a-z0-9-]+)$")
 # the feed-level <updated> (2-space indent); the entry-level one is 4-space indented
 FEED_UPDATED_RE = re.compile(r"^  <updated>.*</updated>$", re.M)
 
+# --- section 14: the SEO rules every post must pass ---------------------------
+# Posts with TARGET KEYWORD: set (every new post) fail the build on any of
+# these. The five Sep 16-19 posts predate section 14, so the judgement rules
+# (title/description length, link counts, word count) print as warnings there:
+# visible, but they do not fail the build.
+TITLE_MIN, TITLE_MAX = 50, 60
+DESC_MIN, DESC_MAX = 150, 160
+MIN_INTERNAL_LINKS = 2
+MIN_OUTBOUND_LINKS = 1
+MIN_PROSE_WORDS = 1200
+MIN_ALT_CHARS = 15
+GENERIC_ANCHORS = {
+    "click here", "clickhere", "here", "this post", "this article",
+    "read more", "readmore", "link", "this link", "more here",
+}
+TEST_TITLE_RE = re.compile(r"\b(tests?|drafts?)\b", re.I)
+PLACEHOLDER_TITLE_RE = re.compile(r"your post title here|untitled|lorem", re.I)
+GENERIC_ALT_RE = re.compile(r"^(image|img|picture|photo|screenshot|figure)\s*\d*$", re.I)
+HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
+HEADING_RE = re.compile(r"<h([1-6])\b[^>]*>(.*?)</h\1\s*>", re.S | re.I)
+LINK_RE = re.compile(r"<a\b([^>]*)>(.*?)</a\s*>", re.S | re.I)
+HREF_RE = re.compile(r"\shref=\"([^\"]*)\"", re.I)
+CAPTION_RE = re.compile(r"font-size:\s*13px", re.I)
+BLOG_HOST = BLOG_URL.split("//", 1)[-1].lower()
+
 
 def stamp(feed: str) -> str:
     """The feed's own timestamp, so two builds can be compared ignoring it."""
@@ -274,6 +299,213 @@ def perf_checks(body: str, img_dir: Path = None, hero: str = "") -> list:
     return problems
 
 
+def _text_of(html: str) -> str:
+    """Visible text of an HTML fragment, whitespace collapsed."""
+    return " ".join(TAG_RE.sub(" ", html).split())
+
+
+def prose_words(body: str) -> int:
+    """Words of original prose: headings, paragraphs, lists, quotes.
+
+    Code blocks (<pre>), caption lines and comments do not count (section 14
+    rule 7: code, alt text and captions are not prose).
+    """
+    no_code = re.sub(r"<pre\b.*?</pre\s*>", " ", body, flags=re.S | re.I)
+    no_cap = re.sub(r"<div\b[^>]*font-size:\s*13px[^>]*>.*?</div\s*>", " ",
+                    no_code, flags=re.S | re.I)
+    return len(_text_of(HTML_COMMENT_RE.sub(" ", no_cap)).split())
+
+
+def links_in(body: str) -> list:
+    """(href, anchor text, position) for every <a> in the body.
+
+    Comments are stripped first, so a commented-out example link (like the
+    ones in posts/_template/) never counts toward the rules 3-4 minimums.
+    """
+    clean = HTML_COMMENT_RE.sub(" ", body)
+    out = []
+    for m in LINK_RE.finditer(clean):
+        hm = HREF_RE.search(m.group(1) or "")
+        if not hm:
+            continue
+        out.append((hm.group(1).strip(), _text_of(m.group(2)), m.start()))
+    return out
+
+
+def href_kind(href: str) -> str:
+    """'internal' (points at this blog), 'outbound', or '' (anchor/mailto)."""
+    h = (href or "").strip()
+    if not h or h.startswith(("#", "mailto:", "tel:", "javascript:", "data:")):
+        return ""
+    if re.match(r"^(https?:)?//", h, re.I):
+        host = re.sub(r"^(https?:)?//", "", h, flags=re.I).split("/")[0].lower()
+        if host.startswith("www."):
+            host = host[4:]
+        return "internal" if host == BLOG_HOST else "outbound"
+    return "internal" if h.startswith("/") else ""
+
+
+def seo_checks(meta: dict, body: str, teaser: str) -> "tuple[list, list]":
+    """Section 14 SEO rules. Returns (errors, warnings).
+
+    Errors fail the build. New posts (TARGET KEYWORD: set) get errors for
+    every automatable rule; the five Sep 16-19 posts predate section 14, so
+    the judgement rules (title/description length, link counts, word count)
+    are warnings there. The never-rules - no test/placeholder titles, no
+    <h1> in the body, no skipped heading levels, no placeholder alt text, a
+    caption under every screenshot - are errors for every post: no live post
+    trips them, and no new one may introduce them.
+    """
+    errors, warnings = [], []
+    title = meta.get("TITLE", "")
+    desc = meta.get("SEARCH DESCRIPTION", "")
+    kw = meta.get("TARGET KEYWORD", "").strip()
+    is_new = bool(kw)
+    clean = HTML_COMMENT_RE.sub(" ", body)
+
+    def legacy(msg: str):
+        (errors if is_new else warnings).append(msg)
+
+    # rule 1: title length, keyword in the first half
+    if title:
+        n = len(title)
+        if not TITLE_MIN <= n <= TITLE_MAX:
+            legacy(f"TITLE: is {n} characters, the rule is {TITLE_MIN}-{TITLE_MAX} "
+                   f"(section 14 rule 1) - cut the subtitle before publishing, "
+                   f"do not trim it in your head")
+        if TEST_TITLE_RE.search(title) or PLACEHOLDER_TITLE_RE.search(title):
+            errors.append(f"TITLE: {title!r} looks like a test/placeholder title - "
+                          f"it must never be published (section 14 rule 8)")
+        if kw:
+            pos = title.lower().find(kw.lower())
+            if pos < 0:
+                errors.append(f"TITLE: does not contain the target keyword {kw!r} "
+                              f"(section 14 rule 1)")
+            elif pos > n // 2:
+                errors.append(f"TITLE: the target keyword starts at character {pos + 1} "
+                              f"of {n} - put it in the first half (section 14 rule 1)")
+
+    # rule 2: search description length, keyword, this-post specificity
+    if desc:
+        n = len(desc)
+        if not DESC_MIN <= n <= DESC_MAX:
+            legacy(f"SEARCH DESCRIPTION: is {n} characters, the rule is "
+                   f"{DESC_MIN}-{DESC_MAX} (section 14 rule 2)")
+        if kw and kw.lower() not in desc.lower():
+            errors.append("SEARCH DESCRIPTION: does not contain the target keyword "
+                          f"{kw!r} (section 14 rule 2)")
+        elif kw and desc.lower().count(kw.lower()) > 1:
+            warnings.append("SEARCH DESCRIPTION: repeats the target keyword - "
+                            "once, naturally (section 14 rule 2)")
+
+    # rule 1 (keyword placement): the keyword in exactly one <h2> and in the hook
+    if kw:
+        h2s = [m for m in HEADING_RE.finditer(clean) if m.group(1) == "2"]
+        hits = [m for m in h2s if kw.lower() in _text_of(m.group(2)).lower()]
+        if not hits:
+            errors.append(f"no <h2> contains the target keyword {kw!r} - exactly one "
+                          f"must (section 14 rule 1)")
+        elif len(hits) > 1:
+            errors.append(f"{len(hits)} <h2> headings contain the target keyword - "
+                          f"exactly one may (section 14 rule 1)")
+        hook = _text_of(" ".join(re.findall(r"<p\b[^>]*>(.*?)</p>", teaser, re.S | re.I)))
+        if kw.lower() not in hook.lower():
+            errors.append("the hook (the teaser before the jump break) does not contain "
+                          "the target keyword (section 14 rule 1)")
+
+    # rule 5: headings - <h2> sections, <h3> only under an <h2>, no <h1> in the body
+    levels = [(int(m.group(1)), _text_of(m.group(2))[:60]) for m in HEADING_RE.finditer(clean)]
+    if levels and not any(lv == 2 for lv, _ in levels):
+        errors.append("no <h2> in the body - main sections use <h2> (section 14 rule 5)")
+    if any(lv == 1 for lv, _ in levels):
+        errors.append("the body contains an <h1> - the post title is the page's only "
+                      "<h1> (section 14 rule 5)")
+    seen_h2, prev = False, None
+    for lv, txt in levels:
+        if lv == 2:
+            seen_h2 = True
+        if lv == 3 and not seen_h2:
+            errors.append(f"<h3> {txt!r} appears before any <h2> - never skip a level "
+                          f"(section 14 rule 5)")
+            break
+        if prev is not None and lv - prev > 1:
+            errors.append(f"heading levels skip: h{prev}->h{lv} ({txt!r}) "
+                          f"(section 14 rule 5)")
+            break
+        prev = lv
+
+    # rules 3-4: internal and outbound links
+    links = links_in(body)
+    internal = [(h, a, p) for h, a, p in links if href_kind(h) == "internal"]
+    outbound = [(h, a, p) for h, a, p in links if href_kind(h) == "outbound"]
+    uniq_internal = {h.split("#")[0].split("?")[0].rstrip("/") for h, _, _ in internal}
+    uniq_internal.discard("")
+    if len(uniq_internal) < MIN_INTERNAL_LINKS:
+        legacy(f"only {len(uniq_internal)} internal link(s) to other posts, the rule is "
+               f"at least {MIN_INTERNAL_LINKS} with descriptive anchors "
+               f"(section 14 rule 3)")
+    for h, a, _ in internal:
+        norm = re.sub(r"\s+", " ", re.sub(r"[^a-z ]", "", a.lower())).strip()
+        if not a.strip():
+            errors.append(f"internal link to {h} has no anchor text - describe the "
+                          f"target post (section 14 rule 3)")
+        elif norm in GENERIC_ANCHORS or a.strip().lower().startswith(("http://", "https://", "www.")):
+            errors.append(f"internal link uses generic anchor text {a.strip()!r} - "
+                          f"describe the target post (section 14 rule 3)")
+    h2_pos = [m.start() for m in re.finditer(r"<h2\b", clean, re.I)]
+    if internal and h2_pos and all(p > h2_pos[-1] for _, _, p in internal):
+        legacy("every internal link sits after the last <h2> - link where the topic "
+               "comes up in the body, not in a dump at the end (section 14 rule 3)")
+    if not outbound:
+        legacy(f"no outbound link to an official/primary source (docs, GitHub repo, "
+               f"wiki) - at least {MIN_OUTBOUND_LINKS} is required where the post names "
+               f"a tool, language or platform (section 14 rule 4)")
+
+    # rule 6: descriptive alt text, one caption line per screenshot
+    for tag in IMG_TAG_RE.findall(clean):
+        src = attr(tag, "src").split("/")[-1]
+        alt = attr(tag, "alt").strip()
+        if not alt:
+            continue  # perf_checks already fails a missing alt
+        if (len(alt) < MIN_ALT_CHARS or GENERIC_ALT_RE.match(alt) or alt == src
+                or alt.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif"))
+                or "REPLACE_ME" in alt):
+            errors.append(f"{src or 'an image'} has a placeholder alt ({alt!r}) - "
+                          f"describe what the screenshot actually shows "
+                          f"(section 14 rule 6)")
+    imgs = list(IMG_TAG_RE.finditer(clean))
+    if imgs:
+        caps = len(CAPTION_RE.findall(clean))
+        if caps < len(imgs):
+            errors.append(f"{len(imgs)} images but only {caps} caption lines - every "
+                          f"screenshot needs its one-line caption (section 14 rule 6)")
+        else:
+            for i, m in enumerate(imgs):
+                nxt = imgs[i + 1].start() if i + 1 < len(imgs) else len(clean)
+                if not CAPTION_RE.search(clean[m.end():nxt][:2000]):
+                    src = attr(m.group(0), "src").split("/")[-1]
+                    errors.append(f"{src or f'image #{i + 1}'} has no caption line after "
+                                  f"it - say what the reader is seeing (section 14 rule 6)")
+
+    # rule 7: word count floor (prose only)
+    n_words = prose_words(clean)
+    if n_words < MIN_PROSE_WORDS:
+        legacy(f"{n_words} words of prose, the floor for a tutorial/guide is "
+               f"{MIN_PROSE_WORDS} (code, alt text and captions do not count) - if the "
+               f"topic is naturally shorter it is the wrong topic for a full post "
+               f"(section 14 rule 7)")
+
+    # rule 8: no placeholders in the body, ever
+    if "REPLACE_ME" in clean:
+        errors.append("the body still contains REPLACE_ME - the post is not finished "
+                      "(section 14 rule 8)")
+    if re.search(r"lorem ipsum", clean, re.I):
+        errors.append("the body contains lorem ipsum placeholder text "
+                      "(section 14 rule 8)")
+
+    return errors, warnings
+
+
 def load_post(folder: Path) -> dict:
     problems = []
     fm = FOLDER_RE.match(folder.name)
@@ -367,6 +599,10 @@ def load_post(folder: Path) -> dict:
             )
         body = teaser.strip() + "\n\n" + rest.strip()
 
+    # --- section 14: the SEO rules every post must pass ----------------------
+    seo_errors, seo_warnings = seo_checks(meta, body, teaser)
+    problems.extend(seo_errors)
+
     return {
         "folder": folder,
         "teaser": teaser,
@@ -376,11 +612,13 @@ def load_post(folder: Path) -> dict:
         "title": meta.get("TITLE", ""),
         "labels": [l.strip() for l in meta.get("LABELS", "").split(",") if l.strip()],
         "description": meta.get("SEARCH DESCRIPTION", ""),
+        "target_keyword": meta.get("TARGET KEYWORD", "").strip(),
         "published": when,
         "html": body,
         "images": sorted(used),
         "unused_images": unused,
         "problems": problems,
+        "warnings": seo_warnings,
     }
 
 
@@ -450,6 +688,8 @@ def main():
         print(f"posts/{folder.name}/")
         for pr in p["problems"]:
             print(f"   ERROR   {pr}")
+        for w in p.get("warnings", []):
+            print(f"   warning {w}")
         for n in p.get("unused_images", []):
             print(f"   warning image in images/ not used by post: {n}")
         if p["problems"]:

@@ -1,7 +1,7 @@
 <!-- ============================================================
 BLOGGER POST - source for import.xml (built by tools/build_import.py)
 
-TITLE:  How to run a Node app in Termux
+TITLE:  Run a Node App in Termux Without the Symlink Errors
 LABELS: Termux, Android, Node.js, JavaScript, Command Line, Nano
 PUBLISHED: 2026-09-26T01:30:00-07:00
 PERMALINK: how-to-run-a-node-app-in-termux
@@ -63,7 +63,7 @@ which node</code></pre>
   <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>One package. Two binaries. The path must sit inside Termux, not in /usr/bin.</i></div>
 </div>
 
-<p><code>which node</code> should print a path under <code>/data/data/com.termux/files/usr/bin</code>. That prefix is the whole story of why laptop instructions fail here. Termux is not a rooted Linux. It cannot write to <code>/usr</code>, and it does not use glibc. A Node binary you download from nodejs.org is built for glibc. It will not link. Do not "fix" a missing package by curling a tarball.</p>
+<p><code>which node</code> should print a path under <code>/data/data/com.termux/files/usr/bin</code>. That prefix is the whole story of why laptop instructions fail here. Termux is not a rooted Linux. It cannot write to <code>/usr</code>, and it does not use glibc. A Node binary you download from <a href="https://nodejs.org/">nodejs.org</a> is built for glibc. It will not link. Do not "fix" a missing package by curling a tarball.</p>
 
 <p>The error from the tutorial that says <code>pkg install node</code> is blunt, and it is the one to trust:</p>
 
@@ -86,7 +86,7 @@ pkg install nodejs-lts -y</code></pre>
 
 <p>The number on the end moves. The meaning does not. The Node package and the ICU library were updated at different moments, and your mirror handed you one without the other. Run <code>pkg update &amp;&amp; pkg upgrade -y</code>, then <code>pkg reinstall nodejs-lts -y</code>. If the upgrade itself cannot download, <code>termux-change-repo</code> and pick a single official mirror, then upgrade again. This is a packaging race, not a reason to install nvm.</p>
 
-<p>Skip nvm. On a laptop it is a reasonable way to pin a version. On Termux it either compiles Node for a long, hot stretch or fetches a build that expects glibc, and you are back at the link error. The Termux package is already the build that matches the phone. A version manager here is how you lose the evening you meant to spend on the app.</p>
+<p>Skip nvm. On a laptop it is a reasonable way to pin a version. On Termux it either compiles Node for a long, hot stretch or fetches a build that expects glibc, and you are back at the link error. The Termux package is already the build that matches the phone. The recipes it is built from live in the <a href="https://github.com/termux/termux-packages">official termux-packages repository</a>. A version manager here is how you lose the evening you meant to spend on the app.</p>
 
 <h2>Put the project in home, not in shared storage</h2>
 
