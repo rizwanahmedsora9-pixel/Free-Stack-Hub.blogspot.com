@@ -57,11 +57,15 @@ LABELS: Label One, Label Two          (comma separated, these become Blogger lab
 PUBLISHED: 2026-09-16                 (optional)
 PERMALINK: the-live-slug              (optional, section 1 - only when Blogger's URL is not the folder slug)
 SEARCH DESCRIPTION:
-One or two sentences for search engines.
+One or two sentences for search engines. New posts: 150-160 characters,
+and the target keyword in it (section 13).
+TARGET KEYWORD: the exact phrase people would search   (required on new posts, section 13)
 -->
 ```
 Then the HTML body. Use `<h2>` for sections, `<p>`, `<ul>/<ol>`, `<code>`, and the
-`<pre>` style block from the template for code.
+`<pre>` style block from the template for code. `TARGET KEYWORD:` stays in the header so the
+next edit still knows the phrase. The build reads it (so it is not swallowed into the search
+description) and does not print it on the page.
 
 ## 3. Story structure (the homepage teaser is cut from exactly this)
 1. **Feature image first** - one `<img>` in the very first block, before any text.
@@ -312,11 +316,69 @@ Every post published on Free Stack Hub must actively participate in an interconn
 - **Descriptive anchor text:** Always use descriptive, human-readable anchor text that clearly identifies the target topic (e.g., `<a href="https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html">our step-by-step Termux terminal commands and nano guide</a>`). Never use generic text like "click here", "read more", or unformatted raw URLs.
 - **Future posts commitment:** In every future post, interlinking to existing posts (especially related ones) is a required quality gate before merging.
 
+## 13. Writing rule: original, searchable, and not a rehash
+
+This is the writing brief for every **new** post, on top of sections 3, 4 and 12. The five
+posts already live are not rewritten to match it. The topic and the exact search phrase come
+from the request. If either is missing, ask before writing. Record the phrase as
+`TARGET KEYWORD:` in the header.
+
+Audience: beginners who want clear, honest, no-fluff guidance on free and open-source ways to
+build and host things (Python, Git, Termux, free hosting, dev tools). Write at least **1200
+words** of original prose (paragraphs, lists, headings, quotes). Do not pad with repetition,
+generic disclaimers, or the same point said twice. Code blocks, alt text and captions do not
+count toward the 1200. Every paragraph has to earn its place.
+
+1. **Open on a real mistake.** The section 3 hook is that opening: 2-4 sentences, one specific
+   pain point or error a beginner actually hits, then `<!--more-->`. Not "In this guide, you
+   will learn…", and not "In today's digital world…".
+2. **Three things the official docs do not say.** At least three of: a gotcha you only learn by
+   doing it, a real error message and the fix that actually works, a comparison of two approaches
+   with an opinion on which is better and why, or a timing or size you measured. "It depends" is
+   not one of the three.
+3. **Shape.** Clear `<h2>` / `<h3>`, paragraphs of 2-4 sentences, and at least one `<ul>` or
+   `<ol>` where a list is the honest shape (the closing recap counts, a list in the body is
+   better when the steps are the point).
+4. **Voice.** Direct, human, slightly conversational. Not robotic, not keyword-stuffed, no filler.
+5. **Close on a next action.** After the section 3 recap `<ol>`, one short closing paragraph:
+   what to do next, or the follow-up mistake to avoid. Not "Hope this helped!"
+6. **Keyword, once each, never forced.** The target keyword appears in `TITLE:`, in exactly one
+   `<h2>`, and in the opening paragraph (the hook). Nowhere else unless the sentence needs it.
+   `TITLE:` stays **under 60 characters**. `SEARCH DESCRIPTION:` is **150-160 characters** and
+   includes the keyword once, naturally. It still only reaches Google after the section 9
+   setting is on; write it anyway.
+7. **Exactly 7 images, each one a screenshot the reader needs.** After a command, an error, or
+   the final output — not decoration, not a stock hero with nothing to look at. Count the feature
+   image: `01-….jpg` through `07-….jpg`, in the order they appear. Section 4's hero budget still
+   applies to `01`.
+8. **Two or three internal links, already real.** A related post on this blog gets a normal
+   sentence and a descriptive `<a>`. Section 12 decides the URL: the target's live permalink,
+   never `href="#"`, never a folder slug, never "click here". If the sister post does not exist
+   yet, leave the sentence out and name the missing topic in `post.md`. A guessed URL is how the
+   live posts shipped four 404s. When this post continues an older one, add the return link in
+   that older post too.
+
+**What the brief's output format means in this repo.** Do not hand Blogger a loose HTML blob,
+and do not leave image placeholders in the file that gets built.
+
+| The brief says | Write this instead |
+|---|---|
+| SEO title on its own line, under 60 characters | `TITLE:` in the header |
+| Meta description, 150-160 characters | `SEARCH DESCRIPTION:` in the header |
+| `<img src="REPLACE_ME_1.png">` … `REPLACE_ME_7.png` | bare `<img src="01-short-name.jpg" alt="…">` through `07-…`. The build rejects a src that is not a file in `images/` |
+| `<figcaption>` | the template's caption line: `<div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>One line: what the reader is looking at.</i></div>`. `#777` fails the contrast check |
+| alt text | specific enough that someone could take the screenshot from the alt alone |
+| paste into Blogger's HTML view | `post.html` is the source. `paste.html` is generated. Never paste `post.html` |
+| tags limited to `h2 h3 p ul li strong em blockquote img figcaption a` | those, plus the house tags the build and the template already use: `<ol>`, `<code>`, `<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;">`, the caption `<div>`, and one `<!--more-->`. No `<html>`, `<head>`, `<body>`, `<picture>`, or a hand-written canonical |
+
+Generate the seven images into `images/` before the build (section 4). A post that still says
+`REPLACE_ME` is not finished.
+
 ## Checklist for the agent when adding a post
 1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
-2. Write `post.html` (+ `post.md`), generate images into `images/` - bare `<img src alt>`, no sizes
-3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker
-4. Apply the section 12 interlinking rule: contextually interlink to related and existing posts on the blog, using each target's live URL (its `PERMALINK:`)
+2. Write `post.html` (+ `post.md`) to section 13: 1200+ words of prose, a real opening mistake, three details the docs skip, keyword in `TITLE:` (under 60 characters), in one `<h2>`, and in the hook, `SEARCH DESCRIPTION:` at 150-160 characters with that keyword, `TARGET KEYWORD:` set. Generate exactly 7 images into `images/` (`01`–`07`), bare `<img src alt>`, no sizes, no `REPLACE_ME`
+3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker, then a recap `<ol>` and a closing that says what to do next
+4. Apply sections 12 and 13 together: 2-3 contextual links to related posts, each target's live URL (its `PERMALINK:`), never `href="#"` or a folder slug, and a return link from the sister post this one continues
 5. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
 6. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
 7. `python3 tools/check_perf.py` → must print `clean`

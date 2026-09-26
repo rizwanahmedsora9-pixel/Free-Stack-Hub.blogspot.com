@@ -33,7 +33,8 @@ post.html header format:
   PUBLISHED: 2026-09-16          (optional; defaults to the date in the folder name)
   PERMALINK: the-slug-it-lives-at   (optional; see below)
   SEARCH DESCRIPTION:
-  One or two sentences.
+  One or two sentences. New posts: 150-160 characters, keyword included.
+  TARGET KEYWORD: the exact search phrase   (optional; required on new posts)
   -->
   <p>body...</p>
   <img src="01-hero.jpg" alt="..."/>     <- bare file name, file lives in ./images/
@@ -83,7 +84,7 @@ REPO_CDN = os.environ.get(
 
 HEADER_RE = re.compile(r"^\s*<!--(.*?)^[ \t]*[-=]*[ \t]*-->[ \t]*$", re.S | re.M)
 KEY_RE = re.compile(r"^\s*([A-Z][A-Z ]+?)(?:\s*\(.*?\))?\s*:\s*(.*)$")
-KEYS = {"TITLE", "LABELS", "SEARCH DESCRIPTION", "PUBLISHED", "PERMALINK", "IMAGES", "BLOGGER POST"}
+KEYS = {"TITLE", "LABELS", "SEARCH DESCRIPTION", "PUBLISHED", "PERMALINK", "IMAGES", "BLOGGER POST", "TARGET KEYWORD"}
 IMG_SRC_RE = re.compile(r'(<img\b[^>]*\bsrc=")([^"]+)(")', re.I)
 # <img src> and <source srcset> both carry file names the build has to make public
 TAG_SRC_RE = re.compile(r'(<img\b[^>]*?(?<![\w-])src=|<source\b[^>]*?(?<![\w-])srcset=)"([^"]+)"', re.I)

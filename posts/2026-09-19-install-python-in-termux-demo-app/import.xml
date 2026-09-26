@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-19T17:51:09.143+00:00</updated>
+  <updated>2026-09-26T09:20:53.301+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -384,7 +384,7 @@ git commit -m "initial commit: pocket tracker demo app"&lt;/code&gt;&lt;/pre&gt;
 &lt;li&gt;Install build tools (&lt;code&gt;clang&lt;/code&gt; and &lt;code&gt;make&lt;/code&gt;) before running pip, and push your code to Git so your mobile work seamlessly connects to production servers.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;You now possess a full, native Python development station that fits in the palm of your hand. Open Termux today, create a project directory, and build a script that automates something in your daily workflow. The entire software engineering stack is accessible from your pocket.&lt;/p&gt;</content>
+&lt;p&gt;You now possess a full, native Python development station that fits in the palm of your hand. Open Termux today, create a project directory, and build a script that automates something in your daily workflow. The entire software engineering stack is accessible from your pocket. If the thing you want is a web server rather than a script, the failures are different: &lt;a href="https://freestackhub.blogspot.com/2026/09/how-to-run-a-node-app-in-termux.html"&gt;how to run a Node app in Termux without the symlink error or a server that dies when the screen locks&lt;/a&gt;.&lt;/p&gt;</content>
     <blogger:metaDescription>Install Python in Termux on Android, write a complete interactive CLI demo app using nano, and run your scripts with zero compilation headaches.</blogger:metaDescription>
     <blogger:created>2026-09-19T00:00:00.000+00:00</blogger:created>
     <published>2026-09-19T00:00:00.000+00:00</published>

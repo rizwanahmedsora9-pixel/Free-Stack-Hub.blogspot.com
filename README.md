@@ -39,7 +39,7 @@ python3 tools/make_video.py 2026-09-16-stop-deleting-pythonanywhere-files   # so
 Never paste `post.html` itself into Blogger — its `<img>` tags use bare file names, so the
 images would show as broken. Only the generated files have full URLs.
 
-- **Rules for writing / adding posts (structure, images, publishing, videos):** [POST_RULES.md](POST_RULES.md)
+- **Rules for writing / adding posts (structure, images, publishing, videos, and §13 — original, 1200+ words, keyword, exactly 7 screenshots):** [POST_RULES.md](POST_RULES.md)
 - **Blogger theme:** `theme/freestackhub-theme.xml` (the file to upload to Blogger) plus
   `theme/preview.html`, a static mock of the home page and a post page - see [theme/README.md](theme/README.md)
 - **Build tool:** `python3 tools/build_import.py` (regenerates `import.xml`, `paste.html`, `title.txt`)
