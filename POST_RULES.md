@@ -374,11 +374,55 @@ and do not leave image placeholders in the file that gets built.
 Generate the seven images into `images/` before the build (section 4). A post that still says
 `REPLACE_ME` is not finished.
 
+## 14. SEO rules — every post, no exceptions
+
+These are the non-negotiables. Sections 3, 4, 12 and 13 already enforce most of them in the
+build; this section is the single list to check against before a post goes live, whether or not
+a tool caught it.
+
+1. **Title length: 50–60 characters max.** Put the main keyword in the first half. Never write a
+   title you have to trim in your head — if it needs "and," "with," or a colon-subtitle to explain
+   everything, cut it down before publishing. (`TITLE:` in the header; the build rejects over 60.)
+2. **Meta description required — never leave blank.** Every post has its own unique
+   `SEARCH DESCRIPTION:` of 150–160 characters. It goes in the header so `import.xml` carries it,
+   and it must also be what shows in Blogger's post editor sidebar after publishing — never let it
+   fall back to the sitewide default. It must:
+   - include the post's main keyword naturally
+   - describe what THIS post specifically covers (not a generic blog blurb)
+3. **Internal links: minimum 2 per post.** Every post links to at least 2 other existing posts on
+   this blog, using descriptive anchor text (not "click here" or "this post"). Put them inside the
+   body where they're contextually relevant, not dumped at the end. Section 12 decides the URL
+   (the target's live `PERMALINK:`), and `check_published.py` fails any that 404.
+4. **Outbound links: minimum 1 per post, where relevant.** When the post references a tool,
+   language, or platform, link out to at least one official/primary source (official docs, GitHub
+   repo, official wiki). This is a trust signal — don't skip it just because it sends traffic away.
+5. **Headings.** H2 for main sections, H3 for sub-points within a section. Never skip a level (no
+   `<h3>` without a parent `<h2>`). The post title is the only H1 (handled by the theme — never
+   add a second `<h1>` inside the body).
+6. **Images.** Every image has a specific, descriptive `alt` — describe what's actually in the
+   screenshot, not "image1" or the filename. Add a one-line caption under each screenshot (the
+   section 13 caption `<div>`) explaining what the reader is seeing.
+7. **Word count floor: 1,200 words** for a tutorial/guide post. Never pad to hit this — if the
+   topic is naturally shorter, it's the wrong topic for a full post; make it a short update or roll
+   it into a bigger post instead.
+8. **No test/placeholder posts published, ever.** Draft and delete test content before it ever
+   hits "Publish." If a post title contains "test," "draft," or is a near-duplicate of another post
+   title, it does not go live — full stop.
+9. **Uniqueness check before publishing.** Search the exact `TARGET KEYWORD:` first. If the top 3
+   results already cover this angle thoroughly, the post must add something they don't — a real
+   error/fix, a comparison, a personal benchmark, an opinion — before it's allowed to publish.
+   Re-explaining existing docs in your own words is not enough on its own (see section 13, "three
+   things the official docs do not say").
+10. **One topic lane at a time.** Don't scatter across unrelated tool categories in the same week.
+    Cluster related posts (e.g. all Termux, then all Git) so the blog builds topical authority
+    before jumping elsewhere. Check the most recent folders under `posts/` before picking a topic.
+
 ## Checklist for the agent when adding a post
 1. `cp -r posts/_template posts/YYYY-MM-DD-slug`
 2. Write `post.html` (+ `post.md`) to section 13: 1200+ words of prose, a real opening mistake, three details the docs skip, keyword in `TITLE:` (under 60 characters), in one `<h2>`, and in the hook, `SEARCH DESCRIPTION:` at 150-160 characters with that keyword, `TARGET KEYWORD:` set. Generate exactly 7 images into `images/` (`01`–`07`), bare `<img src alt>`, no sizes, no `REPLACE_ME`
 3. Write to section 3: feature image, then a 2-4 sentence hook, then the break marker, then a recap `<ol>` and a closing that says what to do next
 4. Apply sections 12 and 13 together: 2-3 contextual links to related posts, each target's live URL (its `PERMALINK:`), never `href="#"` or a folder slug, and a return link from the sister post this one continues
+4b. Run the section 14 SEO list: title 50-60 chars with the keyword in the first half, unique 150-160 char description, 2+ internal links with descriptive anchors, 1+ outbound link to an official source, H2/H3 only (no H1, no skipped level), descriptive alt + caption on every image, 1200+ real words, no "test"/"draft" title, the keyword searched and the post adds something the top 3 don't, and the topic stays in the current lane
 5. `python3 tools/optimize_images.py YYYY-MM-DD-slug` → the `.avif`/`.webp` variants
 6. `python3 tools/build_import.py YYYY-MM-DD-slug` → must print no ERROR
 7. `python3 tools/check_perf.py` → must print `clean`
