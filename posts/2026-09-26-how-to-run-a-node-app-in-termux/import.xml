@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2018">
   <id>tag:blogger.com,1999:blog-7497660712599875944</id>
-  <updated>2026-09-26T09:20:53.123+00:00</updated>
+  <updated>2026-09-26T09:22:05.941+00:00</updated>
   <title type="text">Free Stack Hub</title>
   <link rel="alternate" type="text/html" href="https://freestackhub.blogspot.com/"/>
   <author><name>Free Stack Hub</name></author>
@@ -17,9 +17,9 @@
     <title type="text">How to run a Node app in Termux</title>
     <content type="html">&lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/01-run-node-termux-hero.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/01-run-node-termux-hero.webp" type="image/webp"/&gt;
-    &lt;img alt="An Android phone in a dark room running Termux, with node server.js printed and a line saying the app is listening on 127.0.0.1 port 3000" decoding="async" fetchpriority="high" height="670" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/01-run-node-termux-hero.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/01-run-node-termux-hero.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/01-run-node-termux-hero.webp" type="image/webp"/&gt;
+    &lt;img alt="An Android phone in a dark room running Termux, with node server.js printed and a line saying the app is listening on 127.0.0.1 port 3000" decoding="async" fetchpriority="high" height="670" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/01-run-node-termux-hero.jpg" style="max-width:100%; height:auto;" width="1200"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The server is up when that line is on screen, and not a moment before.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -54,9 +54,9 @@ which node&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/02-pkg-install-nodejs-lts.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/02-pkg-install-nodejs-lts.webp" type="image/webp"/&gt;
-    &lt;img alt="Termux screen showing pkg install nodejs-lts finished, then node -v and npm -v each printing a version, and which node pointing inside the Termux app prefix" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/02-pkg-install-nodejs-lts.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/02-pkg-install-nodejs-lts.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/02-pkg-install-nodejs-lts.webp" type="image/webp"/&gt;
+    &lt;img alt="Termux screen showing pkg install nodejs-lts finished, then node -v and npm -v each printing a version, and which node pointing inside the Termux app prefix" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/02-pkg-install-nodejs-lts.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;One package. Two binaries. The path must sit inside Termux, not in /usr/bin.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -70,9 +70,9 @@ E: Unable to locate package node&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/03-unable-to-locate-package-node.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/03-unable-to-locate-package-node.webp" type="image/webp"/&gt;
-    &lt;img alt="Termux error E: Unable to locate package node after pkg install node, with the working command pkg install nodejs-lts written underneath" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/03-unable-to-locate-package-node.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/03-unable-to-locate-package-node.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/03-unable-to-locate-package-node.webp" type="image/webp"/&gt;
+    &lt;img alt="Termux error E: Unable to locate package node after pkg install node, with the working command pkg install nodejs-lts written underneath" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/03-unable-to-locate-package-node.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;That error is the tutorial's fault. The package was never called node.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -96,9 +96,9 @@ pkg install nodejs-lts -y&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/04-enotsup-symlink-shared-storage.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/04-enotsup-symlink-shared-storage.webp" type="image/webp"/&gt;
-    &lt;img alt="A split diagram: npm install failing with ENOTSUP symlink inside the shared Download folder, and the same install succeeding inside the Termux home folder node-demo" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/04-enotsup-symlink-shared-storage.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/04-enotsup-symlink-shared-storage.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/04-enotsup-symlink-shared-storage.webp" type="image/webp"/&gt;
+    &lt;img alt="A split diagram: npm install failing with ENOTSUP symlink inside the shared Download folder, and the same install succeeding inside the Termux home folder node-demo" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/04-enotsup-symlink-shared-storage.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Same command, two folders. Only the one inside home can hold node_modules.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -170,9 +170,9 @@ node server.js&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/05-express-listening-on-phone.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/05-express-listening-on-phone.webp" type="image/webp"/&gt;
-    &lt;img alt="A phone split between Termux printing Open http://127.0.0.1:3000 on this phone and Chrome on the same phone showing a Pocket notes page with one saved line" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/05-express-listening-on-phone.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/05-express-listening-on-phone.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/05-express-listening-on-phone.webp" type="image/webp"/&gt;
+    &lt;img alt="A phone split between Termux printing Open http://127.0.0.1:3000 on this phone and Chrome on the same phone showing a Pocket notes page with one saved line" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/05-express-listening-on-phone.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Same phone, two apps. Chrome is the client. Termux is the server. Leave the terminal running.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -187,9 +187,9 @@ node server.js&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/06-screen-lock-wake-lock.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/06-screen-lock-wake-lock.webp" type="image/webp"/&gt;
-    &lt;img alt="A locked Android phone beside a Termux session that has stopped answering, and the command termux-wake-lock typed before node server.js" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/06-screen-lock-wake-lock.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/06-screen-lock-wake-lock.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/06-screen-lock-wake-lock.webp" type="image/webp"/&gt;
+    &lt;img alt="A locked Android phone beside a Termux session that has stopped answering, and the command termux-wake-lock typed before node server.js" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/06-screen-lock-wake-lock.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;The listen line is still there. Android stopped scheduling the process. That is not an npm error.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
@@ -231,9 +231,9 @@ git commit -m "pocket notes, localhost only"&lt;/code&gt;&lt;/pre&gt;
 
 &lt;div style="text-align:center; margin:18px 0;"&gt;
   &lt;picture&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/07-node-termux-error-recap.avif" type="image/avif"/&gt;
-    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/07-node-termux-error-recap.webp" type="image/webp"/&gt;
-    &lt;img alt="A five-row checklist on a phone: nodejs-lts not node, project in home not Downloads, express not a native addon, listen on 127.0.0.1, wake lock only while you need it" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/07-node-termux-error-recap.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/07-node-termux-error-recap.avif" type="image/avif"/&gt;
+    &lt;source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/07-node-termux-error-recap.webp" type="image/webp"/&gt;
+    &lt;img alt="A five-row checklist on a phone: nodejs-lts not node, project in home not Downloads, express not a native addon, listen on 127.0.0.1, wake lock only while you need it" decoding="async" height="558" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@518b0e5a9bc3ea862c3a0a19e490a850058d5171/posts/2026-09-26-how-to-run-a-node-app-in-termux/images/07-node-termux-error-recap.jpg" style="max-width:100%; height:auto;" width="1000"/&gt;
   &lt;/picture&gt;
   &lt;div style="font-size:13px; color:#5B6270; margin-top:6px;"&gt;&lt;i&gt;Five checks. If the server is down, one of these is the reason, not Node itself.&lt;/i&gt;&lt;/div&gt;
 &lt;/div&gt;
