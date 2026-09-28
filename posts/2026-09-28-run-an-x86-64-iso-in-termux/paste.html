@@ -1,0 +1,225 @@
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/01-qemu-iso-termux-hero.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/01-qemu-iso-termux-hero.webp" type="image/webp"/>
+    <img alt="An Android phone in a dark room, screen split between a Termux session running qemu-system-x86_64 with -vnc 127.0.0.1:1 and the line VNC server listening on 127.0.0.1:5901, and a browser showing the emulated machine's Linux desktop" decoding="async" fetchpriority="high" height="558" loading="eager" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/01-qemu-iso-termux-hero.jpg" style="max-width:100%; height:auto;" width="1000"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>The guest's screen is a web page. The emulator has no window of its own.</i></div>
+</div>
+
+<p>I wanted to see what a real Linux installer actually does, so I copied an ISO onto my phone to run an x86-64 ISO in Termux. The tutorial's command gave me a black browser tab, an error about SDL, and then a browser that connected to nothing at all. Three separate things were wrong, and not one of them was a QEMU bug.</p>
+
+<p>If Termux is still new to you, stop here first. Storage permission, the extra-keys row and nano are all covered in <a href="https://freestackhub.blogspot.com/2026/09/termux-commands-worth-memorising-basics.html">our step-by-step guide to Termux commands, git cloning and nano</a>. This post assumes you can move around a shell. What it adds is a program that runs for twenty minutes, wants a gigabyte of RAM, and expects a screen you do not have.</p>
+
+<h2>What QEMU on a phone actually is</h2>
+
+<p>Be honest with yourself about what this is before you start. Termux runs inside Android's app sandbox, so QEMU gets no <code>/dev/kvm</code>, no VT-x and no Hypervisor.framework. There is no hardware acceleration available at all. Everything runs under TCG, QEMU's just-in-time compiler, which translates each x86 instruction into ARM instructions on the fly. Hardware executes those instructions in a cycle or two; under TCG each one becomes dozens of ARM instructions plus bookkeeping.</p>
+
+<p>Order of magnitude: expect five to twenty times slower than the same guest under KVM on a laptop. A live environment that reaches a login prompt in ninety seconds on a PC can take many minutes here. That is not a bug and no flag fixes it. If your goal is a working Linux on your phone, you already have one, and this is the wrong tool for the job.</p>
+
+<p>The install is bigger than it looks too. The Termux package pulls in 27 dependencies, including <code>alsa-lib</code>, <code>jack2</code>, <code>pulseaudio</code>, <code>libspice-server</code> and <code>libusb</code>. That is a full audio stack, a remote-display stack and a USB stack that a phone will never use. Budget a few hundred megabytes of download for an emulator you will probably run once.</p>
+
+<p>What it is genuinely good for is reconnaissance. Booting a live ISO costs you 66 MB and a coffee break. Actually installing a distribution, updating it, and keeping it current costs you hours under TCG, and you could have done the same on a free virtual machine. Learn the installer on the phone if you have nothing else. Do not run your infrastructure on it.</p>
+
+<h2>Install qemu, and get the package name right</h2>
+
+<p>The package is <code>qemu-system-x86-64-headless</code>. Hyphens. Almost every tutorial you will find says <code>qemu-system-x86_64-headless</code> with underscores, because that was genuinely the old name. Termux renamed it, so the underscore spelling is now a wrong answer that still reads perfectly well.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg update &amp;&amp; pkg upgrade -y
+pkg install qemu-system-x86-64-headless qemu-utils -y
+qemu-system-x86_64 --version
+qemu-img --version</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/02-pkg-install-qemu-headless.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/02-pkg-install-qemu-headless.webp" type="image/webp"/>
+    <img alt="Termux showing the failed command pkg install qemu-system-x86_64-headless returning E: Unable to locate package, then the working pkg install qemu-system-x86-64-headless qemu-utils setting both up, and qemu-system-x86_64 --version printing QEMU emulator version 11.0.3" decoding="async" height="1376" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/02-pkg-install-qemu-headless.jpg" style="max-width:100%; height:auto;" width="768"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Hyphens in the package, underscores in the command. Both are correct.</i></div>
+</div>
+
+<p>Note that the package name and the command disagree, and neither is a typo. Debian-style packages are named with hyphens; the binaries inside them are named with underscores. <code>qemu-img</code> arrives in a separate package called <code>qemu-utils</code>, which is why that one is on the install line. If you skip it, <code>qemu-img</code> simply is not there and the disk section further down cannot run.</p>
+
+<p>The second trap has no fix at all, so check before you spend an evening on it. Termux builds this package for 64-bit phones only and excludes the 32-bit architectures from the build. On an <code>armv7l</code> device, <code>pkg install</code> can report success while shipping nothing but a manual page, and the next command answers:</p>
+
+<blockquote>qemu-system-x86_64: command not found</blockquote>
+
+<p>Run <code>uname -m</code> first. If it prints <code>armv7l</code>, no amount of reinstalling, updating or clearing storage will produce a binary. That is the floor of what this package supports, and the honest answer is to stop, not to keep retrying. <code>aarch64</code> is what you need.</p>
+
+<h2>Pick an ISO small enough to be worth it</h2>
+
+<p>The Alpine releases directory lists three editions of the same distribution, and the size difference is not a rounding error. For x86_64 at the current stable release: <strong>virtual is 66 MB, standard is 353 MB, extended is 1 GB</strong>. The same page is where you get each edition's <code>.sha256</code> file, which you will want in a moment.</p>
+
+<p>Start with <strong>virtual</strong>. It is built to run entirely from RAM, which is the right shape for a guest where every megabyte of memory is being emulated rather than passed through. Save the standard and extended editions for a laptop.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>mkdir -p ~/vms &amp;&amp; cd ~/vms
+wget https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-virt-3.24.2-x86_64.iso
+wget https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/x86_64/alpine-virt-3.24.2-x86_64.iso.sha256
+sha256sum -c alpine-virt-3.24.2-x86_64.iso.sha256</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/03-download-alpine-virt-iso.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/03-download-alpine-virt-iso.webp" type="image/webp"/>
+    <img alt="Landscape Termux screen showing wget downloading alpine-virt-3.24.2-x86_64.iso and finishing at 66.00M in 5.3s, then ls -lh reporting 66M, then sha256sum -c answering alpine-virt-3.24.2-x86_64.iso: OK" decoding="async" height="509" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/03-download-alpine-virt-iso.jpg" style="max-width:100%; height:auto;" width="1200"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>66 MB, checked. A phone on mobile data deserves that last line.</i></div>
+</div>
+
+<p>The version number in that filename changes whenever Alpine ships a release. If 3.24.2 is no longer there, open the directory listing and read the current one rather than guessing.</p>
+
+<p>Do not skip the checksum. On a phone, a download interrupted by a call or a dead hotspot leaves a truncated ISO, and a truncated ISO typically boots to a black screen and then a bare <code>Boot failed</code> with nothing useful on the terminal. The failure looks identical to "QEMU is broken on Android", which sends you off reinstalling a package that was never the problem. One <code>sha256sum -c</code> turns a mystery into a two-second retry.</p>
+
+<h2>Run an x86-64 ISO in Termux without a graphical app</h2>
+
+<p>Here is the command, and each flag earns its place. The one that matters most is the last two.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>qemu-system-x86_64 -accel tcg,thread=multi \
+  -cdrom alpine-virt-3.24.2-x86_64.iso \
+  -drive file=alpine.qcow2,format=qcow2 \
+  -m 1024 -smp 2 -display none -vnc 127.0.0.1:1</code></pre>
+
+<ul>
+<li><b><code>-accel tcg,thread=multi</code></b> &mdash; TCG is the only accelerator the sandbox allows, and <code>thread=multi</code> lets QEMU run the guest's CPUs on separate ARM cores. On an eight-core phone this is the single biggest speed difference available to you. If your build rejects the property, drop <code>,thread=multi</code> and carry on; everything else still works.</li>
+<li><b><code>-m 1024</code></b> &mdash; a gigabyte for the guest. Alpine's virtual edition is comfortable with that. A Debian or Ubuntu desktop ISO wants <code>2048</code> at minimum, and on a phone where Android has already claimed half the RAM, asking for more tends to get the whole app killed by the low-memory killer instead.</li>
+<li><b><code>-smp 2</code></b> &mdash; two emulated cores. Going beyond two usually makes things <em>slower</em>, because the TCG threads then compete for the same physical cores.</li>
+<li><b><code>-display none -vnc 127.0.0.1:1</code></b> &mdash; the pair that makes this headless. The next section is entirely about why you need both.</li>
+</ul>
+
+<h2>Why -nographic is the wrong flag, and why the port is 5901</h2>
+
+<p>Most guides tell you to add <code>-nographic</code>. For a text-mode guest that is correct advice. For a graphical ISO it is precisely wrong, and it fails quietly rather than loudly. <code>-nographic</code> switches off the graphical display <em>and</em> redirects the serial port to your terminal, so a distribution that draws its entire installer to the video card has nothing left to draw on. You get the BIOS text, then a boot log, then a login prompt you can type at, while the graphical installer runs somewhere you cannot reach.</p>
+
+<p>What you actually want is <code>-display none</code>, which tells QEMU not to open a GUI without touching the serial port, paired with <code>-vnc 127.0.0.1:1</code>, which serves the video card's framebuffer over VNC instead. Two different jobs, two different flags.</p>
+
+<p>Leave the display flag out entirely and the build tries to bring up a GUI backend that does not exist on a phone:</p>
+
+<blockquote>qemu-system-x86_64: could not initialize SDL Could not initialize SDL(2) - exiting</blockquote>
+
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/04-sdl-error-and-vnc-fix.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/04-sdl-error-and-vnc-fix.webp" type="image/webp"/>
+    <img alt="Termux showing qemu-system-x86_64 -m 1024 -cdrom alpine.iso failing with could not initialize SDL(2) - exiting, then the same command with -display none -vnc 127.0.0.1:1 added printing VNC server listening on 127.0.0.1:5901" decoding="async" height="467" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/04-sdl-error-and-vnc-fix.jpg" style="max-width:100%; height:auto;" width="780"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Same command, two extra flags. The emulator was never missing; the display was.</i></div>
+</div>
+
+<p>The second thing that catches everyone is the port. A VNC display number is an offset, not the port itself. Display <code>:0</code> is TCP 5900, and display <code>:1</code> is TCP <strong>5901</strong>. Type <code>-vnc :1</code>, then reflexively try to connect to 5900, and the connection is refused by a server that is running perfectly. QEMU tells you the truth in its own output, and that line is the one to read:</p>
+
+<blockquote>VNC server listening on 127.0.0.1:5901</blockquote>
+
+<h2>Put the console in the browser</h2>
+
+<p>A browser cannot speak VNC. VNC is a raw TCP protocol from the 1990s; browsers speak WebSocket and nothing else. Something has to sit in between and translate, and the standard answer is websockify for the bridge plus noVNC for the page. Together they are usually one command.</p>
+
+<p>Termux ships neither of them. I checked the whole package repository, all 2216 package names, and there is no <code>novnc</code> and no <code>websockify</code>. So this half of the post is a pip step rather than a <code>pkg install</code>.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg install python python-numpy
+pip install websockify --break-system-packages
+git clone --depth 1 https://github.com/novnc/noVNC ~/novnc</code></pre>
+
+<p>Installing <code>python-numpy</code> before the pip line is not a detail, it is the thing that saves you an evening. websockify depends on numpy. If numpy is not already on the phone, pip decides to build it from source, and on a phone that is a long, hot, completely silent stretch during which the terminal looks exactly like a hung one. Many people kill pip here and conclude that websockify is broken on Android. Installing the Termux package first means pip finds a ready-made build and moves straight on to the thing you wanted.</p>
+
+<p><code>--break-system-packages</code> is Termux's answer to the same wall Debian puts up. Termux's Python is marked as externally managed, and pip refuses to install into it without that flag. Seeing the error, read the message: it is telling you the flag it wants.</p>
+
+<p>Now start QEMU, and then open a <b>second Termux session</b> for the bridge. The first one is busy and cannot accept another command until QEMU exits.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>websockify --web ~/novnc 6080 127.0.0.1:5901</code></pre>
+
+<p>That one command does both jobs. It serves the noVNC page on port 6080, and it bridges that page's WebSocket to QEMU's raw VNC port. Then open the phone's own browser to:</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>http://127.0.0.1:6080/vnc.html?autoconnect=1</code></pre>
+
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/05-novnc-browser-console.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/05-novnc-browser-console.webp" type="image/webp"/>
+    <img alt="A browser at http://127.0.0.1:6080/vnc.html?autoconnect=1 showing the noVNC client connected to a black guest console that has reached Welcome to Alpine Linux 3.24 and a localhost login prompt with root typed in" decoding="async" height="655" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/05-novnc-browser-console.jpg" style="max-width:100%; height:auto;" width="1200"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>That page is the emulated machine's screen. Nothing is being streamed from anywhere else.</i></div>
+</div>
+
+<p>That URL works because the page is served from the same host and port that the WebSocket proxy listens on, so noVNC builds a matching address without being told. Serve noVNC any other way and it will construct the WebSocket URL from wherever the page came from, find no bridge there, and leave you with a black rectangle and no error message anywhere. It is the most confusing failure in this entire post, and it is entirely prevented by keeping the page and the proxy on the same port.</p>
+
+<p>A laptop pointed at <code>127.0.0.1</code> is talking to the laptop, not to the phone. For a bigger screen, change QEMU to <code>-vnc 0.0.0.0:1</code> and open <code>http://the-phone's-IP:6080/vnc.html?autoconnect=1</code> from the laptop on the same Wi-Fi. Understand what you are doing first: that is an Alpine live environment with a passwordless root account, reachable by anything else on the network. It is the same decision as <a href="https://freestackhub.blogspot.com/2026/09/how-to-run-a-node-app-in-termux.html">binding a local server to 0.0.0.0</a> for the same reasons, and the same advice applies. Do it on a network you trust, and put the loopback address back afterwards.</p>
+
+<h2>The ISO is read-only, and everything you do in it disappears</h2>
+
+<p>That last flag is an overlay disk, and it is not decoration. <code>-cdrom</code> attaches a CD-ROM, which cannot be written. Run the Alpine installer and when it asks where to put the system, the answer cannot be the ISO you booted from. Without a disk to write to, the install either fails or quietly goes nowhere.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>qemu-img create -f qcow2 alpine.qcow2 10G</code></pre>
+
+<p>With that image present, the <code>-drive</code> flag in the command above gives the guest a blank 10 GB disk to install onto, while the ISO stays pristine and re-bootable. It is the same idea as keeping your work in one folder instead of on the memory stick, applied to a whole machine: one writable layer sitting over an immutable base.</p>
+
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/06-qemu-headless-boot-and-disk.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/06-qemu-headless-boot-and-disk.webp" type="image/webp"/>
+    <img alt="Landscape Termux screen showing qemu-img create making alpine.qcow2 at 10G, the multi-line qemu-system-x86_64 command with -accel tcg,thread=multi and -vnc 127.0.0.1:1, SeaBIOS booting from DVD/CD, and qemu-img info reporting virtual size 10 GiB with disk size 196 KiB" decoding="async" height="655" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/06-qemu-headless-boot-and-disk.jpg" style="max-width:100%; height:auto;" width="1200"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>A 10 GB disk costing 196 KB. That gap is why the format matters.</i></div>
+</div>
+
+<p>Look at those two numbers again. A 10 GiB virtual size sitting on 196 KiB of real disk is qcow2 being sparse, and it is the reason a modest phone can host something that claims to be a large machine. Now the part that will bite you: <strong>put that file inside <code>~/vms</code>, not in <code>~/storage/downloads</code>.</strong> Android's emulated shared storage does not reliably honour sparse allocation, so a disk that should cost 196 KB can quietly grow to its full ten gigabytes, and an SD card is worse. It is the same filesystem that refuses the symlinks npm insists on creating, which cost me an evening before I understood it, described in <a href="https://freestackhub.blogspot.com/2026/09/how-to-run-a-node-app-in-termux.html">running a Node app in Termux without the symlink errors</a>. The general rule is simple enough to memorise: anything with real disk or filesystem requirements lives in <code>~</code>, and shared storage is only for handing finished files to other apps.</p>
+
+<h2>x86-64 or aarch64: which one you actually need</h2>
+
+<p>The same Termux package family ships an aarch64 emulator as a separate subpackage, and it is meaningfully faster, because the instruction set being emulated matches the phone's own. Install it with <code>pkg install qemu-system-aarch64-headless</code>.</p>
+
+<p>My opinion, since you will have to choose: <strong>use the aarch64 ISO unless you have a specific reason not to.</strong> An aarch64 Alpine reaches a desktop several times faster, and a beginner's first hour with an emulator goes a great deal better. I would not have written this post differently if the faster path were the easy one.</p>
+
+<p>Here is the catch. An aarch64 guest boots through UEFI rather than BIOS, so it needs an EDK2 firmware file handed over with <code>-drive if=pflash,...</code>. Whether Termux's QEMU build ships that firmware is worth checking on your own install before you plan an evening around it. The x86-64 guest boots on SeaBIOS, which QEMU has, and needs no extra file at all. That is precisely why the first run in this post is x86-64.</p>
+
+<p>So the decision comes down to this: <strong>x86-64 emulation is the only way to run a Windows ISO or any x86-only installer</strong>, and that is a completely legitimate reason to accept the slowness. If you just want a working Linux to poke at for an afternoon, aarch64 is the better trade and you should take it.</p>
+
+<p>There is a third option worth knowing about, and it is the fastest of the three. <code>pkg install qemu-user-x86-64</code> gives you <code>qemu-x86_64</code>, which runs a single x86-64 Linux binary directly, with no BIOS, no kernel and no disk image at all. It is several times faster than a full system because the only thing being emulated is the program itself. It also cannot boot an ISO and is not a substitute for one, but if what you actually needed was to run one x86 tool, this is the command you were looking for and it takes a fraction of the effort.</p>
+
+<h2>When the phone gets hot, slow, or locked</h2>
+
+<p>A TCG guest will happily occupy every core you give it, and Android's thermal system will throttle the entire phone in response. Expect warmth, expect the battery indicator to move, and expect your other apps to feel slow while it runs. This is a load, not a bug, and the honest framing is that you are using a laptop-class workload on a phone that was not designed for one.</p>
+
+<p>Lock the screen and the guest stops. You will come back, unlock, and find the page frozen while the terminal still shows the QEMU command as though everything were fine. Nothing crashed. Android stopped scheduling the process, exactly as it does to a background server, and the fix is the same one: a wake lock.</p>
+
+<pre style="background:#0d1117; color:#c9d1d9; padding:14px 16px; border-radius:8px; overflow-x:auto; font-size:14px;"><code>pkg install termux-api
+termux-wake-lock</code></pre>
+
+<p>That needs the Termux:API add-on app installed from the same store as Termux itself. Mixing an F-Droid Termux with a Play Store add-on produces a command that is simply <code>not found</code>, and no amount of reinstalling inside Termux changes that. When the emulator has done its job, run <code>termux-wake-unlock</code>. A wake lock left on next to a full-emulation guest running overnight is how a phone is dead by morning, and that is a decision for the hour you need it rather than a setting to leave armed.</p>
+
+<h2>Errors worth recognising on sight</h2>
+
+<p>Match the words, then apply the one fix. Reinstalling everything is how the message that actually mattered scrolls off the screen.</p>
+
+<ul>
+<li><b>E: Unable to locate package qemu-system-x86_64-headless.</b> You typed underscores. The package is <code>qemu-system-x86-64-headless</code>.</li>
+<li><b>qemu-system-x86_64: command not found, right after a successful install.</b> Check <code>uname -m</code>. On <code>armv7l</code> the package contains no binary and never will.</li>
+<li><b>could not initialize SDL(2) - exiting.</b> You left out the display flag. Add <code>-display none</code> and <code>-vnc 127.0.0.1:1</code>.</li>
+<li><b>Connection refused on 5900.</b> Display <code>:1</code> is port 5901. Read the line QEMU printed when it started.</li>
+<li><b>Blank browser page, no error anywhere.</b> noVNC is being served from a different host or port than the WebSocket bridge. Run websockify with <code>--web</code> and open the page from the port websockify itself printed.</li>
+<li><b><code>qemu-img: command not found.</b> You did not install <code>qemu-utils</code>.</li>
+<li><b>Boot failed, or a black screen after a long download.</b> Run <code>sha256sum -c</code> before you blame QEMU. A truncated ISO looks exactly like this.</li>
+<li><b>The install got to about 80% and the phone froze.</b> The low-memory killer. Lower <code>-m</code> to 512 or close other apps. The disk is not the problem.</li>
+<li><b>It worked, and then it is gone.</b> The live session was the ISO. You booted read-only media and never created the <code>qcow2</code>.</li>
+</ul>
+
+<div style="text-align:center; margin:18px 0;">
+  <picture>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/07-qemu-termux-error-recap.avif" type="image/avif"/>
+    <source srcset="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/07-qemu-termux-error-recap.webp" type="image/webp"/>
+    <img alt="A five-item checklist reading: qemu-system-x86-64-headless hyphens not underscores, -display none plus -vnc never -nographic, VNC display :1 is TCP port 5901, ISO and qcow2 live in home not in Downloads, termux-wake-lock before a long boot" decoding="async" height="655" loading="lazy" src="https://cdn.jsdelivr.net/gh/rizwanahmedsora9-pixel/Free-Stack-Hub.blogspot.com@main/posts/2026-09-28-run-an-x86-64-iso-in-termux/images/07-qemu-termux-error-recap.jpg" style="max-width:100%; height:auto;" width="1200"/>
+  </picture>
+  <div style="font-size:13px; color:#5B6270; margin-top:6px;"><i>Five checks. One of them is the reason, nine times out of ten.</i></div>
+</div>
+
+<h2>Quick recap</h2>
+
+<ol>
+<li>Install <code>qemu-system-x86-64-headless</code> and <code>qemu-utils</code>. Hyphens in the package, underscores in the command, and check <code>uname -m</code> is <code>aarch64</code> before you start.</li>
+<li>Download the Alpine <strong>virtual</strong> edition, 66 MB, and check it with <code>sha256sum -c</code> before pointing QEMU at it.</li>
+<li>Run with <code>-accel tcg,thread=multi -display none -vnc 127.0.0.1:1</code>. Never <code>-nographic</code> for a graphical ISO, and read the port off QEMU's own output rather than assuming 5900.</li>
+<li>Install <code>python-numpy</code> before pip-installing websockify, serve noVNC from the same port as the bridge, and open <code>http://127.0.0.1:6080/vnc.html?autoconnect=1</code>.</li>
+<li>Create a <code>qcow2</code> inside <code>~/vms</code> for anything worth keeping, and take the wake lock only for as long as the guest is running.</li>
+</ol>
+
+<p>Do one thing tonight: boot the 66 MB live environment, look around, and shut it down. Do not install a distribution to it, because that is a job for a free virtual machine where KVM is available, and you will spend the evening waiting instead of learning. The follow-up mistake to avoid is the one I made, which is treating a black screen as a broken emulator when the ISO was simply truncated. Check the checksum first, read the port QEMU printed second, and reinstall nothing until you have read both.</p>

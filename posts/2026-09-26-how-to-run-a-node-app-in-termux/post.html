@@ -190,6 +190,8 @@ node server.js</code></pre>
 
 <p>Run <code>termux-wake-unlock</code> when you stop the server. A wake lock left on is how the battery is gone by morning. It is a decision for the hour you need the page, not a setting you leave armed. If you only needed the server while you were looking at it, you do not need the wake lock at all.</p>
 
+<p>This matters even more once the process in question is heavy. A Node server idles between requests; a software-emulated virtual machine is asking for every core on the phone for as long as it runs, and Android will throttle the whole handset in response. <a href="https://freestackhub.blogspot.com/2026/09/run-an-x86-64-iso-in-termux.html">Running an x86-64 ISO in Termux with QEMU</a> is the extreme version of the same problem, and it needs the same two things: a wake lock while it runs, and <code>termux-wake-unlock</code> the moment you are finished.</p>
+
 <h2>Keep a second copy before you experiment</h2>
 
 <p>Termux lives in its own app data. Clear storage, or uninstall, and <code>~/node-demo</code> is gone. There is no trash bin. The phone is a copy, not the original. Commit before you try <code>0.0.0.0</code>, a native module, or a second Node package. Those are the three changes most likely to make you want yesterday's files.</p>

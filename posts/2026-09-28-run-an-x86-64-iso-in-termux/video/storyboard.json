@@ -1,0 +1,74 @@
+[
+  {
+    "kind": "hook",
+    "image": "01-qemu-iso-termux-hero.jpg",
+    "eyebrow": "Free Stack Hub · 28 Sep 2026",
+    "title": "Run an x86-64 ISO in Termux with QEMU",
+    "voiceover": "I wanted to see what a real Linux installer actually does, so I copied an ISO onto my phone to run an x86-64 ISO in Termux. The tutorial's command gave me a black browser tab, an error about SDL, and then a browser that connected to nothing at all. Three separate things were wrong, and not one of them was a QEMU bug.",
+    "index": "01 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "01-qemu-iso-termux-hero.jpg",
+    "eyebrow": "The post",
+    "title": "What QEMU on a phone actually is",
+    "voiceover": "Be honest with yourself about what this is before you start. Termux runs inside Android's app sandbox, so QEMU gets no /dev/kvm , no VT-x and no Hypervisor.framework.",
+    "index": "02 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "02-pkg-install-qemu-headless.jpg",
+    "eyebrow": "The post",
+    "title": "Install qemu, and get the package name right",
+    "voiceover": "The package is qemu-system-x86-64-headless . Hyphens.",
+    "index": "03 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "03-download-alpine-virt-iso.jpg",
+    "eyebrow": "The post",
+    "title": "Pick an ISO small enough to be worth it",
+    "voiceover": "The Alpine releases directory lists three editions of the same distribution, and the size difference is not a rounding error. For x86_64 at the current stable release: virtual is 66 MB, standard is 353 MB, extended is 1 GB .",
+    "index": "04 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "01-qemu-iso-termux-hero.jpg",
+    "eyebrow": "The post",
+    "title": "Run an x86-64 ISO in Termux without a graphical app",
+    "voiceover": "Here is the command, and each flag earns its place. The one that matters most is the last two.",
+    "index": "05 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "04-sdl-error-and-vnc-fix.jpg",
+    "eyebrow": "The post",
+    "title": "Why -nographic is the wrong flag, and why the port is 5901",
+    "voiceover": "Most guides tell you to add -nographic . For a text-mode guest that is correct advice.",
+    "index": "06 / 08"
+  },
+  {
+    "kind": "section",
+    "image": "05-novnc-browser-console.jpg",
+    "eyebrow": "The post",
+    "title": "Put the console in the browser (+5 more)",
+    "voiceover": "A browser cannot speak VNC. VNC is a raw TCP protocol from the 1990s; browsers speak WebSocket and nothing else. That last flag is an overlay disk, and it is not decoration. -cdrom attaches a CD-ROM, which cannot be written. The same Termux package family ships an aarch64 emulator as a separate subp",
+    "index": "07 / 08"
+  },
+  {
+    "kind": "recap",
+    "image": "01-qemu-iso-termux-hero.jpg",
+    "eyebrow": "Quick recap",
+    "title": "What to do",
+    "voiceover": "Install qemu-system-x86-64-headless and qemu-utils . Hyphens in the package, underscores in the command, and check uname -m is aarch64 before you start. Download the Alpine virtual edition, 66 MB, and check it with sha256sum -c before pointing QEMU at it. Run with -accel tcg,thread=multi -display no",
+    "bullets": [
+      "Install qemu-system-x86-64-headless and qemu-utils . Hyphens in the package, underscores in the command, and check uname -m is aarch64 before you start.",
+      "Download the Alpine virtual edition, 66 MB, and check it with sha256sum -c before pointing QEMU at it.",
+      "Run with -accel tcg,thread=multi -display none -vnc 127.0.0.1:1 . Never -nographic for a graphical ISO, and read the port off QEMU's own output rather than assuming 5900.",
+      "Install python-numpy before pip-installing websockify, serve noVNC from the same port as the bridge, and open http://127.0.0.1:6080/vnc.html?autoconnect=1 .",
+      "Create a qcow2 inside ~/vms for anything worth keeping, and take the wake lock only for as long as the guest is running."
+    ],
+    "cta": "Full walkthrough: freestackhub.blogspot.com",
+    "index": "08 / 08"
+  }
+]
